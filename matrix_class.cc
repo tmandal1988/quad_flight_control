@@ -15,15 +15,31 @@ public:
 	Matrix(size_t num_rows, size_t num_cols, string type);
 	~Matrix();
 	// copy constructor
-	Matrix(const Matrix& matrix_to_copy);
+	Matrix(const Matrix<T>& matrix_to_copy);
 	// member functions
 	void PrintMatrix();
 	Matrix Transpose();
 	Matrix Inverse();
 	// operator overloading
-	Matrix operator= (const Matrix& matrix_to_copy);
+	Matrix operator= (const Matrix<T>& matrix_to_copy);
+	// assign elements at row idx and col idx
 	T& operator() (size_t r_idx, size_t c_idx);
+	// read elements at row idx and col idx
 	T operator() (size_t r_idx, size_t c_idx) const;
+	// multiply two matrices
+	Matrix operator* (const Matrix& matrix_to_multipy);
+	// add two matrices
+	Matrix operator+ (const Matrix& matrix_to_add);
+	// subtract two matrices
+	Matrix operator- (const Matrix& matrix_to_subtract);
+	// add a scalar
+	Matrix operator+ (const T x);
+	// subtract a scalar
+	Matrix operator- (const T x);
+	// multiply a scalar
+	Matrix operator* (const T x);
+	// divide by a scalar
+	Matrix operator/ (const T x);
 
 };
 
@@ -64,7 +80,6 @@ Matrix<T>::Matrix(size_t num_rows, size_t num_cols, string type){
 
 	if (type == "eye"){
 		if (num_rows != num_cols){
-			printf("here\n");
 			throw invalid_argument("To create identity matrix number of rows and columns should be equal\n");
 		}
 			// initialize matrix with zeros and then assign 1 to diagonal
@@ -81,7 +96,7 @@ Matrix<T>::Matrix(size_t num_rows, size_t num_cols, string type){
 }
 
 template <typename T>
-Matrix<T>::Matrix(const Matrix& matrix_to_copy){
+Matrix<T>::Matrix(const Matrix<T>& matrix_to_copy){
 	nrows_ = matrix_to_copy.nrows_;
 	ncols_ = matrix_to_copy.ncols_;
 	matrix_ = new T*[nrows_];
@@ -151,7 +166,6 @@ Matrix<T> Matrix<T>::Inverse(){
 		if ( diag_val == 0){
 			for( size_t idx_non_zero = idx_r + 1; idx_non_zero < nrows_; idx_r ++){
 				if ( orig_matrix[idx_non_zero][idx_r] != 0){
-					printf("%lu\n", idx_non_zero);
 					// swap rows
 					for (size_t idx_c = 0; idx_c < ncols_; ++idx_c)
 					{
@@ -192,7 +206,7 @@ Matrix<T> Matrix<T>::Inverse(){
 
 // operator overloading
 template <typename T>
-Matrix<T> Matrix<T>::operator= (const Matrix& matrix_to_copy){
+Matrix<T> Matrix<T>::operator= (const Matrix<T>& matrix_to_copy){
 	if( &matrix_to_copy == this){
 		return *this;
 	}
@@ -242,6 +256,104 @@ T Matrix<T>::operator() (size_t r_idx, size_t c_idx) const {
 	return matrix_[r_idx][c_idx];
 }
 
+template <typename T>
+Matrix<T> Matrix<T>::operator* (const Matrix& matrix_to_multipy){
+	if (ncols_ != matrix_to_multipy.nrows_)
+		throw invalid_argument("Matrix dimensions invalid for multiplication");
+	Matrix<T> return_matrix(nrows_, matrix_to_multipy.ncols_);
+	for (size_t idx_c = 0; idx_c < ncols_; idx_c++) {
+    	for (size_t idx_r = 0; idx_r < nrows_; idx_r++) {
+        	for (size_t idx2_c = 0; idx2_c < matrix_to_multipy.ncols_; idx2_c++) {
+            	return_matrix.matrix_[idx_r][idx2_c] += matrix_[idx_r][idx_c] * matrix_to_multipy.matrix_[idx_c][idx2_c];
+        	}
+    	}
+	}
+
+	return return_matrix;
+}
+
+template <typename T>
+Matrix<T> Matrix<T>::operator+ (const Matrix& matrix_to_add){
+	// check dimensions
+	if (nrows_ != matrix_to_add.nrows_ || ncols_ != matrix_to_add.ncols_)
+		throw invalid_argument("Matrix dimensions invalid for addition");
+
+	Matrix<T> return_matrix(nrows_, ncols_);
+
+	for (size_t idx_r = 0; idx_r < nrows_; idx_r++){
+		for (size_t idx_c = 0; idx_c < ncols_; idx_c++)
+			return_matrix(idx_r, idx_c) = matrix_[idx_r][idx_c] + matrix_to_add.matrix_[idx_r][idx_c];
+	}
+
+	return return_matrix;
+
+}
+
+template <typename T>
+Matrix<T> Matrix<T>::operator- (const Matrix& matrix_to_subtract){
+	// check dimensions
+	if (nrows_ != matrix_to_subtract.nrows_ || ncols_ != matrix_to_subtract.ncols_)
+		throw invalid_argument("Matrix dimensions invalid for subtraction");
+
+	Matrix<T> return_matrix(nrows_, ncols_);
+
+	for (size_t idx_r = 0; idx_r < nrows_; idx_r++){
+		for (size_t idx_c = 0; idx_c < ncols_; idx_c++)
+			return_matrix(idx_r, idx_c) = matrix_[idx_r][idx_c] - matrix_to_subtract.matrix_[idx_r][idx_c];
+	}
+
+	return return_matrix;
+
+}
+
+template <typename T>
+Matrix<T> Matrix<T>::operator+ (const T x){
+	Matrix<T> return_matrix(nrows_, ncols_);
+
+	for (size_t idx_r = 0; idx_r < nrows_; idx_r++){
+		for (size_t idx_c = 0; idx_c < ncols_; idx_c++)
+			return_matrix(idx_r, idx_c) = matrix_[idx_r][idx_c] + x;
+	}
+
+	return return_matrix;
+}
+
+template <typename T>
+Matrix<T> Matrix<T>::operator- (const T x){
+	Matrix<T> return_matrix(nrows_, ncols_);
+
+	for (size_t idx_r = 0; idx_r < nrows_; idx_r++){
+		for (size_t idx_c = 0; idx_c < ncols_; idx_c++)
+			return_matrix(idx_r, idx_c) = matrix_[idx_r][idx_c] - x;
+	}
+
+	return return_matrix;
+}
+
+template <typename T>
+Matrix<T> Matrix<T>::operator* (const T x){
+	Matrix<T> return_matrix(nrows_, ncols_);
+
+	for (size_t idx_r = 0; idx_r < nrows_; idx_r++){
+		for (size_t idx_c = 0; idx_c < ncols_; idx_c++)
+			return_matrix(idx_r, idx_c) = matrix_[idx_r][idx_c] * x;
+	}
+
+	return return_matrix;
+}
+
+template <typename T>
+Matrix<T> Matrix<T>::operator/ (const T x){
+	Matrix<T> return_matrix(nrows_, ncols_);
+
+	for (size_t idx_r = 0; idx_r < nrows_; idx_r++){
+		for (size_t idx_c = 0; idx_c < ncols_; idx_c++)
+			return_matrix(idx_r, idx_c) = matrix_[idx_r][idx_c] / x;
+	}
+
+	return return_matrix;
+}
+
 int main()
 {
 	Matrix<float> m(3, 3);
@@ -285,4 +397,19 @@ int main()
 	m5(1, 1) = 0;
 	m5(2, 2) = 0;
 	m5.Inverse().PrintMatrix();
+	Matrix<float> m7(3, 3);
+	m7 = m5.Inverse()*m5;
+	m7.PrintMatrix();
+	m7 = m7 + m7;
+	m7.PrintMatrix();
+	m7 = m7 - m7;
+	m7.PrintMatrix();
+	m7 = m7 + 1;
+	m7.PrintMatrix();
+	m7 = m7 - 2;
+	m7.PrintMatrix();
+	m7 = m7/2;
+	m7.PrintMatrix();
+	m7 = m7*5;
+	m7.PrintMatrix();
 }
