@@ -1,5 +1,6 @@
 #include<iostream>
 #include<string>
+#include<array>
 
 using namespace	std;
 
@@ -20,6 +21,7 @@ public:
 	void PrintMatrix();
 	Matrix Transpose();
 	Matrix Inverse();
+	array<Matrix, 2> Lu();
 	// operator overloading
 	Matrix operator= (const Matrix<T>& matrix_to_copy);
 	// assign elements at row idx and col idx
@@ -203,6 +205,11 @@ Matrix<T> Matrix<T>::Inverse(){
 	return inverse_matrix;
 }
 
+template<typename T>
+array<Matrix<T>, 2> Matrix<T>::Lu(){
+	array<Matrix, 2> lu_decomp;
+	return lu_decomp;
+}
 
 // operator overloading
 template <typename T>
@@ -392,6 +399,9 @@ int main()
 	m5(2, 2) = -2;
 	m5.PrintMatrix();
 	Matrix<float> m6 = m5.Inverse();
+	array<Matrix<float>, 2> lu_decomp = m5.Lu();
+	lu_decomp[0].PrintMatrix();
+	lu_decomp[1].PrintMatrix();
 	m6.PrintMatrix();
 	m5(0, 0) = 0;
 	m5(1, 1) = 0;
