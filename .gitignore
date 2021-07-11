@@ -4,5 +4,7 @@
 !*/
 # Allow files with an extension
 !*.*
-# Allow Makefile
-!Makefile
+# Don't commit build
+build
+# Don't include mac specific folder
+.DS_Store
