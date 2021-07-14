@@ -36,13 +36,13 @@ class MatrixBase{
 		// subtract two matrices
 		MatrixBase operator- (const MatrixBase& matrix_to_subtract);
 		// add a scalar
-		MatrixBase operator+ (const T x);
+		MatrixBase operator+ (T x);
 		// subtract a scalar
-		MatrixBase operator- (const T x);
+		MatrixBase operator- (T x);
 		// multiply a scalar
-		MatrixBase operator* (const T x);
+		MatrixBase operator* (T x);
 		// divide by a scalar
-		MatrixBase operator/ (const T x);
+		MatrixBase operator/ (T x);
 		// getter and setters
 		size_t get_ncols();
 		size_t get_nrows();

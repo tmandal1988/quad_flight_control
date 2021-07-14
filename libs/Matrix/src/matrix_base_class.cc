@@ -209,7 +209,7 @@ MatrixBase<T> MatrixBase<T>::operator- (const MatrixBase& matrix_to_subtract){
 }
 
 template <typename T>
-MatrixBase<T> MatrixBase<T>::operator+ (const T x){
+MatrixBase<T> MatrixBase<T>::operator+ (T x){
 	MatrixBase<T> return_MatrixBase(nrows_, ncols_);
 
 	for (size_t idx_r = 0; idx_r < nrows_; idx_r++){
@@ -221,7 +221,7 @@ MatrixBase<T> MatrixBase<T>::operator+ (const T x){
 }
 
 template <typename T>
-MatrixBase<T> MatrixBase<T>::operator- (const T x){
+MatrixBase<T> MatrixBase<T>::operator- (T x){
 	MatrixBase<T> return_MatrixBase(nrows_, ncols_);
 
 	for (size_t idx_r = 0; idx_r < nrows_; idx_r++){
@@ -233,7 +233,7 @@ MatrixBase<T> MatrixBase<T>::operator- (const T x){
 }
 
 template <typename T>
-MatrixBase<T> MatrixBase<T>::operator* (const T x){
+MatrixBase<T> MatrixBase<T>::operator* (T x){
 	MatrixBase<T> return_MatrixBase(nrows_, ncols_);
 
 	for (size_t idx_r = 0; idx_r < nrows_; idx_r++){
@@ -245,7 +245,7 @@ MatrixBase<T> MatrixBase<T>::operator* (const T x){
 }
 
 template <typename T>
-MatrixBase<T> MatrixBase<T>::operator/ (const T x){
+MatrixBase<T> MatrixBase<T>::operator/ (T x){
 	MatrixBase<T> return_MatrixBase(nrows_, ncols_);
 
 	for (size_t idx_r = 0; idx_r < nrows_; idx_r++){
