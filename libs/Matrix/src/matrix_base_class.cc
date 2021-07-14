@@ -37,7 +37,7 @@ MatrixBase<T>::MatrixBase(size_t num_rows, size_t num_cols, string type){
 
 	if (type == "eye"){
 		if (num_rows != num_cols){
-			throw invalid_argument("To create identity MatrixBase number of rows and columns should be equal\n");
+			throw invalid_argument("To create identity Matrix number of rows and columns should be equal\n");
 		}
 			// initialize MatrixBase with zeros and then assign 1 to diagonal
 		for(size_t idx_r = 0; idx_r < nrows_; idx_r++){
@@ -79,6 +79,7 @@ MatrixBase<T>::~MatrixBase(){
 	if(nrows_ > 0){
 		delete[] matrix_;
 	}
+
 }
 
 // member functions
@@ -92,6 +93,17 @@ void MatrixBase<T>::PrintMatrix(){
 		printf("\n");
 	}
 	printf("*****************************\n");
+}
+
+template <typename T>
+MatrixBase<T> MatrixBase<T>::Transpose(){
+	MatrixBase<T> transpose_matrix(ncols_, nrows_);
+	for(size_t idx_c = 0; idx_c < ncols_; idx_c++){
+		for(size_t idx_r = 0; idx_r < nrows_; idx_r++){
+			transpose_matrix(idx_c, idx_r) = matrix_[idx_r][idx_c];
+		}
+	}
+	return transpose_matrix;
 }
 
 // operator overloading
@@ -117,7 +129,7 @@ MatrixBase<T> MatrixBase<T>::operator= (const MatrixBase<T>& matrix_to_copy){
 	for(size_t idx_r = 0; idx_r < nrows_; idx_r++){
 		matrix_[idx_r] = new T[ncols_];
 	}
-	// initialize MatrixBase with zeros
+	// initialize Matrix with the matrix_to_copy values
 	for(size_t idx_r = 0; idx_r < nrows_; idx_r++){
 		for(size_t idx_c = 0; idx_c < ncols_; idx_c++){
 			matrix_[idx_r][idx_c] = matrix_to_copy.matrix_[idx_r][idx_c];
@@ -242,6 +254,27 @@ MatrixBase<T> MatrixBase<T>::operator/ (const T x){
 	}
 
 	return return_MatrixBase;
+}
+
+// getters and setters
+template<typename T>
+size_t MatrixBase<T>::get_ncols(){
+	return ncols_;
+}
+
+template<typename T>
+size_t MatrixBase<T>::get_nrows(){
+	return nrows_;
+}
+
+template<typename T>
+T MatrixBase<T>::get_element(size_t idx_r, size_t idx_c){
+	return matrix_[idx_r][idx_c];
+}
+
+template<typename T>
+void MatrixBase<T>::set_element(size_t idx_r, size_t idx_c, T val){
+	matrix_[idx_r][idx_c] = val;
 }
 
 // Explicit template instantiation

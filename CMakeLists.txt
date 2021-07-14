@@ -1,6 +1,9 @@
 # Minimum version of CMake required to build this project
 cmake_minimum_required(VERSION 3.16.2)
 
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 set(PROJECT_NAME MatrixMain)
 
 set(PROJECT_SOURCE_DIR

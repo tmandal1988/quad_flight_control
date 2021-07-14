@@ -19,8 +19,10 @@ class MatrixBase{
 
 		// copy constructor
 		MatrixBase(const MatrixBase<T>& matrix_to_copy);
+		
 		// member functions
 		void PrintMatrix();
+		MatrixBase Transpose();
 		// operator overloading
 		MatrixBase operator= (const MatrixBase<T>& matrix_to_copy);
 		// assign elements at row idx and col idx
@@ -41,8 +43,13 @@ class MatrixBase{
 		MatrixBase operator* (const T x);
 		// divide by a scalar
 		MatrixBase operator/ (const T x);
+		// getter and setters
+		size_t get_ncols();
+		size_t get_nrows();
+		T get_element(size_t idx_r, size_t idx_c);
+		void set_element(size_t idx_r, size_t idx_c, T val);
 
-	private:
+	protected:
 		size_t nrows_, ncols_;
 		T **matrix_;
 

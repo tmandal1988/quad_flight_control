@@ -1,8 +1,8 @@
-#include <Matrix/matrix_base_class.h>
+#include <Matrix/matrix_inv_class.h>
 
 
 int main(){
-	MatrixBase<float> m(3, 3);
+	MatrixInv<float> m(3, 3);
 	m(0, 0) = 1;
 	m(0, 1) = 5;
 	m(0, 2) = 3;
@@ -13,6 +13,13 @@ int main(){
 	m(2, 1) = 0;
 	m(2, 2) = 13;
 	m.PrintMatrix();
+
+	MatrixInv<float> m1 = m;
+	m1.PrintMatrix();
+
+	MatrixInv<float> m2;
+	m2 = m1;
+	m2.Inverse().PrintMatrix();
 
 	return 0;
 }
