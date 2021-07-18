@@ -15,6 +15,7 @@ set(LIBRARY_HEADERS_DIR
 set(LIBRARY_HEADERS
     ${LIBRARY_HEADERS_DIR}/matrix_base_class.h
     ${LIBRARY_HEADERS_DIR}/matrix_inv_class.h
+    ${LIBRARY_HEADERS_DIR}/matrix_factorization_class.h
 )
 set(LIBRARY_SOURCE_DIR
     src
@@ -22,6 +23,7 @@ set(LIBRARY_SOURCE_DIR
 set(LIBRARY_SOURCE
     ${LIBRARY_SOURCE_DIR}/matrix_base_class.cc
     ${LIBRARY_SOURCE_DIR}/matrix_inv_class.cc
+    ${LIBRARY_SOURCE_DIR}/matrix_factorization_class.cc
 )
 
 project(${PROJECT_NAME})

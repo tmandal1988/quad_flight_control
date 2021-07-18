@@ -1,8 +1,8 @@
-#include <Matrix/matrix_inv_class.h>
+#include <Matrix/matrix_factorization_class.h>
 
 
 int main(){
-	MatrixInv<float> m(3, 3);
+	MatrixFact<float> m(3, 3);
 	m(0, 0) = 1;
 	m(0, 1) = 5;
 	m(0, 2) = 3;
@@ -12,14 +12,18 @@ int main(){
 	m(2, 0) = 2;
 	m(2, 1) = 0;
 	m(2, 2) = 13;
-	m.PrintMatrix();
 
-	MatrixInv<float> m1 = m;
+	MatrixFact<float> m1 = m;
 	m1.PrintMatrix();
 
-	MatrixInv<float> m2;
+	MatrixFact<float> m2;
 	m2 = m1;
-	m2.Inverse().PrintMatrix();
+	array<MatrixFact<float>, 2> lu_decomp = m2.Lu();
+	lu_decomp[0].PrintMatrix();
+	lu_decomp[1].PrintMatrix();
 
+	MatrixBase<float> m3;
+	m3 = lu_decomp[0]*lu_decomp[1];
+	m3.PrintMatrix();
 	return 0;
 }
