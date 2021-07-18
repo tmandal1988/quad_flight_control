@@ -48,6 +48,7 @@ class MatrixBase{
 		size_t get_nrows();
 		T get_element(size_t idx_r, size_t idx_c);
 		void set_element(size_t idx_r, size_t idx_c, T val);
+		bool is_empty();
 
 	protected:
 		size_t nrows_, ncols_;

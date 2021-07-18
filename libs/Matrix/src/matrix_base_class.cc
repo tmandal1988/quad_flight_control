@@ -277,6 +277,15 @@ void MatrixBase<T>::set_element(size_t idx_r, size_t idx_c, T val){
 	matrix_[idx_r][idx_c] = val;
 }
 
+template<typename T>
+bool MatrixBase<T>::is_empty(){
+	if (matrix_ == NULL){
+		return true;
+	}else{
+		return false;
+	}
+}
+
 // Explicit template instantiation
 template class MatrixBase<float>;
 template class MatrixBase<double>;
