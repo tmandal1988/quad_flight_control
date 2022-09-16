@@ -1,6 +1,6 @@
 #ifndef MATRIXFACT_H
 #define MATRIXFACT_H
-#endif
+
 
 #include "matrix_base_class.h"
 #include<array>
@@ -13,3 +13,5 @@ class MatrixFact : public MatrixBase<T>{
 		array<MatrixFact, 2> Lu();
 
 };
+
+#endif

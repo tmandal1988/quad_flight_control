@@ -1,6 +1,5 @@
 #ifndef MATRIXINV_H
 #define MATRIXINV_H
-#endif
 
 #include "matrix_base_class.h"
 
@@ -12,3 +11,5 @@ class MatrixInv : public MatrixBase<T>{
 		MatrixInv Inverse();
 
 };
+
+#endif

@@ -4,13 +4,13 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(PROJECT_NAME
-    MatrixLib
+    EkfLib
 )
 set(LIBRARY_NAME
-    Matrix
+    Ekf
 )
 set(LIBRARY_HEADERS_DIR
-    include/${LIBRARY_NAME}
+    include
 )
 
 file(GLOB LIBRARY_HEADERS CONFIGURE_DEPENDS "${LIBRARY_HEADERS_DIR}/*.h")
@@ -28,15 +28,19 @@ add_library(${LIBRARY_NAME} STATIC
     ${LIBRARY_SOURCE}
 )
 
+include_directories(${Matrix_SOURCE_DIR})
+# Specify lib2's dependency on lib1
+
+target_link_libraries(Ekf Matrix)
+
+
 target_include_directories(${LIBRARY_NAME} PRIVATE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/${LIBRARY_NAME}>
-    $<INSTALL_INTERFACE:include/${LIBRARY_NAME}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
 )
 
 target_include_directories(${LIBRARY_NAME} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
-
-add_subdirectory(test)
 

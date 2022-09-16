@@ -7,4 +7,5 @@
 # Don't commit build
 build
 # Don't include mac specific folder
+._.DS_Store
 .DS_Store

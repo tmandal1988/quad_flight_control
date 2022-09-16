@@ -1,6 +1,6 @@
 #ifndef MATRIXBASE_H
 #define MATRIXBASE_H
-#endif
+
 
 #include<iostream>
 #include<string>
@@ -56,3 +56,5 @@ class MatrixBase{
 
 
 };
+
+#endif

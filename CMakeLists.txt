@@ -4,14 +4,14 @@ cmake_minimum_required(VERSION 3.16.2)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(PROJECT_NAME MatrixMain)
+set(PROJECT_NAME IMUGPSEKF)
 
 set(PROJECT_SOURCE_DIR
 	src
 )
 
 set(PROJECT_SOURCE
-    ${PROJECT_SOURCE_DIR}/matrix_main.cc
+    ${PROJECT_SOURCE_DIR}/ekf_example.cc
 )
 
 set(PROJECT_LIBRARIES_DIR
@@ -20,6 +20,16 @@ set(PROJECT_LIBRARIES_DIR
 
 set(PROJECT_LIBRARIES 
     Matrix
+    NavioCommon
+    NavioNavio2
+    Ekf
+)
+
+set(PROJECT_LIBRARIES_SUBDIR
+    Matrix
+    Navio/Common
+    Navio/Navio2
+    Ekf
 )
 
 include(FetchContent)
@@ -39,7 +49,7 @@ project(${PROJECT_NAME})
 
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCE})
 
-foreach(LIBRARY ${PROJECT_LIBRARIES})
+foreach(LIBRARY ${PROJECT_LIBRARIES_SUBDIR})
     add_subdirectory("${PROJECT_LIBRARIES_DIR}/${LIBRARY}")
 endforeach(LIBRARY)
 
