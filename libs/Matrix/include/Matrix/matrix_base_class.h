@@ -27,8 +27,12 @@ class MatrixBase{
 		MatrixBase operator= (const MatrixBase<T>& matrix_to_copy);
 		// assign elements at row idx and col idx
 		T& operator() (size_t r_idx, size_t c_idx);
+		// assign elements at row idx and col idx 0, useful for using with column vectors
+		T& operator() (size_t r_idx);
 		// read elements at row idx and col idx
 		T operator() (size_t r_idx, size_t c_idx) const;
+		// read elements at row idx and col idx 0, useful for using with column vectors
+		T operator() (size_t r_idx) const;
 		// multiply two matrices
 		MatrixBase operator* (const MatrixBase& matrix_to_multipy);
 		// add two matrices

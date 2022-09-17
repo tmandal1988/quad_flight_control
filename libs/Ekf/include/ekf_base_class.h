@@ -4,7 +4,8 @@
 
 #include<iostream>
 #include<string>
-#include <functional>
+#include<functional>
+#include<cmath>
 
 #include <Matrix/matrix_inv_class.h>
 
@@ -33,12 +34,12 @@ class EkfBase{
 
 
 		// member functions
-		virtual MatrixBase<T> GetStateFunction(MatrixBase<T> previous_state, MatrixBase<T> current_states_meas) = 0;
-		virtual MatrixBase<T> GetStateJacobian(MatrixBase<T> previous_state, MatrixBase<T> current_states_meas) = 0;
-		virtual MatrixBase<T> GetStateNoiseJacobian(MatrixBase<T> previous_state, MatrixBase<T> current_states_meas) = 0;
-		virtual MatrixBase<T> GetMeasFunction(MatrixBase<T> current_meas) = 0;
-		virtual MatrixBase<T> GetMeasJacobian(MatrixBase<T> current_meas) = 0;
-		virtual MatrixBase<T> GetMeasNoiseJacobian(MatrixBase<T> current_meas) = 0;
+		virtual void PropagateState(MatrixBase<T> previous_state, MatrixBase<T> current_states_meas) = 0;
+		virtual void ComputeStateJacobian(MatrixBase<T> previous_state, MatrixBase<T> current_states_meas) = 0;
+		virtual MatrixBase<T> ComputeStateNoiseJacobian(MatrixBase<T> previous_state, MatrixBase<T> current_states_meas) = 0;
+		virtual MatrixBase<T> GetMeas(MatrixBase<T> current_meas) = 0;
+		virtual MatrixBase<T> ComputeMeasJacobian(MatrixBase<T> current_meas) = 0;
+		virtual MatrixBase<T> ComputeMeasNoiseJacobian(MatrixBase<T> current_meas) = 0;
 
 		// EKF variables
 		MatrixBase<T> initial_state_;
@@ -50,6 +51,10 @@ class EkfBase{
 		const MatrixBase<T> meas_noise_r_;
 		MatrixBase<T> covariance_p_;
 
-
-		
+		// Variables to run EKF
+		MatrixBase<T> time_propagated_state_;
+		MatrixBase<T> state_jacobian_;
+		MatrixBase<T> state_noise_jacobian_;
+		MatrixBase<T> meas_jacobian_;
+		MatrixBase<T> meas_noise_jacobian_;
 };

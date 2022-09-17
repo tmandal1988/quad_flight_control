@@ -149,6 +149,16 @@ T& MatrixBase<T>::operator()(size_t r_idx, size_t c_idx){
 }
 
 template <typename T>
+T& MatrixBase<T>::operator()(size_t r_idx){
+	if (r_idx >= nrows_ )
+	{
+		throw out_of_range("Matrx subscript out of bounds\n");
+	}
+
+	return matrix_[r_idx][0];
+}
+
+template <typename T>
 T MatrixBase<T>::operator() (size_t r_idx, size_t c_idx) const {
 	if (r_idx >= nrows_ || c_idx >= ncols_)
 	{
@@ -156,6 +166,16 @@ T MatrixBase<T>::operator() (size_t r_idx, size_t c_idx) const {
 	}
 
 	return matrix_[r_idx][c_idx];
+}
+
+template <typename T>
+T MatrixBase<T>::operator() (size_t r_idx) const {
+	if (r_idx >= nrows_)
+	{
+		throw out_of_range("Matrx subscript out of bounds\n");
+	}
+
+	return matrix_[r_idx][0];
 }
 
 template <typename T>

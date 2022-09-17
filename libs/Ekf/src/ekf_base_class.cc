@@ -17,6 +17,12 @@ EkfBase<T>::EkfBase(size_t num_states, size_t num_meas, size_t num_states_sensor
 
 		covariance_p_ = MatrixBase<T> (num_states_, num_states_, "eye");
 
+		state_jacobian_ = MatrixBase<T> (num_states_, num_states_);
+		state_noise_jacobian_ = MatrixBase<T> (num_states_, num_states_);
+
+		time_propagated_state_ = initial_state;
+		meas_jacobian_ = MatrixBase<T> (num_meas_, num_states_);
+		meas_noise_jacobian_ = MatrixBase<T>(num_meas_, num_meas_, "eye");
 }
 
 template <typename T>
@@ -26,8 +32,8 @@ EkfBase<T>::~EkfBase(){
 
 template <typename T>
 void EkfBase<T>::run(){
-	MatrixBase<T> stateVal = GetStateFunction(current_state_, current_state_sensor_val_);
-	current_state_ = stateVal;
+	PropagateState(current_state_, current_state_sensor_val_);
+	ComputeStateJacobian(current_state_, current_state_sensor_val_);
 }
 
 // Explicit template instantiation
