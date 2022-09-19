@@ -6,9 +6,9 @@
 template <typename T>
 class MatrixInv : public MatrixBase<T>{
 	using MatrixBase<T>::MatrixBase;
-
 	public:
 		MatrixInv Inverse();
+		MatrixInv(const MatrixBase<T>& matrix):MatrixBase<T>(matrix){}
 
 };
 

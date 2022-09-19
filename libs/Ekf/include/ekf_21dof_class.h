@@ -21,19 +21,22 @@ template <typename T>
 class Ekf21Dof:public EkfBase<T>{
 	public:
 		// constructors
-		Ekf21Dof(T sample_time_s, MatrixBase<T> initial_state, MatrixBase<T> process_noise_q, MatrixBase<T> meas_noise_r);
+		Ekf21Dof(T sample_time_s, MatrixInv<T> initial_state, MatrixInv<T> process_noise_q, MatrixInv<T> meas_noise_r);
 
 		// destructor
 		~Ekf21Dof();	
 
 	protected:
 		// member functions
-		void PropagateState(MatrixBase<T> previous_state, MatrixBase<T> current_states_meas);
-		void ComputeStateJacobian(MatrixBase<T> previous_state, MatrixBase<T> current_states_meas);
-		MatrixBase<T> ComputeStateNoiseJacobian(MatrixBase<T> previous_state, MatrixBase<T> current_states_meas);
-		MatrixBase<T> GetMeas(MatrixBase<T> current_meas);
-		MatrixBase<T> ComputeMeasJacobian(MatrixBase<T> current_meas);
-		MatrixBase<T> ComputeMeasNoiseJacobian(MatrixBase<T> current_meas);
+		void PropagateState(MatrixInv<T> previous_state, MatrixInv<T> state_sensor_val);
+		void ComputeStateJacobian(MatrixInv<T> previous_state, MatrixInv<T> state_sensor_val);
+		void ComputeStateNoiseJacobian(MatrixInv<T> previous_state);
+		void GetMeas(MatrixInv<T> meas_sensor_val);
+		void ComputeMeasJacobian(MatrixInv<T> meas_sensor_val);
+		void ComputeMeasNoiseJacobian(MatrixInv<T> meas_sensor_val);
+		void ComputeMeasFromState(MatrixInv<T> time_propagated_state);
+
+		void ComputeTrignometricValues();
 
 		// trignometric values
 		T s_phi;

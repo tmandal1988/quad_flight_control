@@ -100,7 +100,8 @@ public:
 enum message_t
 {
     NAV_POSLLH = 0x0102,
-    NAV_STATUS = 0x0103
+    NAV_STATUS = 0x0103,
+    NAV_VELNED = 0x0112
 };
 
 private:
@@ -141,6 +142,7 @@ public:
     Ublox(std::string name, UBXScanner* scan, UBXParser* pars);
     int enableNAV_POSLLH();
     int enableNAV_STATUS();
+    int enableNAV_VELNED();
     int testConnection();
     int configureSolutionRate(std::uint16_t meas_rate,
                               std::uint16_t nav_rate = 1,

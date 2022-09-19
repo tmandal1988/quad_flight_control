@@ -1,5 +1,5 @@
-#include <Matrix/matrix_factorization_class.h>
 #include <ekf_21dof_class.h>
+#include <Matrix/matrix_factorization_class.h>
 
 
 int main(){
@@ -23,16 +23,18 @@ int main(){
 	lu_decomp[0].PrintMatrix();
 	lu_decomp[1].PrintMatrix();
 
-	MatrixBase<float> m3;
+	MatrixInv<float> m3;
 	m3 = lu_decomp[0]*lu_decomp[1];
 	m3.PrintMatrix();*/
-	MatrixBase<float> initial_state(21, 1);
-	MatrixBase<float> process_noise_q(21, 21, "eye");
-	MatrixBase<float> meas_noise_r(7, 7, "eye");
+	MatrixInv<float> initial_state(21, 1);
+	MatrixInv<float> sensor_meas(9, 1);
+	MatrixInv<float> state_sensor_val(6, 1);
+	MatrixInv<float> process_noise_q(21, 21, "eye");
+	MatrixInv<float> meas_noise_r(7, 7, "eye");
 
 	Ekf21Dof<float> imu_gps_ekf(0.01, initial_state, process_noise_q, meas_noise_r);
 
-	imu_gps_ekf.run();
+	imu_gps_ekf.run(state_sensor_val, sensor_meas);
 
 
 	return 0;

@@ -228,6 +228,47 @@ int UBXParser::decodeMessage(std::vector<double>& data)
 
                 break;
 
+
+        case 274:
+                // ID for Nav-Velned messages is 0x0112 == 274
+                // In this example we extract 9 variables
+                // 1. iTOW - GPS Millisecond Time of Week
+                // 2. North velocity
+                // 3. East velocity
+                // 4. Down velocity
+                // 5. 3D speed
+                // 6. 2D speed - ground speed
+                // 7. 2D heading
+                // 8. Speed accuracy estimate
+                // 9. Course/Heading accuracy estimate
+
+                // All the needed parameters are 4-byte numbers with little endianness.
+                // We know the current message and we want to update the info in the data vector.
+                // First we clear the old data:
+
+                data.clear();
+
+                //iTOW
+                data.push_back ((unsigned)((*(message+pos+9) << 24) | (*(message+pos+8) << 16) | (*(message+pos+7) << 8) | (*(message+pos+6))));
+                //North velocity
+                data.push_back ((*(message+pos+13) << 24) | (*(message+pos+12) << 16) | (*(message+pos+11) << 8) | (*(message+pos+10)));
+                //East velocity
+                data.push_back ((*(message+pos+17) << 24) | (*(message+pos+16) << 16) | (*(message+pos+15) << 8) | (*(message+pos+14)));
+                //Down velocity
+                data.push_back ((*(message+pos+21) << 24) | (*(message+pos+20) << 16) | (*(message+pos+19) << 8) | (*(message+pos+18)));
+                //3D speed
+                data.push_back ((*(message+pos+25) << 24) | (*(message+pos+24) << 16) | (*(message+pos+23) << 8) | (*(message+pos+22)));
+                //2D speed - ground speed
+                data.push_back ((*(message+pos+29) << 24) | (*(message+pos+28) << 16) | (*(message+pos+27) << 8) | (*(message+pos+26)));
+                //2D heading
+                data.push_back ((*(message+pos+33) << 24) | (*(message+pos+32) << 16) | (*(message+pos+31) << 8) | (*(message+pos+30)));
+                //Speed accuracy estimate
+                data.push_back ((unsigned)((*(message+pos+37) << 24) | (*(message+pos+36) << 16) | (*(message+pos+35) << 8) | (*(message+pos+34))));
+                //Course/Heading accuracy estimate
+                data.push_back ((unsigned)((*(message+pos+41) << 24) | (*(message+pos+40) << 16) | (*(message+pos+39) << 8) | (*(message+pos+38))));
+                break;
+
+
         default:
                 // In case we don't want to decode the received message
                 flag = 0;
@@ -299,6 +340,15 @@ int Ublox::enableNAV_STATUS()
     return SPIdev::transfer(spi_device_name.c_str(), gps_nav_status, from_gps_data_nav, gps_nav_status_length, 200000);
 }
 
+int Ublox::enableNAV_VELNED()
+{
+    unsigned char gps_nav_status[] = {0xb5, 0x62, 0x06, 0x01, 0x03, 0x00, 0x01, 0x12, 0x01, 0x1E, 0x67};
+    int gps_nav_status_length = (sizeof(gps_nav_status)/sizeof(*gps_nav_status));
+    unsigned char from_gps_data_nav[gps_nav_status_length];
+
+    return SPIdev::transfer(spi_device_name.c_str(), gps_nav_status, from_gps_data_nav, gps_nav_status_length, 200000);
+}
+
 int Ublox::testConnection()
 {
     int status;
@@ -313,6 +363,11 @@ int Ublox::testConnection()
     }
 
     if (enableNAV_STATUS()<0)
+    {
+        std::cerr << "Could not configure ublox over SPI\n";
+    }
+
+    if (enableNAV_VELNED()<0)
     {
         std::cerr << "Could not configure ublox over SPI\n";
     }
@@ -605,6 +660,47 @@ int Ublox::decodeSingleMessage(message_t msg, std::vector<double>& position_data
                             // }
                             //
                             // printf("\n");
+
+                            // You can see ubx message structure in ublox reference manual
+
+                            scanner->reset();
+
+                            return 1;
+                        }
+
+                        scanner->reset();
+                    }
+
+                    count++;
+                }
+
+                return 0;
+            }
+
+        break;
+
+        case NAV_VELNED:
+            {
+                uint16_t id = 0x0112;
+                int status;
+                int count = 0;
+                unsigned char to_gps_data = 0x00, from_gps_data = 0x00;
+
+                while (count < UBX_BUFFER_LENGTH/2)
+                {
+                    // From now on, we will send zeroes to the receiver, which it will ignore
+                    // However, we are simultaneously getting useful information from it
+                    SPIdev::transfer(spi_device_name.c_str(), &to_gps_data, &from_gps_data, 1, 200000);
+
+                    // Scanner checks the message structure with every byte received
+                    status = scanner->update(from_gps_data);
+
+                    if (status == UBXScanner::Done)
+                    {
+                        // Once we have a full message we decode it and reset the scanner, making it look for another message
+                        // in the data stream, coming over SPI
+                        if(parser->decodeMessage(position_data) == id)
+                        {
 
                             // You can see ubx message structure in ublox reference manual
 
