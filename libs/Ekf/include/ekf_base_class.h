@@ -22,7 +22,8 @@ class EkfBase{
 		// destructor
 		~EkfBase();
 
-		void run(MatrixInv<T> state_sensor_val, MatrixInv<T> meas_sensor_val);
+		void Run(MatrixInv<T> state_sensor_val, MatrixInv<T> meas_sensor_val);
+		MatrixInv<T> GetCurrentState(){ return current_state_;}
 	protected:
 
 		// EKF dimension and sample time
