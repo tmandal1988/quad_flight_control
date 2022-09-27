@@ -21,8 +21,13 @@ class MatrixBase{
 		MatrixBase(const MatrixBase<T>& matrix_to_copy);
 		
 		// member functions
-		void PrintMatrix();
+		void PrintMatrix() const;
+		void PrintRow(size_t r_idx) const;
+		void PrintCol(size_t c_idx) const;
 		MatrixBase Transpose();
+		// get a row of the matrix
+		MatrixBase GetRow(size_t r_idx);
+		MatrixBase GetCol(size_t c_idx);
 		// operator overloading
 		MatrixBase operator= (const MatrixBase<T>& matrix_to_copy);
 		// assign elements at row idx and col idx

@@ -1,6 +1,6 @@
-#ifndef EKF21DOF_H
-#define EKF21DOF_H
-#endif
+#ifndef EKF15DOF_H
+#define EKF15DOF_H
+
 
 #include<iostream>
 #include<string>
@@ -10,7 +10,7 @@
 
 using namespace std;
 
-#define NUM_STATES 			21
+#define NUM_STATES 			15
 #define NUM_MEAS 			7
 
 /* First three indices correspond to body angular rates and last 3 sensors corresponds to
@@ -18,13 +18,13 @@ accelerometers measurement without the gravity resolved in body frame*/
 #define NUM_STATES_SENSOR 	6 
 
 template <typename T>
-class Ekf21Dof:public EkfBase<T>{
+class Ekf15Dof:public EkfBase<T>{
 	public:
 		// constructors
-		Ekf21Dof(T sample_time_s, MatrixInv<T> initial_state, MatrixInv<T> process_noise_q, MatrixInv<T> meas_noise_r);
+		Ekf15Dof(T sample_time_s, MatrixInv<T> initial_state, MatrixInv<T> process_noise_q, MatrixInv<T> meas_noise_r);
 
 		// destructor
-		~Ekf21Dof();	
+		~Ekf15Dof();	
 
 	protected:
 		// member functions
@@ -50,5 +50,8 @@ class Ekf21Dof:public EkfBase<T>{
 		T s_psi;
 		T c_psi;
 
+		MatrixInv<T> g;
+
 			
 };
+#endif

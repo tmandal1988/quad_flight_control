@@ -24,6 +24,7 @@ class EkfBase{
 
 		void Run(MatrixInv<T> state_sensor_val, MatrixInv<T> meas_sensor_val);
 		MatrixInv<T> GetCurrentState(){ return current_state_;}
+		MatrixInv<T> GetStateJacobian(){ return state_jacobian_;}
 	protected:
 
 		// EKF dimension and sample time
@@ -41,6 +42,8 @@ class EkfBase{
 		virtual void ComputeMeasJacobian(MatrixInv<T> meas_sensor_val) = 0;
 		virtual void ComputeMeasNoiseJacobian(MatrixInv<T> meas_sensor_val) = 0;
 		virtual void ComputeMeasFromState(MatrixInv<T> time_propagated_state) = 0;
+
+		void ComputeKalmanGainSequential(size_t r_idx);
 
 		
 
@@ -62,6 +65,7 @@ class EkfBase{
 		MatrixInv<T> meas_noise_jacobian_;
 		MatrixInv<T> inv_part_of_kalman_gain_;
 		MatrixInv<T> kalman_gain_;
+		MatrixInv<T> kalman_gain_seq_;
 
 		MatrixInv<T> kalman_eye_;
 };

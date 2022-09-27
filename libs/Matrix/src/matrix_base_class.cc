@@ -84,13 +84,31 @@ MatrixBase<T>::~MatrixBase(){
 
 // member functions
 template <typename T>
-void MatrixBase<T>::PrintMatrix(){
+void MatrixBase<T>::PrintMatrix() const{
 	printf("*****************************\n");
 	for(size_t idx_r = 0; idx_r < nrows_; idx_r++){
 		for(size_t idx_c = 0; idx_c < ncols_; idx_c++){
 			printf("%g\t", matrix_[idx_r][idx_c]);
 		}
 		printf("\n");
+	}
+	printf("*****************************\n");
+}
+
+template <typename T>
+void MatrixBase<T>::PrintRow(size_t r_idx) const{
+	printf("*****************************\n");
+	for(size_t idx_c = 0; idx_c < ncols_; idx_c++){
+		printf("%g\t", matrix_[r_idx][idx_c]);
+	}
+	printf("*****************************\n");
+}
+
+template <typename T>
+void MatrixBase<T>::PrintCol(size_t c_idx) const{
+	printf("*****************************\n");
+	for(size_t idx_r = 0; idx_r < nrows_; idx_r++){
+		printf("%g\n", matrix_[idx_r][c_idx]);
 	}
 	printf("*****************************\n");
 }
@@ -104,6 +122,24 @@ MatrixBase<T> MatrixBase<T>::Transpose(){
 		}
 	}
 	return transpose_matrix;
+}
+
+template <typename T>
+MatrixBase<T> MatrixBase<T>::GetRow(size_t r_idx){
+	MatrixBase<T> row_matrix(1, ncols_);
+	for(size_t idx_c = 0; idx_c < ncols_; idx_c++){
+			row_matrix(0, idx_c) = matrix_[r_idx][idx_c];
+	}
+	return row_matrix;
+}
+
+template <typename T>
+MatrixBase<T> MatrixBase<T>::GetCol(size_t c_idx){
+	MatrixBase<T> col_matrix(nrows_, 1);
+	for(size_t idx_r = 0; idx_r < nrows_; idx_r++){
+			col_matrix(idx_r, 0) = matrix_[idx_r][c_idx];
+	}
+	return col_matrix;
 }
 
 // operator overloading
