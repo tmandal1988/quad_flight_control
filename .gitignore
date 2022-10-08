@@ -9,3 +9,4 @@ build
 # Don't include mac specific folder
 ._.DS_Store
 .DS_Store
+*.csv

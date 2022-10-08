@@ -55,33 +55,85 @@ int main(){
 	MatrixInv<float> state_jacobian(15, 15);
 
 	//Compute initial heading
-/*	float magnetic_declination = 13.01;
-	sensor->read_magnetometer(&mx, &my, &mz);
+	float magnetic_declination = 13.01/RAD2DEG;
+	/*sensor->read_magnetometer(&mx, &my, &mz);
 	initial_state(2) = atan2( -my, mx) + magnetic_declination/RAD2DEG;
 	printf("My = %+7.3f, Mx = %+7.3f\n", my, mx);
 	printf("Initial Heading: %+7.3f\n", initial_state(2));*/
-	process_noise_q = process_noise_q*0.1;
-	process_noise_q(0, 0) = 0.01;
-	process_noise_q(1, 1) = 0.01;
-	process_noise_q(2, 2) = 0.01;
+	// process_noise_q = process_noise_q*0.1;
+	// process_noise_q(0, 0) = 0.01;
+	// process_noise_q(1, 1) = 0.01;
+	// process_noise_q(2, 2) = 0.01;
 
-	process_noise_q(6, 6) = 1;
-	process_noise_q(7, 7) = 1;
-	process_noise_q(8, 8) = 1;
-	process_noise_q(9, 9) = 1;
-	process_noise_q(10, 10) = 1;
-	process_noise_q(11, 11) = 1;
+	// process_noise_q(6, 6) = 1;
+	// process_noise_q(7, 7) = 1;
+	// process_noise_q(8, 8) = 1;
+	// process_noise_q(9, 9) = 1;
+	// process_noise_q(10, 10) = 1;
+	// process_noise_q(11, 11) = 1;
 
-	process_noise_q(12, 12) = 0.01;
-	process_noise_q(12, 12) = 0.01;
-	process_noise_q(12, 12) = 0.01;
+	// process_noise_q(12, 12) = 0.01;
+	// process_noise_q(12, 12) = 0.01;
+	// process_noise_q(12, 12) = 0.01;
 
-	Ekf15Dof<float> imu_gps_ekf(0.01, initial_state, process_noise_q*0.1, meas_noise_r*50);
+	// Compute initial roll, pitch, yaw but collecting and averaging data for 2 sec
+	float sum_ax = 0;
+	float sum_ay = 0;
+	float sum_az = 0;
+	float sum_mx = 0;
+	float sum_my = 0;
+	float sum_mz = 0;
+	for (size_t idx_s = 0; idx_s < 200; idx_s++){
+		sensor->update();
+	    sensor->read_accelerometer(&ax, &ay, &az);
+	    sensor->read_magnetometer(&mx, &my, &mz);
 
-	// file pointer
+	    sum_ax += ay;
+	    sum_ay += ax;
+	    sum_az += -az;
+
+	    sum_mx += mx;
+	    sum_my += my;
+	    sum_mz += -mz;
+
+		usleep(10000);
+	}
+
+	float avg_acc_mag = sqrt(pow((sum_ax/200), 2) + pow((sum_ay/200), 2) + pow((sum_az/200), 2));
+	float avg_gaus_mag = sqrt(pow((sum_mx/200), 2) + pow((sum_my/200), 2) + pow((sum_mz/200), 2));
+
+	initial_state(0) = atan2(sum_ay/200, avg_acc_mag);
+	initial_state(1) = atan2(sum_ax/200, avg_acc_mag);
+
+	MatrixInv<float> mag2d_projection(2, 3);
+	mag2d_projection(0, 0) = cos(initial_state(1));
+	mag2d_projection(0, 1) = sin(initial_state(1))*sin(initial_state(0));
+	mag2d_projection(0, 2) =  sin(initial_state(1))*cos(initial_state(0));
+
+	mag2d_projection(1, 1)  = cos(initial_state(1));
+	mag2d_projection(1, 2) = -sin(initial_state(0));
+
+	MatrixInv<float> mag_vector(3, 1);
+	mag_vector(0) = sum_mx/200/avg_gaus_mag;
+	mag_vector(1) = sum_my/200/avg_gaus_mag;
+	mag_vector(2) = sum_mz/200/avg_gaus_mag;
+
+	MatrixInv<float> mag2d = mag2d_projection*mag_vector;
+	initial_state(2) = -atan2(mag2d(1), mag2d(0)) + magnetic_declination;
+
+	// initial_state(2) = atan2( -(sum_my/200/avg_gaus_mag)*cos(initial_state(0)) + (sum_mz/200/avg_gaus_mag)*sin(initial_state(0)), (sum_mx/200/avg_gaus_mag)*cos(initial_state(1)) + 
+	// 	((sum_my/200/avg_gaus_mag)*sin(initial_state(0)) + (sum_mz/200/avg_gaus_mag)*cos(initial_state(0)))*sin(initial_state(1)) ) + magnetic_declination;
+
+	printf("Initial Roll: %g [deg], Initial Pitch: %g [deg], Initial Yaw: %g [deg]\n", initial_state(0)*RAD2DEG, initial_state(1)*RAD2DEG, initial_state(2)*RAD2DEG);
+
+	usleep(5000000);
+
+	Ekf15Dof<float> imu_gps_ekf(0.01, initial_state, process_noise_q*0.00001, meas_noise_r*20);
+
+	// // file pointer
     fstream fout;
   
-    // opens an existing csv file or creates a new file.
+ //    // opens an existing csv file or creates a new file.
     fout.open("imu.csv", ios::out | ios::app);
 
 	size_t count = 0;
@@ -91,7 +143,7 @@ int main(){
 	    sensor->update();
 	    sensor->read_accelerometer(&ax, &ay, &az);
 	    sensor->read_gyroscope(&gx, &gy, &gz);
-	   //  sensor->read_magnetometer(&mx, &my, &mz);
+	    sensor->read_magnetometer(&mx, &my, &mz);
 	   //  //printf("Acc: %+7.3f %+7.3f %+7.3f  \n", ax, ay, az);
 	   //  //printf("Gyr: %+8.3f %+8.3f %+8.3f  \n", gy, gx, -gz);
 	   // //printf("Mag: %+7.3f %+7.3f %+7.3f\n", mx, my, mz);
@@ -110,9 +162,9 @@ int main(){
 	    state_sensor_val(4) = ax;
 	    state_sensor_val(5) = -az;
 
-/*	    sensor_meas(0) = mx;
+	    sensor_meas(0) = mx;
 	    sensor_meas(1) = my;
-	    sensor_meas(2) = mz;*/
+	    sensor_meas(2) = -mz;
 	    imu_gps_ekf.Run(state_sensor_val, sensor_meas);
 	    current_state = imu_gps_ekf.GetCurrentState();
 	    state_jacobian = imu_gps_ekf.GetStateJacobian();
@@ -126,6 +178,9 @@ int main(){
              << ay << ", "
              << ax << ", "
              << az << ","
+             << my << ", "
+             << mx << ", "
+             << -mz << ", "
              << current_state(0) << ", "
              << current_state(1) << ", "
              << current_state(2)
