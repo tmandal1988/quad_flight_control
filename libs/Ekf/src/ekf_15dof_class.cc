@@ -103,8 +103,8 @@ void Ekf15Dof<T>::PropagateState(MatrixInv<T> previous_state, MatrixInv<T> state
 	this->time_propagated_state_(1) = previous_state(1) + propogated_euler_ang(1);
 	this->time_propagated_state_(2) = previous_state(2) + propogated_euler_ang(2);
 
-	if (this->time_propagated_state_(2) > 180/57.29578){
-		this->time_propagated_state_(2) = -(360/57.29578 - this->time_propagated_state_(2));
+	if ( abs(this->time_propagated_state_(2)) > 180/57.29578 ){
+		this->time_propagated_state_(2) = -( this->time_propagated_state_(2)/abs(this->time_propagated_state_(2)) )*( 360/57.29578 - abs(this->time_propagated_state_(2)) ) ;
 	}
 	// this->time_propagated_state_(0) = previous_state(0) +  dt*( state_sensor_val(0) - previous_state(3) + c_phi*t_theta*( state_sensor_val(2) - previous_state(5) ) +
 	// 															s_phi*t_theta*(state_sensor_val(1) - previous_state(4)) );
@@ -161,7 +161,7 @@ void Ekf15Dof<T>::ComputeStateJacobian(MatrixInv<T> previous_state, MatrixInv<T>
 	this->state_jacobian_(0, 5) = -dt*c_phi*t_theta;
 
 	//2nd row
-	this->state_jacobian_(1, 0) = dt*(-s_phi*(state_sensor_val(1) - previous_state(4)) - c_phi*(state_sensor_val(2) - previous_state(5)) );
+	this->state_jacobian_(1, 0) = dt*( -s_phi*(state_sensor_val(1) - previous_state(4)) - c_phi*(state_sensor_val(2) - previous_state(5)) );
 	this->state_jacobian_(1, 1) = 1;
 
 	this->state_jacobian_(1, 4) = -dt*c_phi;
@@ -212,7 +212,7 @@ void Ekf15Dof<T>::ComputeStateJacobian(MatrixInv<T> previous_state, MatrixInv<T>
 	//11th row
 	this->state_jacobian_(10, 0) = dt*( (-s_phi*c_psi + c_phi*s_theta*s_psi)*(state_sensor_val(4) - previous_state(13)) + 
     									 (-c_phi*c_psi - s_phi*s_theta*s_psi)*(state_sensor_val(5) - previous_state(14)) );
-	this->state_jacobian_(10, 1) = dt*( -s_theta*s_psi*(state_sensor_val(3) - previous_state(12)) + s_phi*c_theta*s_psi*(state_sensor_val(4) - previous_state(13)) - 
+	this->state_jacobian_(10, 1) = dt*( -s_theta*s_psi*(state_sensor_val(3) - previous_state(12)) + s_phi*c_theta*s_psi*(state_sensor_val(4) - previous_state(13)) + 
    										 c_phi*c_theta*s_psi*(state_sensor_val(5) - previous_state(14)) );
 	this->state_jacobian_(10, 2) = dt*( c_theta*c_psi*(state_sensor_val(3) - previous_state(12)) + 
     									(-c_phi*s_psi + s_phi*s_theta*c_psi)*(state_sensor_val(4) - previous_state(13)) + 
@@ -319,7 +319,7 @@ void Ekf15Dof<T>::GetMeas(MatrixInv<T> meas_sensor_val){
 	mag2d_projection(0, 1) = s_theta*s_phi;
 	mag2d_projection(0, 2) = s_theta*c_phi;
 
-	mag2d_projection(1, 1)  = c_theta;
+	mag2d_projection(1, 1)  = c_phi;
 	mag2d_projection(1, 2) = -s_phi;
 
 	MatrixInv<float> mag_vector(3, 1);
@@ -333,7 +333,12 @@ void Ekf15Dof<T>::GetMeas(MatrixInv<T> meas_sensor_val){
 	MatrixInv<float> mag2d = mag2d_projection*mag_vector;
 	this->computed_meas_(0) = -atan2(mag2d(1), mag2d(0)) + magnetic_declination;
 
-	
+	while (this->computed_meas_(0) > this->time_propagated_state_(2) + 3.14){
+			this->computed_meas_(0) = this->computed_meas_(0)-2*3.14;
+	}
+	while (this->computed_meas_(0) < this->time_propagated_state_(2) - 3.14){
+			this->computed_meas_(0) = this->computed_meas_(0)+2*3.14;
+	}
 
 	// this->computed_meas_(0) = atan2( -m2*c_phi + m3*s_phi, m1*c_theta + (m2*s_phi + m3*c_phi)*s_theta ) + magnetic_declination;
 

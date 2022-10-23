@@ -26,7 +26,7 @@ std::unique_ptr <InertialSensor> get_inertial_sensor( std::string sensor_name)
     }
 }
 
-int main(){
+int main(int argc, char *argv[]){
 
 	auto sensor = get_inertial_sensor("mpu");
 
@@ -45,17 +45,29 @@ int main(){
     float gx, gy, gz;
     float mx, my, mz;
 
-	MatrixInv<float> initial_state(15, 1);
-	MatrixInv<float> sensor_meas(9, 1);
-	MatrixInv<float> state_sensor_val(6, 1);
-	MatrixInv<float> process_noise_q(15, 15, "eye");
-	MatrixInv<float> meas_noise_r(7, 7, "eye");
+	MatrixInv<double> initial_state(15, 1);
+	MatrixInv<double> sensor_meas(9, 1);
+	MatrixInv<double> state_sensor_val(6, 1);
+	MatrixInv<double> process_noise_q(15, 15, "eye");
+	MatrixInv<double> meas_noise_r(7, 7, "eye");
+	MatrixInv<double> mag_offset(3, 1);
+	MatrixInv<double> mag_scale(3, 1);
+	MatrixInv<double> temp_mag(3, 1);
 
-	MatrixInv<float> current_state(15, 1);
-	MatrixInv<float> state_jacobian(15, 15);
+	MatrixInv<double> current_state(15, 1);
+	MatrixInv<double> state_jacobian(1, 15);
+	MatrixInv<double> computed_meas(7, 1);
 
 	//Compute initial heading
-	float magnetic_declination = 13.01/RAD2DEG;
+	double magnetic_declination = 13.01/RAD2DEG;
+
+	mag_offset(0) = 16.2264; 
+	mag_offset(1) = 35.5269;
+	mag_offset(2) =  -27.5698;
+
+	mag_scale(0) = 0.9652; 
+	mag_scale(1) = 1.09;
+	mag_scale(2) = 0.9556;
 	/*sensor->read_magnetometer(&mx, &my, &mz);
 	initial_state(2) = atan2( -my, mx) + magnetic_declination/RAD2DEG;
 	printf("My = %+7.3f, Mx = %+7.3f\n", my, mx);
@@ -75,15 +87,18 @@ int main(){
 	// process_noise_q(12, 12) = 0.01;
 	// process_noise_q(12, 12) = 0.01;
 	// process_noise_q(12, 12) = 0.01;
+	size_t count = 0;
+	int t_idx = atoi(argv[1]);
+ 	cout<<t_idx<<endl;
 
 	// Compute initial roll, pitch, yaw but collecting and averaging data for 2 sec
-	float sum_ax = 0;
-	float sum_ay = 0;
-	float sum_az = 0;
-	float sum_mx = 0;
-	float sum_my = 0;
-	float sum_mz = 0;
-	for (size_t idx_s = 0; idx_s < 200; idx_s++){
+	double sum_ax = 0;
+	double sum_ay = 0;
+	double sum_az = 0;
+	double sum_mx = 0;
+	double sum_my = 0;
+	double sum_mz = 0;
+	for (size_t idx_s = 0; idx_s < 2; idx_s++){
 		sensor->update();
 	    sensor->read_accelerometer(&ax, &ay, &az);
 	    sensor->read_magnetometer(&mx, &my, &mz);
@@ -94,31 +109,31 @@ int main(){
 
 	    sum_mx += mx;
 	    sum_my += my;
-	    sum_mz += -mz;
+	    sum_mz += mz;
 
-		usleep(10000);
+		usleep(10);
 	}
 
-	float avg_acc_mag = sqrt(pow((sum_ax/200), 2) + pow((sum_ay/200), 2) + pow((sum_az/200), 2));
-	float avg_gaus_mag = sqrt(pow((sum_mx/200), 2) + pow((sum_my/200), 2) + pow((sum_mz/200), 2));
+	double avg_acc_mag = sqrt(pow((sum_ax/200), 2) + pow((sum_ay/200), 2) + pow((sum_az/200), 2));
+	double avg_gaus_mag = sqrt(pow((sum_mx/200), 2) + pow((sum_my/200), 2) + pow((sum_mz/200), 2));
 
 	initial_state(0) = atan2(sum_ay/200, avg_acc_mag);
 	initial_state(1) = atan2(sum_ax/200, avg_acc_mag);
 
-	MatrixInv<float> mag2d_projection(2, 3);
+	MatrixInv<double> mag2d_projection(2, 3);
 	mag2d_projection(0, 0) = cos(initial_state(1));
 	mag2d_projection(0, 1) = sin(initial_state(1))*sin(initial_state(0));
 	mag2d_projection(0, 2) =  sin(initial_state(1))*cos(initial_state(0));
 
-	mag2d_projection(1, 1)  = cos(initial_state(1));
+	mag2d_projection(1, 1)  = cos(initial_state(0));
 	mag2d_projection(1, 2) = -sin(initial_state(0));
 
-	MatrixInv<float> mag_vector(3, 1);
+	MatrixInv<double> mag_vector(3, 1);
 	mag_vector(0) = sum_mx/200/avg_gaus_mag;
 	mag_vector(1) = sum_my/200/avg_gaus_mag;
 	mag_vector(2) = sum_mz/200/avg_gaus_mag;
 
-	MatrixInv<float> mag2d = mag2d_projection*mag_vector;
+	MatrixInv<double> mag2d = mag2d_projection*mag_vector;
 	initial_state(2) = -atan2(mag2d(1), mag2d(0)) + magnetic_declination;
 
 	// initial_state(2) = atan2( -(sum_my/200/avg_gaus_mag)*cos(initial_state(0)) + (sum_mz/200/avg_gaus_mag)*sin(initial_state(0)), (sum_mx/200/avg_gaus_mag)*cos(initial_state(1)) + 
@@ -126,9 +141,9 @@ int main(){
 
 	printf("Initial Roll: %g [deg], Initial Pitch: %g [deg], Initial Yaw: %g [deg]\n", initial_state(0)*RAD2DEG, initial_state(1)*RAD2DEG, initial_state(2)*RAD2DEG);
 
-	usleep(5000000);
+	usleep(50);
 
-	Ekf15Dof<float> imu_gps_ekf(0.01, initial_state, process_noise_q*0.00001, meas_noise_r*20);
+	Ekf15Dof<double> imu_gps_ekf(0.01, initial_state, process_noise_q*0.00001, meas_noise_r*0.01);
 
 	// // file pointer
     fstream fout;
@@ -136,7 +151,23 @@ int main(){
  //    // opens an existing csv file or creates a new file.
     fout.open("imu.csv", ios::out | ios::app);
 
-	size_t count = 0;
+    fout << 0 << ", "
+             << 0 << ", "
+             << 0 << ", "
+             << 0 << ", "
+             << 0 << ", "
+             << 0 << ","
+             << 0 << ", "
+             << 0 << ", "
+             << 0 << ", "
+             << initial_state(0) << ", "
+             << initial_state(1) << ", "
+             << initial_state(2) << ", "
+             << 0 << ", "<< 0 << ", " << 0 << ", " << 0 << ", " << 0 << ", " << 0 << ", " << 0 << ", " << 0 << ", " << 0 << ", " << 0 << ", " << 0 << ", " << 0 << ", "
+             << 0 << ", "<< 0 << ", " << 0
+             << "\n";
+
+	
     while(count < 100000) {
 /*    	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 */
@@ -162,43 +193,44 @@ int main(){
 	    state_sensor_val(4) = ax;
 	    state_sensor_val(5) = -az;
 
-	    sensor_meas(0) = mx;
-	    sensor_meas(1) = my;
-	    sensor_meas(2) = -mz;
+	    temp_mag(0) = mx;
+	    temp_mag(1) = my;
+	    temp_mag(2) = mz;
+
+	    temp_mag = (temp_mag - mag_offset);
+	    sensor_meas(0) = temp_mag(0)*mag_scale(0);
+	    sensor_meas(1) = temp_mag(1)*mag_scale(1);
+	    sensor_meas(2) = temp_mag(2)*mag_scale(2);
 	    imu_gps_ekf.Run(state_sensor_val, sensor_meas);
+	    state_jacobian = imu_gps_ekf.GetCovariance();
+	    //state_jacobian = imu_gps_ekf.GetStateJacobian();
+	    computed_meas = imu_gps_ekf.GetSensorMeasurement();
 	    current_state = imu_gps_ekf.GetCurrentState();
-	    state_jacobian = imu_gps_ekf.GetStateJacobian();
 	    //current_state(0)*RAD2DEG
 
+
+
 	    printf("Roll [deg]: %+7.3f, Pitch[deg]: %+7.3f, Yaw[deg]: %+7.3f\n", current_state(0)*RAD2DEG, current_state(1)*RAD2DEG, current_state(2)*RAD2DEG);
+
 	    usleep(10000);
 	      fout << gy << ", "
              << gx << ", "
              << -gz << ", "
              << ay << ", "
              << ax << ", "
-             << az << ","
-             << my << ", "
+             << -az << ","
              << mx << ", "
-             << -mz << ", "
+             << my << ", "
+             << mz << ", "
              << current_state(0) << ", "
              << current_state(1) << ", "
-             << current_state(2)
+             << current_state(2) << ", "
+             << state_jacobian(t_idx, 0) << ", " <<state_jacobian(t_idx, 1)<<", "<<state_jacobian(t_idx, 2)<<", "<<state_jacobian(t_idx, 3)<<", "<<state_jacobian(t_idx, 4)<<", "<<state_jacobian(t_idx, 5)<<", "
+             << state_jacobian(t_idx, 6) << ", " <<state_jacobian(t_idx, 7)<<", "<<state_jacobian(t_idx, 8)<<", "<<state_jacobian(t_idx, 9)<<", "<<state_jacobian(t_idx, 10)<<", "<<state_jacobian(t_idx, 11)<<", "
+             << state_jacobian(t_idx, 12) << ", " <<state_jacobian(t_idx, 13)<<", "<<state_jacobian(t_idx, 14)
              << "\n";
 
- //         	this->state_jacobian_(1, 0) = dt*(-s_phi*(state_sensor_val(1) - previous_state(4)) - c_phi*(state_sensor_val(2) - previous_state(5)) );
-	// this->state_jacobian_(1, 1) = 1;
 
-	// this->state_jacobian_(1, 4) = -dt*c_phi;
-	// this->state_jacobian_(1, 5) = dt*s_phi;
- //             this->state_jacobian_(2, 0) = dt*( c_phi*sc_theta*(state_sensor_val(1) - previous_state(4)) - s_phi*sc_theta*(state_sensor_val(2) - previous_state(5)) );
-	// this->state_jacobian_(2, 1) = dt*( s_phi*sc_theta*t_theta*(state_sensor_val(1) - previous_state(4)) + c_phi*sc_theta*t_theta*(state_sensor_val(2) - previous_state(5)) );
-	// this->state_jacobian_(2, 2) = 1;
-
-	// this->state_jacobian_(2, 4) = -dt*s_phi*sc_theta;
-	// this->state_jacobian_(2, 5) = -dt*c_phi*sc_theta;
-	    /*std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-	    std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[µs]" << std::endl;*/
 	    count++;
 	}
 
