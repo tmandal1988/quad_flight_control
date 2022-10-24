@@ -13,6 +13,7 @@ class MatrixBase{
 	public:
 		// constructors
 		MatrixBase();
+		MatrixBase(const initializer_list< initializer_list<T> > initial_data);
 		MatrixBase(size_t num_rows, size_t num_cols);
 		MatrixBase(size_t num_rows, size_t num_cols, string type);
 		~MatrixBase();
@@ -30,6 +31,8 @@ class MatrixBase{
 		MatrixBase GetCol(size_t c_idx);
 		// operator overloading
 		MatrixBase operator= (const MatrixBase<T>& matrix_to_copy);
+		// copy from a list
+		MatrixBase operator= (const initializer_list< initializer_list<T> > list_data);
 		// assign elements at row idx and col idx
 		T& operator() (size_t r_idx, size_t c_idx);
 		// assign elements at row idx and col idx 0, useful for using with column vectors

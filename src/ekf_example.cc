@@ -45,29 +45,26 @@ int main(int argc, char *argv[]){
     float gx, gy, gz;
     float mx, my, mz;
 
-	MatrixInv<double> initial_state(15, 1);
-	MatrixInv<double> sensor_meas(9, 1);
-	MatrixInv<double> state_sensor_val(6, 1);
-	MatrixInv<double> process_noise_q(15, 15, "eye");
-	MatrixInv<double> meas_noise_r(7, 7, "eye");
-	MatrixInv<double> mag_offset(3, 1);
-	MatrixInv<double> mag_scale(3, 1);
-	MatrixInv<double> temp_mag(3, 1);
+	MatrixInv<float> initial_state(15, 1);
+	MatrixInv<float> sensor_meas(9, 1);
+	MatrixInv<float> state_sensor_val(6, 1);
+	MatrixInv<float> process_noise_q(15, 15, "eye");
+	MatrixInv<float> meas_noise_r(7, 7, "eye");
 
-	MatrixInv<double> current_state(15, 1);
-	MatrixInv<double> state_jacobian(1, 15);
-	MatrixInv<double> computed_meas(7, 1);
+	
+	MatrixInv<float> temp_mag(3, 1);
+
+	MatrixInv<float> current_state(15, 1);
+	MatrixInv<float> state_jacobian(1, 15);
+	MatrixInv<float> computed_meas(7, 1);
 
 	//Compute initial heading
-	double magnetic_declination = 13.01/RAD2DEG;
+	float magnetic_declination = 13.01/RAD2DEG;
 
-	mag_offset(0) = 16.2264; 
-	mag_offset(1) = 35.5269;
-	mag_offset(2) =  -27.5698;
+	MatrixInv<float> mag_offset = {{16.2264}, {35.5269}, {-27.5698}};
+	MatrixInv<float> mag_scale = {{0.9652}, {1.09}, {0.9556}};
 
-	mag_scale(0) = 0.9652; 
-	mag_scale(1) = 1.09;
-	mag_scale(2) = 0.9556;
+
 	/*sensor->read_magnetometer(&mx, &my, &mz);
 	initial_state(2) = atan2( -my, mx) + magnetic_declination/RAD2DEG;
 	printf("My = %+7.3f, Mx = %+7.3f\n", my, mx);
@@ -92,12 +89,12 @@ int main(int argc, char *argv[]){
  	cout<<t_idx<<endl;
 
 	// Compute initial roll, pitch, yaw but collecting and averaging data for 2 sec
-	double sum_ax = 0;
-	double sum_ay = 0;
-	double sum_az = 0;
-	double sum_mx = 0;
-	double sum_my = 0;
-	double sum_mz = 0;
+	float sum_ax = 0;
+	float sum_ay = 0;
+	float sum_az = 0;
+	float sum_mx = 0;
+	float sum_my = 0;
+	float sum_mz = 0;
 	for (size_t idx_s = 0; idx_s < 2; idx_s++){
 		sensor->update();
 	    sensor->read_accelerometer(&ax, &ay, &az);
@@ -114,13 +111,13 @@ int main(int argc, char *argv[]){
 		usleep(10);
 	}
 
-	double avg_acc_mag = sqrt(pow((sum_ax/200), 2) + pow((sum_ay/200), 2) + pow((sum_az/200), 2));
-	double avg_gaus_mag = sqrt(pow((sum_mx/200), 2) + pow((sum_my/200), 2) + pow((sum_mz/200), 2));
+	float avg_acc_mag = sqrt(pow((sum_ax/200), 2) + pow((sum_ay/200), 2) + pow((sum_az/200), 2));
+	float avg_gaus_mag = sqrt(pow((sum_mx/200), 2) + pow((sum_my/200), 2) + pow((sum_mz/200), 2));
 
 	initial_state(0) = atan2(sum_ay/200, avg_acc_mag);
 	initial_state(1) = atan2(sum_ax/200, avg_acc_mag);
 
-	MatrixInv<double> mag2d_projection(2, 3);
+	MatrixInv<float> mag2d_projection(2, 3);
 	mag2d_projection(0, 0) = cos(initial_state(1));
 	mag2d_projection(0, 1) = sin(initial_state(1))*sin(initial_state(0));
 	mag2d_projection(0, 2) =  sin(initial_state(1))*cos(initial_state(0));
@@ -128,12 +125,12 @@ int main(int argc, char *argv[]){
 	mag2d_projection(1, 1)  = cos(initial_state(0));
 	mag2d_projection(1, 2) = -sin(initial_state(0));
 
-	MatrixInv<double> mag_vector(3, 1);
+	MatrixInv<float> mag_vector(3, 1);
 	mag_vector(0) = sum_mx/200/avg_gaus_mag;
 	mag_vector(1) = sum_my/200/avg_gaus_mag;
 	mag_vector(2) = sum_mz/200/avg_gaus_mag;
 
-	MatrixInv<double> mag2d = mag2d_projection*mag_vector;
+	MatrixInv<float> mag2d = mag2d_projection*mag_vector;
 	initial_state(2) = -atan2(mag2d(1), mag2d(0)) + magnetic_declination;
 
 	// initial_state(2) = atan2( -(sum_my/200/avg_gaus_mag)*cos(initial_state(0)) + (sum_mz/200/avg_gaus_mag)*sin(initial_state(0)), (sum_mx/200/avg_gaus_mag)*cos(initial_state(1)) + 
@@ -143,7 +140,7 @@ int main(int argc, char *argv[]){
 
 	usleep(50);
 
-	Ekf15Dof<double> imu_gps_ekf(0.01, initial_state, process_noise_q*0.00001, meas_noise_r*0.01);
+	Ekf15Dof<float> imu_gps_ekf(0.01, initial_state, process_noise_q*0.00001, meas_noise_r*0.01);
 
 	// // file pointer
     fstream fout;

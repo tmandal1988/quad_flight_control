@@ -8,6 +8,33 @@ MatrixBase<T>::MatrixBase(){
 }
 
 template <typename T>
+MatrixBase<T>::MatrixBase(initializer_list< initializer_list<T> > initial_data){
+	// get the number of rows
+	nrows_ = initial_data.size();
+	matrix_ = new T*[nrows_];
+
+	// get the number of columns
+	const initializer_list<T> *initial_data_first_row = initial_data.begin();
+	ncols_ = (*initial_data_first_row).size();
+	size_t ncols_temp = ncols_;
+
+	// iterate over the initialization list and fill out the matrix
+	size_t idx_r = 0;
+	for (initializer_list<T> row : initial_data) {
+        ncols_temp = row.size();
+        if (ncols_temp != ncols_)
+        	throw invalid_argument("Initializer list dimensions are not consistent accross rows or columns");
+        	matrix_[idx_r] = new T[ncols_];
+        	size_t idx_c = 0;
+        	for(T data : row){
+        		matrix_[idx_r][idx_c] = data;
+        		idx_c++;
+        	}
+        	idx_r++;
+    }
+}
+
+template <typename T>
 MatrixBase<T>::MatrixBase(size_t num_rows, size_t num_cols){
 	nrows_ = num_rows;
 	ncols_ = num_cols;
@@ -172,6 +199,65 @@ MatrixBase<T> MatrixBase<T>::operator= (const MatrixBase<T>& matrix_to_copy){
 		}
 	}
 	return *this;
+}
+
+template <typename T>
+MatrixBase<T> MatrixBase<T>::operator= (const initializer_list< initializer_list<T> > list_data){
+// get the number of columns
+	size_t nrows_in = list_data.size();
+	const initializer_list<T> *list_data_first_row = list_data.begin();
+	size_t ncols_in = (*list_data_first_row).size();
+	size_t ncols_temp = ncols_;
+
+	if( (nrows_ == nrows_in) && (ncols_ == ncols_in) ){
+		// iterate over the initialization list and fill out the matrix
+		size_t idx_r = 0;
+		for (initializer_list<T> row : list_data) {
+        	ncols_temp = row.size();
+        	if (ncols_temp != ncols_)
+        		throw invalid_argument("Initializer list dimensions are not consistent accross rows or columns1");
+        		size_t idx_c = 0;
+        		for(T data : row){
+        			matrix_[idx_r][idx_c] = data;
+        			idx_c++;
+        		}
+        	idx_r++;
+    	}
+	}else{
+		if (ncols_ > 0){
+			for(size_t idx_r = 0; idx_r < nrows_; idx_r++){
+				delete[] matrix_[idx_r];
+			}
+		}
+
+		if(nrows_ > 0){
+			delete[] matrix_;
+		}
+
+		// get the number of rows
+		nrows_ = nrows_in;
+		matrix_ = new T*[nrows_];
+		ncols_ = ncols_in;
+	
+
+		// iterate over the initialization list and fill out the matrix
+		size_t idx_r = 0;
+		for (initializer_list<T> row : list_data) {
+        	ncols_temp = row.size();
+        	if (ncols_temp != ncols_)
+        		throw invalid_argument("Initializer list dimensions are not consistent accross rows or columns2");
+        		matrix_[idx_r] = new T[ncols_];
+        		size_t idx_c = 0;
+        		for(T data : row){
+        			matrix_[idx_r][idx_c] = data;
+        			idx_c++;
+        		}
+        	idx_r++;
+    	}
+	}
+
+    return *this;
+
 }
 
 template <typename T>
