@@ -37,8 +37,8 @@ class EkfBase{
 
 
 		// member functions
-		virtual void PropagateState(MatrixInv<T> previous_state, MatrixInv<T> state_sensor_val) = 0;
-		virtual void ComputeStateJacobian(MatrixInv<T> previous_state, MatrixInv<T> state_sensor_val) = 0;
+		virtual void PropagateState(MatrixInv<T> state_sensor_val) = 0;
+		virtual void ComputeStateJacobian(MatrixInv<T> state_sensor_val) = 0;
 		virtual void ComputeStateNoiseJacobian(MatrixInv<T> previous_state) = 0;
 		virtual void GetMeas(MatrixInv<T> meas_sensor_val) = 0;
 		virtual void ComputeMeasJacobian(MatrixInv<T> meas_sensor_val) = 0;

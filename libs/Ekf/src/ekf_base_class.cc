@@ -35,16 +35,15 @@ EkfBase<T>::~EkfBase(){
 
 template <typename T>
 void EkfBase<T>::Run(MatrixInv<T> state_sensor_val, MatrixInv<T> meas_sensor_val){
-	PropagateState(current_state_, state_sensor_val);
-	ComputeStateJacobian(current_state_, state_sensor_val);
+	PropagateState(state_sensor_val);
+	ComputeStateJacobian(state_sensor_val);
 	GetMeas(meas_sensor_val);
 	
-	// //P = F*P*F' + L*Q*L';
+	//P = F*P*F' + L*Q*L';
 	covariance_p_ = state_jacobian_*covariance_p_*state_jacobian_.Transpose() + process_noise_q_;
-	// process_noise_q_.PrintMatrix();
-	// state_jacobian_.PrintMatrix();
-	// state_jacobian_.Transpose().PrintMatrix();
+
 	current_state_ = time_propagated_state_;
+
 	// sequentially update state with measurement
 	for(size_t idx_r = 0; idx_r < num_meas_; idx_r++){
 		ComputeKalmanGainSequential(idx_r);
@@ -53,21 +52,6 @@ void EkfBase<T>::Run(MatrixInv<T> state_sensor_val, MatrixInv<T> meas_sensor_val
 		current_state_ = current_state_ + kalman_gain_seq_*( computed_meas_(idx_r) - temp(0) );
 		covariance_p_ = covariance_p_ - kalman_gain_seq_*meas_jacobian_row*covariance_p_;
 	}
-
-	current_state_(2) = remainder(current_state_(2) + 3.14, 2*3.14) - 3.14;
-
-	if ( abs(current_state_(2)) > 180/57.29578){
-		current_state_(2) = -( current_state_(2)/abs(current_state_(2)) )*( 360/57.29578 - abs(current_state_(2)) ) ;
-	}
-
-
-	// // kalman_gain_.PrintMatrix();
-
-	// // meas_from_propogated_state_.PrintMatrix();
-
-	//update state x = x + K(y - h(x))
-	// current_state_ = time_propagated_state_ + kalman_gain_*(computed_meas_ - meas_from_propogated_state_);
-	// covariance_p_ = (kalman_eye_ - kalman_gain_*meas_jacobian_)*covariance_p_;
 }
 
 template <typename T>

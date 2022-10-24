@@ -50,126 +50,89 @@ void Ekf15Dof<T>::ComputeTrignometricValues(){
 }
 
 template <typename T>
-void Ekf15Dof<T>::PropagateState(MatrixInv<T> previous_state, MatrixInv<T> state_sensor_val){
+void Ekf15Dof<T>::PropagateState(MatrixInv<T> state_sensor_val){
+	// wrap the yaw angle	
+	this->current_state_(2) = remainder(this->current_state_(2) + PI, PIx2) - PI;
+
 	ComputeTrignometricValues();
 	T dt = this->sample_time_s_;
 
 	MatrixInv<T> propogated_euler_ang(3, 1);
 	MatrixInv<T> propogated_velocity(3, 1);
-	MatrixInv<T> body_rates_2_euler_rates(3, 3);
-	MatrixInv<T> c_b2ned(3, 3);
-	MatrixInv<T> angular_rate_vector(3, 1);
-	MatrixInv<T> accel_vector(3, 1);
 
-	body_rates_2_euler_rates(0, 0) = 1;
-	body_rates_2_euler_rates(0, 1) = s_phi*t_theta;
-	body_rates_2_euler_rates(0, 2) =  c_phi*t_theta;
+	MatrixInv<T> body_rates_2_euler_rates = { {1, s_phi*t_theta, c_phi*t_theta}, {0, c_phi, -s_phi}, {0, s_phi/c_theta, c_phi/c_theta} };
 
-	body_rates_2_euler_rates(1, 0) = 0;
-	body_rates_2_euler_rates(1, 1) = c_phi;
-	body_rates_2_euler_rates(1, 2) = -s_phi;
+	MatrixInv<T> c_b2ned = { {c_psi*c_theta, c_psi*s_phi*s_theta - c_phi*s_psi, s_phi*s_psi + c_phi*c_psi*s_theta},
+								   {c_theta*s_psi, c_phi*c_psi + s_phi*s_psi*s_theta, c_phi*s_psi*s_theta - c_psi*s_phi},
+								   {-s_theta, c_theta*s_phi, c_phi*c_theta} };
 
-	body_rates_2_euler_rates(2, 0) = 0;
-	body_rates_2_euler_rates(2, 1) = s_phi/c_theta;
-	body_rates_2_euler_rates(2, 2) = c_phi/c_theta;
 
-	angular_rate_vector(0) = state_sensor_val(0) - previous_state(3);
-	angular_rate_vector(1) = state_sensor_val(1) - previous_state(4);
-	angular_rate_vector(2) = state_sensor_val(2) - previous_state(5);
+	MatrixInv<T> angular_rate_vector = { {state_sensor_val(0) - this->current_state_(3)},
+										{state_sensor_val(1) - this->current_state_(4)},
+										{state_sensor_val(2) - this->current_state_(5)} };
+	MatrixInv<T> accel_vector = { {state_sensor_val(3) - this->current_state_(12)},
+								  {state_sensor_val(4) - this->current_state_(13)},
+								  {state_sensor_val(5) - this->current_state_(14)} };
+
 
 	propogated_euler_ang = body_rates_2_euler_rates*angular_rate_vector*dt;
-
-
-	c_b2ned(0, 0) = c_psi*c_theta;
-	c_b2ned(0, 1) = c_psi*s_phi*s_theta - c_phi*s_psi;
-	c_b2ned(0, 2) = s_phi*s_psi + c_phi*c_psi*s_theta;
-
-	c_b2ned(1, 0) = c_theta*s_psi;
-	c_b2ned(1, 1) = c_phi*c_psi + s_phi*s_psi*s_theta;
-	c_b2ned(1, 2) = c_phi*s_psi*s_theta - c_psi*s_phi;
-
-	c_b2ned(2, 0) = -s_theta;
-	c_b2ned(2, 1) = c_theta*s_phi;
-	c_b2ned(2, 2) = c_phi*c_theta;
-
-	accel_vector(0) = state_sensor_val(3) - previous_state(12);
-	accel_vector(1) = state_sensor_val(4) - previous_state(13);
-	accel_vector(2) = state_sensor_val(5) - previous_state(14);
 
 	propogated_velocity = (c_b2ned*accel_vector + g)*dt;
 
 	// propagate phi
-	this->time_propagated_state_(0) = previous_state(0) + propogated_euler_ang(0);
-	this->time_propagated_state_(1) = previous_state(1) + propogated_euler_ang(1);
-	this->time_propagated_state_(2) = previous_state(2) + propogated_euler_ang(2);
+	this->time_propagated_state_(0) = this->current_state_(0) + propogated_euler_ang(0);
+	this->time_propagated_state_(1) = this->current_state_(1) + propogated_euler_ang(1);
+	this->time_propagated_state_(2) = this->current_state_(2) + propogated_euler_ang(2);
 
 	if ( abs(this->time_propagated_state_(2)) > 180/57.29578 ){
 		this->time_propagated_state_(2) = -( this->time_propagated_state_(2)/abs(this->time_propagated_state_(2)) )*( 360/57.29578 - abs(this->time_propagated_state_(2)) ) ;
 	}
-	// this->time_propagated_state_(0) = previous_state(0) +  dt*( state_sensor_val(0) - previous_state(3) + c_phi*t_theta*( state_sensor_val(2) - previous_state(5) ) +
-	// 															s_phi*t_theta*(state_sensor_val(1) - previous_state(4)) );
-
-	// // propagate theta
-	// this->time_propagated_state_(1) = previous_state(1)  + dt*( c_phi*(state_sensor_val(1) - previous_state(4)) - s_phi*(state_sensor_val(2) - previous_state(5)) );
-	// // propagate psi
-	// this->time_propagated_state_(2) = previous_state(2)  + dt*( (c_phi*(state_sensor_val(2) - previous_state(5)))/c_theta + (s_phi*(state_sensor_val(1) - previous_state(4)))/c_theta );
-
+	
 	// propagate gyro bias
-	this->time_propagated_state_(3) = previous_state(3);
-	this->time_propagated_state_(4) = previous_state(4);
-	this->time_propagated_state_(5) = previous_state(5);
+	this->time_propagated_state_(3) = this->current_state_(3);
+	this->time_propagated_state_(4) = this->current_state_(4);
+	this->time_propagated_state_(5) = this->current_state_(5);
 
 	// propagate NED X position
-	this->time_propagated_state_(6) = previous_state(6) + dt*previous_state(9);
+	this->time_propagated_state_(6) = this->current_state_(6) + dt*this->current_state_(9);
 	// propagate NED Y position
-	this->time_propagated_state_(7) = previous_state(7) + dt*previous_state(10);
+	this->time_propagated_state_(7) = this->current_state_(7) + dt*this->current_state_(10);
 	// propagate NED Z position
-	this->time_propagated_state_(8) = previous_state(8) + dt*previous_state(11);
+	this->time_propagated_state_(8) = this->current_state_(8) + dt*this->current_state_(11);
 
 	// propagate NED X velocity
-	this->time_propagated_state_(9) = previous_state(9) + propogated_velocity(0);
-	this->time_propagated_state_(10) = previous_state(10) + propogated_velocity(1);
-	this->time_propagated_state_(11) = previous_state(11) + propogated_velocity(2);
-	// this->time_propagated_state_(9) = previous_state(9) + dt*((s_phi*s_psi + c_phi*c_psi*s_theta)*(state_sensor_val(5) - previous_state(14)) - 
-	// 														  (c_phi*s_psi - c_psi*s_phi*s_theta)*(state_sensor_val(4) - previous_state(13)) + 
-	// 														  c_psi*c_theta*(state_sensor_val(3) - previous_state(12)));
-	// // propagate NED Y velocity
-	// this->time_propagated_state_(10) = previous_state(10) + dt*((c_phi*c_psi + s_phi*s_psi*s_theta)*(state_sensor_val(4) - previous_state(13)) - 
-	// 															(c_psi*s_phi - c_phi*s_psi*s_theta)*(state_sensor_val(5) - previous_state(14)) + 
-	// 															c_theta*s_psi*(state_sensor_val(3) - previous_state(12)));
-	// // propagate NED Z velocity
-	// this->time_propagated_state_(11) = previous_state(11) + dt*(c_phi*c_theta*(state_sensor_val(5) - previous_state(14)) - 
-	// 															s_theta*(state_sensor_val(3) - previous_state(12)) + 
-	// 															c_theta*s_phi*(state_sensor_val(4) - previous_state(13)) + 9.81);
+	this->time_propagated_state_(9) = this->current_state_(9) + propogated_velocity(0);
+	this->time_propagated_state_(10) = this->current_state_(10) + propogated_velocity(1);
+	this->time_propagated_state_(11) = this->current_state_(11) + propogated_velocity(2);
 
 	// // propagate accel bias
-	this->time_propagated_state_(12) = previous_state(12);
-	this->time_propagated_state_(13) = previous_state(13);
-	this->time_propagated_state_(14) = previous_state(14);
+	this->time_propagated_state_(12) = this->current_state_(12);
+	this->time_propagated_state_(13) = this->current_state_(13);
+	this->time_propagated_state_(14) = this->current_state_(14);
 }
 
 template <typename T>
-void Ekf15Dof<T>::ComputeStateJacobian(MatrixInv<T> previous_state, MatrixInv<T> state_sensor_val){
+void Ekf15Dof<T>::ComputeStateJacobian(MatrixInv<T> state_sensor_val){
 	T dt = this->sample_time_s_;
 
 	// 1st row
-	this->state_jacobian_(0, 0) = 1 + dt*( c_phi*t_theta*(state_sensor_val(1) - previous_state(4)) - s_phi*t_theta*(state_sensor_val(2) - previous_state(5)) );
-	this->state_jacobian_(0, 1) = dt*(s_phi*sc_theta*sc_theta*(state_sensor_val(1) - previous_state(4)) + c_phi*sc_theta*sc_theta*(state_sensor_val(2) - previous_state(5)) );
+	this->state_jacobian_(0, 0) = 1 + dt*( c_phi*t_theta*(state_sensor_val(1) - this->current_state_(4)) - s_phi*t_theta*(state_sensor_val(2) - this->current_state_(5)) );
+	this->state_jacobian_(0, 1) = dt*(s_phi*sc_theta*sc_theta*(state_sensor_val(1) - this->current_state_(4)) + c_phi*sc_theta*sc_theta*(state_sensor_val(2) - this->current_state_(5)) );
 	
 	this->state_jacobian_(0, 3) = -dt;
 	this->state_jacobian_(0, 4) = -dt*s_phi*t_theta;
 	this->state_jacobian_(0, 5) = -dt*c_phi*t_theta;
 
 	//2nd row
-	this->state_jacobian_(1, 0) = dt*( -s_phi*(state_sensor_val(1) - previous_state(4)) - c_phi*(state_sensor_val(2) - previous_state(5)) );
+	this->state_jacobian_(1, 0) = dt*( -s_phi*(state_sensor_val(1) - this->current_state_(4)) - c_phi*(state_sensor_val(2) - this->current_state_(5)) );
 	this->state_jacobian_(1, 1) = 1;
 
 	this->state_jacobian_(1, 4) = -dt*c_phi;
 	this->state_jacobian_(1, 5) = dt*s_phi;
 
 	//3rd row
-	this->state_jacobian_(2, 0) = dt*( c_phi*sc_theta*(state_sensor_val(1) - previous_state(4)) - s_phi*sc_theta*(state_sensor_val(2) - previous_state(5)) );
-	this->state_jacobian_(2, 1) = dt*( s_phi*sc_theta*t_theta*(state_sensor_val(1) - previous_state(4)) + c_phi*sc_theta*t_theta*(state_sensor_val(2) - previous_state(5)) );
+	this->state_jacobian_(2, 0) = dt*( c_phi*sc_theta*(state_sensor_val(1) - this->current_state_(4)) - s_phi*sc_theta*(state_sensor_val(2) - this->current_state_(5)) );
+	this->state_jacobian_(2, 1) = dt*( s_phi*sc_theta*t_theta*(state_sensor_val(1) - this->current_state_(4)) + c_phi*sc_theta*t_theta*(state_sensor_val(2) - this->current_state_(5)) );
 	this->state_jacobian_(2, 2) = 1;
 
 	this->state_jacobian_(2, 4) = -dt*s_phi*sc_theta;
@@ -195,12 +158,12 @@ void Ekf15Dof<T>::ComputeStateJacobian(MatrixInv<T> previous_state, MatrixInv<T>
 	this->state_jacobian_(8, 11) = this->sample_time_s_;
 
 	//10th row
-	this->state_jacobian_(9, 0) = dt*( (s_phi*s_psi + c_phi*s_theta*c_psi)*(state_sensor_val(4) - previous_state(13)) + 
-                					   (c_phi*s_psi - s_phi*s_theta*c_psi)*(state_sensor_val(5) - previous_state(14)) );
-	this->state_jacobian_(9, 1) = dt*( -s_theta*c_psi*(state_sensor_val(3) - previous_state(12)) + s_phi*c_theta*c_psi*(state_sensor_val(4) - previous_state(13)) + 
-										c_phi*c_theta*c_psi*(state_sensor_val(5) - previous_state(14)) );
-	this->state_jacobian_(9, 2) = dt*( -c_theta*s_psi*(state_sensor_val(3) - previous_state(12)) + (-c_phi*c_psi - s_phi*s_theta*s_psi)*(state_sensor_val(4) - previous_state(13)) +
-										(s_phi*c_psi - c_phi*s_theta*s_psi)*(state_sensor_val(5) - previous_state(14)) );
+	this->state_jacobian_(9, 0) = dt*( (s_phi*s_psi + c_phi*s_theta*c_psi)*(state_sensor_val(4) - this->current_state_(13)) + 
+                					   (c_phi*s_psi - s_phi*s_theta*c_psi)*(state_sensor_val(5) - this->current_state_(14)) );
+	this->state_jacobian_(9, 1) = dt*( -s_theta*c_psi*(state_sensor_val(3) - this->current_state_(12)) + s_phi*c_theta*c_psi*(state_sensor_val(4) - this->current_state_(13)) + 
+										c_phi*c_theta*c_psi*(state_sensor_val(5) - this->current_state_(14)) );
+	this->state_jacobian_(9, 2) = dt*( -c_theta*s_psi*(state_sensor_val(3) - this->current_state_(12)) + (-c_phi*c_psi - s_phi*s_theta*s_psi)*(state_sensor_val(4) - this->current_state_(13)) +
+										(s_phi*c_psi - c_phi*s_theta*s_psi)*(state_sensor_val(5) - this->current_state_(14)) );
 
 	this->state_jacobian_(9, 9) = 1;
 
@@ -210,13 +173,13 @@ void Ekf15Dof<T>::ComputeStateJacobian(MatrixInv<T> previous_state, MatrixInv<T>
 
 
 	//11th row
-	this->state_jacobian_(10, 0) = dt*( (-s_phi*c_psi + c_phi*s_theta*s_psi)*(state_sensor_val(4) - previous_state(13)) + 
-    									 (-c_phi*c_psi - s_phi*s_theta*s_psi)*(state_sensor_val(5) - previous_state(14)) );
-	this->state_jacobian_(10, 1) = dt*( -s_theta*s_psi*(state_sensor_val(3) - previous_state(12)) + s_phi*c_theta*s_psi*(state_sensor_val(4) - previous_state(13)) + 
-   										 c_phi*c_theta*s_psi*(state_sensor_val(5) - previous_state(14)) );
-	this->state_jacobian_(10, 2) = dt*( c_theta*c_psi*(state_sensor_val(3) - previous_state(12)) + 
-    									(-c_phi*s_psi + s_phi*s_theta*c_psi)*(state_sensor_val(4) - previous_state(13)) + 
-    									(s_phi*s_psi + c_phi*s_theta*c_psi)*(state_sensor_val(5) - previous_state(14)) );
+	this->state_jacobian_(10, 0) = dt*( (-s_phi*c_psi + c_phi*s_theta*s_psi)*(state_sensor_val(4) - this->current_state_(13)) + 
+    									 (-c_phi*c_psi - s_phi*s_theta*s_psi)*(state_sensor_val(5) - this->current_state_(14)) );
+	this->state_jacobian_(10, 1) = dt*( -s_theta*s_psi*(state_sensor_val(3) - this->current_state_(12)) + s_phi*c_theta*s_psi*(state_sensor_val(4) - this->current_state_(13)) + 
+   										 c_phi*c_theta*s_psi*(state_sensor_val(5) - this->current_state_(14)) );
+	this->state_jacobian_(10, 2) = dt*( c_theta*c_psi*(state_sensor_val(3) - this->current_state_(12)) + 
+    									(-c_phi*s_psi + s_phi*s_theta*c_psi)*(state_sensor_val(4) - this->current_state_(13)) + 
+    									(s_phi*s_psi + c_phi*s_theta*c_psi)*(state_sensor_val(5) - this->current_state_(14)) );
 	this->state_jacobian_(10, 10) = 1;
 
 	this->state_jacobian_(10, 12) = -dt*c_theta*s_psi;
@@ -224,9 +187,9 @@ void Ekf15Dof<T>::ComputeStateJacobian(MatrixInv<T> previous_state, MatrixInv<T>
 	this->state_jacobian_(10, 14) = -dt*(-s_phi*c_psi + c_phi*s_theta*s_psi);
 
 	//12th row
-	this->state_jacobian_(11, 0) = dt*( c_phi*c_theta*(state_sensor_val(4) - previous_state(13)) - s_phi*c_theta*(state_sensor_val(5) - previous_state(14)) );
-	this->state_jacobian_(11, 1) = dt*( -c_theta*(state_sensor_val(3) - previous_state(12)) - s_phi*s_theta*(state_sensor_val(4) - previous_state(13)) - 
-    									 c_phi*s_theta*(state_sensor_val(5) - previous_state(14)) );
+	this->state_jacobian_(11, 0) = dt*( c_phi*c_theta*(state_sensor_val(4) - this->current_state_(13)) - s_phi*c_theta*(state_sensor_val(5) - this->current_state_(14)) );
+	this->state_jacobian_(11, 1) = dt*( -c_theta*(state_sensor_val(3) - this->current_state_(12)) - s_phi*s_theta*(state_sensor_val(4) - this->current_state_(13)) - 
+    									 c_phi*s_theta*(state_sensor_val(5) - this->current_state_(14)) );
 	this->state_jacobian_(11, 11) = 1;
 	this->state_jacobian_(11, 12) = dt*s_theta;
 	this->state_jacobian_(11, 13) = -dt*s_phi*c_theta;
@@ -243,6 +206,7 @@ void Ekf15Dof<T>::ComputeStateJacobian(MatrixInv<T> previous_state, MatrixInv<T>
 
 template <typename T>
 void Ekf15Dof<T>::ComputeStateNoiseJacobian(MatrixInv<T> previous_state){
+	// Not used right now
 	//1st row
 	this->state_noise_jacobian_(0, 15) = this->sample_time_s_;
 	this->state_noise_jacobian_(0, 16) = this->sample_time_s_*s_phi*t_theta;
@@ -314,33 +278,24 @@ void Ekf15Dof<T>::GetMeas(MatrixInv<T> meas_sensor_val){
 
 	T avg_gaus_mag = sqrt(pow(m1, 2) + pow(m2, 2) + pow(m3, 2));
 
-	MatrixInv<float> mag2d_projection(2, 3);
-	mag2d_projection(0, 0) = c_theta;
-	mag2d_projection(0, 1) = s_theta*s_phi;
-	mag2d_projection(0, 2) = s_theta*c_phi;
+	MatrixInv<T> mag2d_projection = { {c_theta, s_theta*s_phi, s_theta*c_phi},
+										  {0, c_phi, -s_phi} };
 
-	mag2d_projection(1, 1)  = c_phi;
-	mag2d_projection(1, 2) = -s_phi;
+	MatrixInv<T> mag_vector = { {m1/avg_gaus_mag}, {m2/avg_gaus_mag}, {m3/avg_gaus_mag} };
 
-	MatrixInv<float> mag_vector(3, 1);
-	mag_vector(0) = m1/avg_gaus_mag;
-	mag_vector(1) = m2/avg_gaus_mag;
-	mag_vector(2) = m3/avg_gaus_mag;
 
 	//Assume we are in bay area and use a declination 
-	T magnetic_declination = 13.01/57.29578;
+	 T magnetic_declination = 13.01*DEG2RAD;
 
-	MatrixInv<float> mag2d = mag2d_projection*mag_vector;
-	this->computed_meas_(0) = -atan2(mag2d(1), mag2d(0)) + magnetic_declination;
+	MatrixInv<T> mag2d = mag2d_projection*mag_vector;
+	this->computed_meas_(0) = atan2(-mag2d(1), mag2d(0)) + magnetic_declination;
 
-	while (this->computed_meas_(0) > this->time_propagated_state_(2) + 3.14){
-			this->computed_meas_(0) = this->computed_meas_(0)-2*3.14;
+	while (this->computed_meas_(0) > this->time_propagated_state_(2) + PI){
+			this->computed_meas_(0) = this->computed_meas_(0) - PIx2;
 	}
-	while (this->computed_meas_(0) < this->time_propagated_state_(2) - 3.14){
-			this->computed_meas_(0) = this->computed_meas_(0)+2*3.14;
+	while (this->computed_meas_(0) < this->time_propagated_state_(2) - PI){
+			this->computed_meas_(0) = this->computed_meas_(0) + PIx2;
 	}
-
-	// this->computed_meas_(0) = atan2( -m2*c_phi + m3*s_phi, m1*c_theta + (m2*s_phi + m3*c_phi)*s_theta ) + magnetic_declination;
 
 	this->computed_meas_(1) = meas_sensor_val(3);//Px
 	this->computed_meas_(2) = meas_sensor_val(4);//Py

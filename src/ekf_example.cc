@@ -7,7 +7,6 @@
 #include <fstream>
 /*#include <chrono>
 */
-#define RAD2DEG 57.29578
 
 std::unique_ptr <InertialSensor> get_inertial_sensor( std::string sensor_name)
 {
@@ -59,7 +58,7 @@ int main(int argc, char *argv[]){
 	MatrixInv<float> computed_meas(7, 1);
 
 	//Compute initial heading
-	float magnetic_declination = 13.01/RAD2DEG;
+	float magnetic_declination = 13.01*DEG2RAD;
 
 	MatrixInv<float> mag_offset = {{16.2264}, {35.5269}, {-27.5698}};
 	MatrixInv<float> mag_scale = {{0.9652}, {1.09}, {0.9556}};
