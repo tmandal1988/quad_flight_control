@@ -60,8 +60,9 @@ int main(int argc, char *argv[]){
 	//Compute initial heading
 	float magnetic_declination = 13.01*DEG2RAD;
 
-	MatrixInv<float> mag_offset = {{16.2264}, {35.5269}, {-27.5698}};
-	MatrixInv<float> mag_scale = {{0.9652}, {1.09}, {0.9556}};
+	MatrixInv<float> mag_offset = {{17.8902136639429}, {35.5186740453011}, {-33.8067089624238}};
+	MatrixInv<float> mag_a(3, 3, "eye");
+	MatrixInv<float> mag_scale = {{0.9652, 0, 0}, {0, 1.09, 0}, {0, 0, 0.9556}};
 
 
 	/*sensor->read_magnetometer(&mx, &my, &mz);
@@ -129,6 +130,8 @@ int main(int argc, char *argv[]){
 	mag_vector(1) = sum_my/200/avg_gaus_mag;
 	mag_vector(2) = sum_mz/200/avg_gaus_mag;
 
+	mag_vector = mag_a*mag_scale*(mag_vector - mag_offset);
+
 	MatrixInv<float> mag2d = mag2d_projection*mag_vector;
 	initial_state(2) = -atan2(mag2d(1), mag2d(0)) + magnetic_declination;
 
@@ -192,11 +195,10 @@ int main(int argc, char *argv[]){
 	    temp_mag(0) = mx;
 	    temp_mag(1) = my;
 	    temp_mag(2) = mz;
-
-	    temp_mag = (temp_mag - mag_offset);
-	    sensor_meas(0) = temp_mag(0)*mag_scale(0);
-	    sensor_meas(1) = temp_mag(1)*mag_scale(1);
-	    sensor_meas(2) = temp_mag(2)*mag_scale(2);
+	    temp_mag = mag_scale*mag_a*(temp_mag - mag_offset);
+	    sensor_meas(0) = temp_mag(0);
+	    sensor_meas(1) = temp_mag(1);
+	    sensor_meas(2) = temp_mag(2);
 	    imu_gps_ekf.Run(state_sensor_val, sensor_meas);
 	    state_jacobian = imu_gps_ekf.GetCovariance();
 	    //state_jacobian = imu_gps_ekf.GetStateJacobian();

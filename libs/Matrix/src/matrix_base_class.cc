@@ -24,8 +24,10 @@ MatrixBase<T>::MatrixBase(initializer_list< initializer_list<T> > initial_data){
         if (ncols_temp != ncols_)
         	throw invalid_argument("Initializer list dimensions are not consistent accross rows or columns");
         	matrix_[idx_r].resize(ncols_);
+        	size_t idx_c = 0;
         	for(T data : row){
-        		matrix_[idx_r].push_back(data);
+        		matrix_[idx_r][idx_c] =  data;
+        		idx_c++;
         	}
         	idx_r++;
     }
