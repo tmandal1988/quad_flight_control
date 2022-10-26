@@ -4,6 +4,7 @@
 
 #include<iostream>
 #include<string>
+#include <vector>
 
 using namespace std;
 
@@ -64,7 +65,7 @@ class MatrixBase{
 
 	protected:
 		size_t nrows_, ncols_;
-		T **matrix_;
+		vector< vector<T> > matrix_;
 
 
 };

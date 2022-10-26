@@ -31,6 +31,10 @@ set(PROJECT_LIBRARIES_SUBDIR
     Navio/Navio2
     Ekf
 )
+# Disbale ABI change warning
+SET(GCC_NO_ABI_WARNING_FLAG "-Wno-psabi")
+
+SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_NO_ABI_WARNING_FLAG}")
 
 include(FetchContent)
 FetchContent_Declare(

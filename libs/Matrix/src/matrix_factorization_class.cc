@@ -4,7 +4,7 @@ template<typename T>
 array<MatrixFact<T>, 2> MatrixFact<T>::Lu(){
 	size_t nrows_ = this->nrows_;
 	size_t ncols_ = this->ncols_;
-	T **matrix_   = this->matrix_;
+	vector< vector<T> > matrix_   = this->matrix_;
 	if (nrows_ != ncols_)
 		throw invalid_argument("Matrix is not square\n");
 	array<MatrixFact<T>, 2> lu_decomp = {MatrixFact<T>(nrows_, ncols_, "eye"), MatrixFact<T>(nrows_, ncols_)};

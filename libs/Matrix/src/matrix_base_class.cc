@@ -4,14 +4,13 @@ template <typename T>
 MatrixBase<T>::MatrixBase(){
 	nrows_ = 0;
 	ncols_ = 0;
-	matrix_ = nullptr;
 }
 
 template <typename T>
 MatrixBase<T>::MatrixBase(initializer_list< initializer_list<T> > initial_data){
 	// get the number of rows
 	nrows_ = initial_data.size();
-	matrix_ = new T*[nrows_];
+	matrix_.resize(nrows_);
 
 	// get the number of columns
 	const initializer_list<T> *initial_data_first_row = initial_data.begin();
@@ -24,11 +23,9 @@ MatrixBase<T>::MatrixBase(initializer_list< initializer_list<T> > initial_data){
         ncols_temp = row.size();
         if (ncols_temp != ncols_)
         	throw invalid_argument("Initializer list dimensions are not consistent accross rows or columns");
-        	matrix_[idx_r] = new T[ncols_];
-        	size_t idx_c = 0;
+        	matrix_[idx_r].resize(ncols_);
         	for(T data : row){
-        		matrix_[idx_r][idx_c] = data;
-        		idx_c++;
+        		matrix_[idx_r].push_back(data);
         	}
         	idx_r++;
     }
@@ -38,43 +35,32 @@ template <typename T>
 MatrixBase<T>::MatrixBase(size_t num_rows, size_t num_cols){
 	nrows_ = num_rows;
 	ncols_ = num_cols;
-	matrix_ = new T*[nrows_];
-	// assign memory for the columns
-	for(size_t idx_r = 0; idx_r < nrows_; idx_r++){
-		matrix_[idx_r] = new T[ncols_];
-	}
+	matrix_.resize(nrows_);
+
 	// initialize MatrixBase with zeros
 	for(size_t idx_r = 0; idx_r < nrows_; idx_r++){
-		for(size_t idx_c = 0; idx_c < ncols_; idx_c++){
-			matrix_[idx_r][idx_c] = 0;
-		}
+		// assign memory for the columns
+		matrix_[idx_r].resize(ncols_, 0);
 	}
 
 }
 
 template <typename T>
 MatrixBase<T>::MatrixBase(size_t num_rows, size_t num_cols, string type){
-	nrows_ = num_rows;
-	ncols_ = num_cols;
-	matrix_ = new T*[nrows_];
-	// assign memory for the columns
-	for(size_t idx_r = 0; idx_r < nrows_; idx_r++){
-		matrix_[idx_r] = new T[ncols_];
-	}
-
 	if (type == "eye"){
 		if (num_rows != num_cols){
 			throw invalid_argument("To create identity Matrix number of rows and columns should be equal\n");
 		}
-			// initialize MatrixBase with zeros and then assign 1 to diagonal
-		for(size_t idx_r = 0; idx_r < nrows_; idx_r++){
-			for(size_t idx_c = 0; idx_c < ncols_; idx_c++){
-				if (idx_r == idx_c)
-					matrix_[idx_r][idx_c] = 1;
-				else
-					matrix_[idx_r][idx_c] = 0;
-			}
-		}
+	}
+
+	nrows_ = num_rows;
+	ncols_ = num_cols;
+
+	matrix_.resize(nrows_);
+	// assign memory for the columns
+	for(size_t idx_r = 0; idx_r < nrows_; idx_r++){
+		matrix_[idx_r].resize(ncols_, 0);
+		matrix_[idx_r][idx_r] = 1;
 	}
 
 }
@@ -83,12 +69,10 @@ template <typename T>
 MatrixBase<T>::MatrixBase(const MatrixBase<T>& matrix_to_copy){
 	nrows_ = matrix_to_copy.nrows_;
 	ncols_ = matrix_to_copy.ncols_;
-	matrix_ = new T*[nrows_];
+	matrix_.resize(nrows_);
 	for(size_t idx_r = 0; idx_r < nrows_; idx_r++){
-		matrix_[idx_r] = new T[ncols_];
-	}
-	// initialize MatrixBase with zeros
-	for(size_t idx_r = 0; idx_r < nrows_; idx_r++){
+		// assign memory for the columns
+		matrix_[idx_r].resize(ncols_, 0);
 		for(size_t idx_c = 0; idx_c < ncols_; idx_c++){
 			matrix_[idx_r][idx_c] = matrix_to_copy.matrix_[idx_r][idx_c];
 		}
@@ -99,12 +83,12 @@ template <typename T>
 MatrixBase<T>::~MatrixBase(){
 	if (ncols_ > 0){
 		for(size_t idx_r = 0; idx_r < nrows_; idx_r++){
-			delete[] matrix_[idx_r];
+			matrix_[idx_r].clear();
 		}
 	}
 
 	if(nrows_ > 0){
-		delete[] matrix_;
+		matrix_.clear();
 	}
 
 }
@@ -178,19 +162,19 @@ MatrixBase<T> MatrixBase<T>::operator= (const MatrixBase<T>& matrix_to_copy){
 
 	if (ncols_ > 0){
 		for(size_t idx_r = 0; idx_r < nrows_; idx_r++){
-			delete[] matrix_[idx_r];
+			matrix_[idx_r].clear();
 		}
 	}
 
 	if(nrows_ > 0){
-		delete[] matrix_;
+		matrix_.clear();
 	}
 
 	nrows_ = matrix_to_copy.nrows_;
 	ncols_ = matrix_to_copy.ncols_;
-	matrix_ = new T*[nrows_];
+	matrix_.resize(nrows_);
 	for(size_t idx_r = 0; idx_r < nrows_; idx_r++){
-		matrix_[idx_r] = new T[ncols_];
+		matrix_[idx_r].resize(ncols_);
 	}
 	// initialize Matrix with the matrix_to_copy values
 	for(size_t idx_r = 0; idx_r < nrows_; idx_r++){
@@ -226,17 +210,17 @@ MatrixBase<T> MatrixBase<T>::operator= (const initializer_list< initializer_list
 	}else{
 		if (ncols_ > 0){
 			for(size_t idx_r = 0; idx_r < nrows_; idx_r++){
-				delete[] matrix_[idx_r];
+				matrix_[idx_r].clear();
 			}
 		}
 
 		if(nrows_ > 0){
-			delete[] matrix_;
+			matrix_.clear();
 		}
 
 		// get the number of rows
 		nrows_ = nrows_in;
-		matrix_ = new T*[nrows_];
+		matrix_.resize(nrows_);
 		ncols_ = ncols_in;
 	
 
@@ -246,7 +230,7 @@ MatrixBase<T> MatrixBase<T>::operator= (const initializer_list< initializer_list
         	ncols_temp = row.size();
         	if (ncols_temp != ncols_)
         		throw invalid_argument("Initializer list dimensions are not consistent accross rows or columns2");
-        		matrix_[idx_r] = new T[ncols_];
+        		matrix_[idx_r].resize(ncols_);
         		size_t idx_c = 0;
         		for(T data : row){
         			matrix_[idx_r][idx_c] = data;
@@ -421,7 +405,7 @@ void MatrixBase<T>::set_element(size_t idx_r, size_t idx_c, T val){
 
 template<typename T>
 bool MatrixBase<T>::is_empty(){
-	if (matrix_ == NULL){
+	if (matrix_.empty()){
 		return true;
 	}else{
 		return false;

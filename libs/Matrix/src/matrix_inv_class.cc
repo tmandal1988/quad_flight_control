@@ -4,7 +4,7 @@ template <typename T>
 MatrixInv<T> MatrixInv<T>::Inverse(){
 	size_t nrows_ = this->nrows_;
 	size_t ncols_ = this->ncols_;
-	T **matrix_ = this->matrix_;
+	vector< vector<T> > matrix_ = this->matrix_;
 	if (nrows_ != ncols_)
 		throw invalid_argument("Matrix is not square\n");
 
