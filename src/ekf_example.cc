@@ -95,7 +95,7 @@ int main(int argc, char *argv[]){
 	float sum_mx = 0;
 	float sum_my = 0;
 	float sum_mz = 0;
-	for (size_t idx_s = 0; idx_s < 2; idx_s++){
+	for (size_t idx_s = 0; idx_s < 200; idx_s++){
 		sensor->update();
 	    sensor->read_accelerometer(&ax, &ay, &az);
 	    sensor->read_magnetometer(&mx, &my, &mz);
@@ -112,8 +112,6 @@ int main(int argc, char *argv[]){
 	}
 
 	float avg_acc_mag = sqrt(pow((sum_ax/200), 2) + pow((sum_ay/200), 2) + pow((sum_az/200), 2));
-	float avg_gaus_mag = sqrt(pow((sum_mx/200), 2) + pow((sum_my/200), 2) + pow((sum_mz/200), 2));
-
 	initial_state(0) = atan2(sum_ay/200, avg_acc_mag);
 	initial_state(1) = atan2(sum_ax/200, avg_acc_mag);
 
@@ -126,14 +124,16 @@ int main(int argc, char *argv[]){
 	mag2d_projection(1, 2) = -sin(initial_state(0));
 
 	MatrixInv<float> mag_vector(3, 1);
-	mag_vector(0) = sum_mx/200/avg_gaus_mag;
-	mag_vector(1) = sum_my/200/avg_gaus_mag;
-	mag_vector(2) = sum_mz/200/avg_gaus_mag;
+	mag_vector(0) = sum_mx/200;
+	mag_vector(1) = sum_my/200;
+	mag_vector(2) = sum_mz/200;
 
 	mag_vector = mag_a*mag_scale*(mag_vector - mag_offset);
+	float avg_gaus_mag = sqrt(pow(mag_vector(0), 2) + pow(mag_vector(1), 2) + pow(mag_vector(2), 2));
+	mag_vector = mag_vector/avg_gaus_mag;
 
 	MatrixInv<float> mag2d = mag2d_projection*mag_vector;
-	initial_state(2) = -atan2(mag2d(1), mag2d(0)) + magnetic_declination;
+	initial_state(2) = atan2(-mag2d(1), mag2d(0)) + magnetic_declination;
 
 	// initial_state(2) = atan2( -(sum_my/200/avg_gaus_mag)*cos(initial_state(0)) + (sum_mz/200/avg_gaus_mag)*sin(initial_state(0)), (sum_mx/200/avg_gaus_mag)*cos(initial_state(1)) + 
 	// 	((sum_my/200/avg_gaus_mag)*sin(initial_state(0)) + (sum_mz/200/avg_gaus_mag)*cos(initial_state(0)))*sin(initial_state(1)) ) + magnetic_declination;
@@ -167,7 +167,7 @@ int main(int argc, char *argv[]){
              << "\n";
 
 	
-    while(count < 100000) {
+    while(count < 10000000) {
 /*    	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 */
 	    sensor->update();
