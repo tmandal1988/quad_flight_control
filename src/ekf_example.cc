@@ -5,8 +5,7 @@
 #include "Navio/Common/Util.h"
 #include <memory>
 #include <fstream>
-/*#include <chrono>
-*/
+#include <chrono>
 
 std::unique_ptr <InertialSensor> get_inertial_sensor( std::string sensor_name)
 {
@@ -166,10 +165,11 @@ int main(int argc, char *argv[]){
              << 0 << ", "<< 0 << ", " << 0
              << "\n";
 
-	
-    while(count < 10000000) {
+	double avg_duration = 0;
+    while(count < 1000000) {
 /*    	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 */
+		// auto start = std::chrono::high_resolution_clock::now();
 	    sensor->update();
 	    sensor->read_accelerometer(&ax, &ay, &az);
 	    sensor->read_gyroscope(&gx, &gy, &gz);
@@ -210,28 +210,32 @@ int main(int argc, char *argv[]){
 
 	    printf("Roll [deg]: %+7.3f, Pitch[deg]: %+7.3f, Yaw[deg]: %+7.3f\n", current_state(0)*RAD2DEG, current_state(1)*RAD2DEG, current_state(2)*RAD2DEG);
 
-	    usleep(10000);
-	      fout << gy << ", "
-             << gx << ", "
-             << -gz << ", "
-             << ay << ", "
-             << ax << ", "
-             << -az << ","
-             << mx << ", "
-             << my << ", "
-             << mz << ", "
-             << current_state(0) << ", "
-             << current_state(1) << ", "
-             << current_state(2) << ", "
-             << state_jacobian(t_idx, 0) << ", " <<state_jacobian(t_idx, 1)<<", "<<state_jacobian(t_idx, 2)<<", "<<state_jacobian(t_idx, 3)<<", "<<state_jacobian(t_idx, 4)<<", "<<state_jacobian(t_idx, 5)<<", "
-             << state_jacobian(t_idx, 6) << ", " <<state_jacobian(t_idx, 7)<<", "<<state_jacobian(t_idx, 8)<<", "<<state_jacobian(t_idx, 9)<<", "<<state_jacobian(t_idx, 10)<<", "<<state_jacobian(t_idx, 11)<<", "
-             << state_jacobian(t_idx, 12) << ", " <<state_jacobian(t_idx, 13)<<", "<<state_jacobian(t_idx, 14)
-             << "\n";
+	    usleep(7100);
+	      // fout << gy << ", "
+       //       << gx << ", "
+       //       << -gz << ", "
+       //       << ay << ", "
+       //       << ax << ", "
+       //       << -az << ","
+       //       << mx << ", "
+       //       << my << ", "
+       //       << mz << ", "
+       //       << current_state(0) << ", "
+       //       << current_state(1) << ", "
+       //       << current_state(2) << ", "
+       //       << state_jacobian(t_idx, 0) << ", " <<state_jacobian(t_idx, 1)<<", "<<state_jacobian(t_idx, 2)<<", "<<state_jacobian(t_idx, 3)<<", "<<state_jacobian(t_idx, 4)<<", "<<state_jacobian(t_idx, 5)<<", "
+       //       << state_jacobian(t_idx, 6) << ", " <<state_jacobian(t_idx, 7)<<", "<<state_jacobian(t_idx, 8)<<", "<<state_jacobian(t_idx, 9)<<", "<<state_jacobian(t_idx, 10)<<", "<<state_jacobian(t_idx, 11)<<", "
+       //       << state_jacobian(t_idx, 12) << ", " <<state_jacobian(t_idx, 13)<<", "<<state_jacobian(t_idx, 14)
+       //       << "\n";
 
 
 	    count++;
+	    // auto stop = std::chrono::high_resolution_clock::now();
+	    // auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+	    // avg_duration = avg_duration + duration.count();
+	    // cout<<"duration.count(): "<<duration.count()<<endl;
 	}
-
+	cout<<"Avg Execution Time: "<<avg_duration/100<<endl;
 	fout.flush();
 
 
