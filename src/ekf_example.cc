@@ -1,24 +1,40 @@
+// EKF related headers
 #include <ekf_15dof_class.h>
+// Matrix library
 #include <Matrix/matrix_factorization_class.h>
+// Navio 2 Utilities
 #include "Navio/Common/MPU9250.h"
 #include "Navio/Navio2/LSM9DS1.h"
 #include "Navio/Common/Util.h"
 #include <Navio/Common/Ublox.h>
+// Standard C++ Libraries file, time and memory
 #include <memory>
 #include <fstream>
 #include <chrono>
+// Standard C++ Libraries for multi-threading
 #include <thread>
 #include <mutex>
 
+// Variable to store gps measured position and velocity, this is shared between threads
 MatrixInv<float> ned_pos_and_vel_meas = {{0}, {0}, {0}, {0}, {0}, {0}};
+// Variable to store initial velocity as measured by GPS during EKF initialization
 float vned_init[] = {0, 0, 0};
 
-bool gps_meas_indices[] = {false, false, false, 
-						   false, false, false};
+// Variable to indicate if GPS has been initialized, this is shared between threads
 bool is_gps_initialized = false;
 
+/* Variable to indicate which GPS measurement has been updated
+first 3 indices are for position and last 3 indices are for velocities,
+this is shared between threads
+*/
+bool gps_meas_indices[] = {false, false, false, 
+						   false, false, false};
+
+
+// Mutex to guard resource access between threads
 std::mutex gps_mutex;
 
+// Function to construct an object of inertial sensor class for a given IMU type
 std::unique_ptr <InertialSensor> get_inertial_sensor( std::string sensor_name)
 {
     if (sensor_name == "mpu") {
@@ -37,8 +53,20 @@ std::unique_ptr <InertialSensor> get_inertial_sensor( std::string sensor_name)
 }
 
 MatrixInv<float> Geodetic2Ecef(float lat, float lon, float height){
+	/* This function converts Geodetic positions to ECEF positions
+	Inputs:
+		lat (float)		: Lattitude measured by GPS
+		lon (float)		: Longitude measured by GPS
+		height (float)	: Height above ellipsoid measured by GPS
+	Outputs:
+		MatrixInv<float>: 3x1 array of ECEF X, Y, Z coordinates
+	*/
+
+	// Square of Earth's eccentricity
 	float ecc_sq = 0.0066943798522561;
+	// Earth's semi measure axis
     float r_ea = 6378137.0;
+    // Intermediate variable for coordinate conversion
     float n_lat = r_ea/sqrt( ( 1 - ecc_sq * pow(sin(lat), 2) ) );
 
     float c_lat = cos(lat);
@@ -46,16 +74,27 @@ MatrixInv<float> Geodetic2Ecef(float lat, float lon, float height){
     float s_lat = sin(lat);
     float s_lon = sin(lon);
 
+    // Transform the coordinates and return
     MatrixInv<float> ecef_cord = { {(n_lat + height)*c_lat*c_lon}, {(n_lat + height)*c_lat*s_lon}, {(n_lat*(1 - ecc_sq) + height)*s_lat} };
     return ecef_cord;
 }
 
 MatrixInv<float> Geodetic2Ned(float lat, float lon, float height, float lat_ref, float lon_ref, float height_ref){
+	/* This function converts Geodetic positions to NED positions
+	Inputs:
+		lat (float)			: Lattitude measured by GPS
+		lon (float)			: Longitude measured by GPS
+		height (float)		: Height above ellipsoid measured by GPS
+		lat_ref (float) 	: Lattitude of the origin of the NED frame
+		lon_ref (float) 	: Longitude of the origin of the NED frame
+		height_ref (float)	: Height of the origin of the NED frame
+	Outputs:
+		MatrixInv<float> 	: 3x1 array of N, E, D coordinates
+	*/
+
+	// Convert the origin and current llh to ECEF coordinates
 	MatrixInv<float> ecef_cord_ref = Geodetic2Ecef(lat_ref, lon_ref, height_ref);
 	MatrixInv<float> ecef_cord = Geodetic2Ecef(lat, lon, height);
-
-	MatrixInv<float> llh = { {lat}, {lon}, {height}};
-	MatrixInv<float> llh_ref = {{lat_ref}, {lon_ref}, {height_ref}};
 
 	float c_lat_ref = cos(lat_ref);
 	float s_lat_ref = sin(lat_ref);
@@ -66,7 +105,7 @@ MatrixInv<float> Geodetic2Ned(float lat, float lon, float height, float lat_ref,
     MatrixInv<float> ecef2ned = { {-s_lat_ref*c_lon_ref, -s_lat_ref*s_lon_ref, c_lat_ref}, 
     							  {-s_lon_ref, c_lon_ref, 0}, 
     							  {-c_lat_ref*c_lon_ref, -c_lat_ref*s_lon_ref, -s_lat_ref} };
-   	return ecef2ned*(llh - llh_ref);
+   	return ecef2ned*(ecef_cord - ecef_cord_ref);
 
 }
 
@@ -104,8 +143,8 @@ void GetGpsData(){
     	if  ( gps_3d_fix && ( gps_fix_count > n_valid_gps_count ) ) 
         {
         	if((gps.decodeSingleMessage(Ublox::NAV_POSLLH, pos_data) == 1) && (gps_pos_count < n_gps_meas_count) ){
-        		lat_ref += pos_data[1]/10000000;
-        		lon_ref += pos_data[2]/10000000;
+        		lat_ref += pos_data[2]/10000000;
+        		lon_ref += pos_data[1]/10000000;
         		height_ref += pos_data[3]/1000;
         		gps_pos_count++;
         	}
