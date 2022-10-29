@@ -22,7 +22,7 @@ class EkfBase{
 		// destructor
 		~EkfBase();
 
-		void Run(MatrixInv<T> state_sensor_val, MatrixInv<T> meas_sensor_val);
+		void Run(MatrixInv<T> state_sensor_val, MatrixInv<T> meas_sensor_val, bool meas_indices[]);
 		MatrixInv<T> GetCurrentState(){ return current_state_; }
 		MatrixInv<T> GetStateJacobian(){ return state_jacobian_; }
 		MatrixInv<T> GetSensorMeasurement(){ return computed_meas_; }

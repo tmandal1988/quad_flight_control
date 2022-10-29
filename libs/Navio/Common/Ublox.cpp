@@ -328,7 +328,7 @@ int Ublox::enableNAV_POSLLH()
     int gps_nav_posllh_length = (sizeof(gps_nav_posllh)/sizeof(*gps_nav_posllh));
     unsigned char from_gps_data_nav[gps_nav_posllh_length];
 
-    return SPIdev::transfer(spi_device_name.c_str(), gps_nav_posllh, from_gps_data_nav, gps_nav_posllh_length, 200000);
+    return SPIdev::transfer(spi_device_name.c_str(), gps_nav_posllh, from_gps_data_nav, gps_nav_posllh_length);
 }
 
 int Ublox::enableNAV_STATUS()
@@ -337,7 +337,7 @@ int Ublox::enableNAV_STATUS()
     int gps_nav_status_length = (sizeof(gps_nav_status)/sizeof(*gps_nav_status));
     unsigned char from_gps_data_nav[gps_nav_status_length];
 
-    return SPIdev::transfer(spi_device_name.c_str(), gps_nav_status, from_gps_data_nav, gps_nav_status_length, 200000);
+    return SPIdev::transfer(spi_device_name.c_str(), gps_nav_status, from_gps_data_nav, gps_nav_status_length);
 }
 
 int Ublox::enableNAV_VELNED()
@@ -346,7 +346,7 @@ int Ublox::enableNAV_VELNED()
     int gps_nav_status_length = (sizeof(gps_nav_status)/sizeof(*gps_nav_status));
     unsigned char from_gps_data_nav[gps_nav_status_length];
 
-    return SPIdev::transfer(spi_device_name.c_str(), gps_nav_status, from_gps_data_nav, gps_nav_status_length, 200000);
+    return SPIdev::transfer(spi_device_name.c_str(), gps_nav_status, from_gps_data_nav, gps_nav_status_length);
 }
 
 int Ublox::testConnection()
@@ -376,7 +376,7 @@ int Ublox::testConnection()
     {
         // From now on, we will send zeroes to the receiver, which it will ignore
         // However, we are simultaneously getting useful information from it
-        SPIdev::transfer(spi_device_name.c_str(), &to_gps_data, &from_gps_data, 1, 200000);
+        SPIdev::transfer(spi_device_name.c_str(), &to_gps_data, &from_gps_data, 1);
 
         // Scanner checks the message structure with every byte received
         status = scanner->update(from_gps_data);
@@ -411,7 +411,7 @@ int Ublox::configureSolutionRate(std::uint16_t meas_rate,
     msg.nav_rate     = nav_rate;
     msg.timeref      = timeref;
 
-    _sendMessage(CLASS_CFG, MSG_CFG_RATE, &msg, sizeof(CfgNavRate));
+    return _sendMessage(CLASS_CFG, MSG_CFG_RATE, &msg, sizeof(CfgNavRate));
 }
 
 int Ublox::_sendMessage(std::uint8_t msg_class, std::uint8_t msg_id, void *msg, std::uint16_t size)
@@ -431,7 +431,7 @@ int Ublox::_sendMessage(std::uint8_t msg_class, std::uint8_t msg_id, void *msg, 
     auto checksum = _calculateCheckSum(buffer, offset);
     offset = _spliceMemory(buffer, &checksum, sizeof(CheckSum), offset);
 
-    return SPIdev::transfer(spi_device_name.c_str(), buffer, nullptr, offset, 200000);
+    return SPIdev::transfer(spi_device_name.c_str(), buffer, nullptr, offset);
 }
 
 int Ublox::_spliceMemory(unsigned char *dest, const void * const src, std::size_t size, int dest_offset)
@@ -471,7 +471,7 @@ int Ublox::decodeMessages()
     {
         // From now on, we will send zeroes to the receiver, which it will ignore
         // However, we are simultaneously getting useful information from it
-        SPIdev::transfer(spi_device_name.c_str(), &to_gps_data, &from_gps_data, 1, 200000);
+        SPIdev::transfer(spi_device_name.c_str(), &to_gps_data, &from_gps_data, 1);
 
         // Scanner checks the message structure with every byte received
         status = scanner->update(from_gps_data);
@@ -559,7 +559,7 @@ int Ublox::decodeSingleMessage(message_t msg, std::vector<double>& position_data
                 {
                     // From now on, we will send zeroes to the receiver, which it will ignore
                     // However, we are simultaneously getting useful information from it
-                    SPIdev::transfer(spi_device_name.c_str(), &to_gps_data, &from_gps_data, 1, 200000);
+                    SPIdev::transfer(spi_device_name.c_str(), &to_gps_data, &from_gps_data, 1);
 
                     // Scanner checks the message structure with every byte received
                     status = scanner->update(from_gps_data);
@@ -610,7 +610,7 @@ int Ublox::decodeSingleMessage(message_t msg, std::vector<double>& position_data
                 {
                     // From now on, we will send zeroes to the receiver, which it will ignore
                     // However, we are simultaneously getting useful information from it
-                    SPIdev::transfer(spi_device_name.c_str(), &to_gps_data, &from_gps_data, 1, 200000);
+                    SPIdev::transfer(spi_device_name.c_str(), &to_gps_data, &from_gps_data, 1);
 
                     // Scanner checks the message structure with every byte received
                     status = scanner->update(from_gps_data);
@@ -690,7 +690,7 @@ int Ublox::decodeSingleMessage(message_t msg, std::vector<double>& position_data
                 {
                     // From now on, we will send zeroes to the receiver, which it will ignore
                     // However, we are simultaneously getting useful information from it
-                    SPIdev::transfer(spi_device_name.c_str(), &to_gps_data, &from_gps_data, 1, 200000);
+                    SPIdev::transfer(spi_device_name.c_str(), &to_gps_data, &from_gps_data, 1);
 
                     // Scanner checks the message structure with every byte received
                     status = scanner->update(from_gps_data);

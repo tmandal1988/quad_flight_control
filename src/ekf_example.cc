@@ -3,9 +3,21 @@
 #include "Navio/Common/MPU9250.h"
 #include "Navio/Navio2/LSM9DS1.h"
 #include "Navio/Common/Util.h"
+#include <Navio/Common/Ublox.h>
 #include <memory>
 #include <fstream>
 #include <chrono>
+#include <thread>
+#include <mutex>
+
+MatrixInv<float> ned_pos_and_vel_meas = {{0}, {0}, {0}, {0}, {0}, {0}};
+float vned_init[] = {0, 0, 0};
+
+bool gps_meas_indices[] = {false, false, false, 
+						   false, false, false};
+bool is_gps_initialized = false;
+
+std::mutex gps_mutex;
 
 std::unique_ptr <InertialSensor> get_inertial_sensor( std::string sensor_name)
 {
@@ -24,6 +36,179 @@ std::unique_ptr <InertialSensor> get_inertial_sensor( std::string sensor_name)
     }
 }
 
+MatrixInv<float> Geodetic2Ecef(float lat, float lon, float height){
+	float ecc_sq = 0.0066943798522561;
+    float r_ea = 6378137.0;
+    float n_lat = r_ea/sqrt( ( 1 - ecc_sq * pow(sin(lat), 2) ) );
+
+    float c_lat = cos(lat);
+    float c_lon = cos(lon);
+    float s_lat = sin(lat);
+    float s_lon = sin(lon);
+
+    MatrixInv<float> ecef_cord = { {(n_lat + height)*c_lat*c_lon}, {(n_lat + height)*c_lat*s_lon}, {(n_lat*(1 - ecc_sq) + height)*s_lat} };
+    return ecef_cord;
+}
+
+MatrixInv<float> Geodetic2Ned(float lat, float lon, float height, float lat_ref, float lon_ref, float height_ref){
+	MatrixInv<float> ecef_cord_ref = Geodetic2Ecef(lat_ref, lon_ref, height_ref);
+	MatrixInv<float> ecef_cord = Geodetic2Ecef(lat, lon, height);
+
+	MatrixInv<float> llh = { {lat}, {lon}, {height}};
+	MatrixInv<float> llh_ref = {{lat_ref}, {lon_ref}, {height_ref}};
+
+	float c_lat_ref = cos(lat_ref);
+	float s_lat_ref = sin(lat_ref);
+
+	float c_lon_ref = cos(lon_ref);
+	float s_lon_ref = sin(lon_ref);
+
+    MatrixInv<float> ecef2ned = { {-s_lat_ref*c_lon_ref, -s_lat_ref*s_lon_ref, c_lat_ref}, 
+    							  {-s_lon_ref, c_lon_ref, 0}, 
+    							  {-c_lat_ref*c_lon_ref, -c_lat_ref*s_lon_ref, -s_lat_ref} };
+   	return ecef2ned*(llh - llh_ref);
+
+}
+
+void GetGpsData(){
+	Ublox gps;
+    if(gps.testConnection())
+    {
+        printf("Ublox test OK\n");
+        if (!gps.configureSolutionRate(100))
+        {
+            printf("Setting new rate: FAILED\n");
+        }
+    }
+
+    std::vector<double> fix_data;
+    size_t gps_pos_count = 0;
+    size_t gps_vel_count = 0;
+    size_t gps_fix_count = 0;
+    size_t n_gps_meas_count = 1;
+    size_t n_valid_gps_count = 1;
+    bool gps_3d_fix = false;
+    double lat_ref = 0;
+    double lon_ref = 0;
+    double height_ref = 0;
+
+    double vn_init = 0;
+    double ve_init = 0;
+    double vd_init = 0;
+
+    MatrixInv<float> ned_pos_meas;
+    vector<double> pos_data;
+    vector<double> vel_data;
+    size_t count = 0;
+    while( (gps_pos_count < n_gps_meas_count) || (gps_vel_count < n_gps_meas_count) ){
+    	if  ( gps_3d_fix && ( gps_fix_count > n_valid_gps_count ) ) 
+        {
+        	if((gps.decodeSingleMessage(Ublox::NAV_POSLLH, pos_data) == 1) && (gps_pos_count < n_gps_meas_count) ){
+        		lat_ref += pos_data[1]/10000000;
+        		lon_ref += pos_data[2]/10000000;
+        		height_ref += pos_data[3]/1000;
+        		gps_pos_count++;
+        	}
+        }  
+
+        if ( gps_3d_fix && ( gps_fix_count > n_valid_gps_count) )
+        {
+        	if( (gps.decodeSingleMessage(Ublox::NAV_VELNED, vel_data) == 1) && (gps_vel_count < n_gps_meas_count) ){
+        		vn_init += vel_data[1]/100;
+        		ve_init += vel_data[2]/100;
+        		vd_init += vel_data[3]/100;
+        		gps_vel_count++;
+        	}
+        }  
+        if (gps.decodeSingleMessage(Ublox::NAV_STATUS, fix_data) == 1){
+        	switch((int)fix_data[0]){
+        		case 0x03:
+        			if (!gps_3d_fix)
+        				gps_mutex.lock();
+        				cout<<"GPS 3D FIX OK"<<endl;
+        				gps_mutex.unlock();
+        			gps_3d_fix = true;
+        			if (gps_fix_count <= n_valid_gps_count)
+        				gps_fix_count++;
+        			break;
+        		default:
+        			if (gps_3d_fix)
+        				gps_mutex.lock();
+        				cout<<"GPS 3D FIX FAILED"<<endl;
+        				gps_mutex.unlock();
+        			if (gps_fix_count != 0)
+        				gps_fix_count--;
+        			gps_3d_fix = false;
+        	}
+        }
+        gps_mutex.lock();
+        printf("GPS INITIALIZATION PROGRESS: %g%%\r", ( (float)(gps_pos_count + gps_vel_count) * 100 )/(2*n_gps_meas_count) );
+        gps_mutex.unlock();
+    }
+
+    gps_mutex.lock();
+    cout<<"Done GPS Init"<<endl;
+    gps_mutex.unlock();
+    lat_ref = (lat_ref * DEG2RAD)/n_gps_meas_count;
+    lon_ref = (lon_ref * DEG2RAD)/n_gps_meas_count;
+    height_ref = height_ref/n_gps_meas_count;
+
+    gps_mutex.lock();
+    vned_init[0] = vn_init/n_gps_meas_count;
+    vned_init[1] = ve_init/n_gps_meas_count;
+    vned_init[2] = vd_init/n_gps_meas_count;    
+    is_gps_initialized = true;
+    gps_mutex.unlock();
+
+    while(1){
+    	gps_mutex.lock();
+    	for( size_t idx_meas = 0; idx_meas < 6; idx_meas++ ){
+    		gps_meas_indices[idx_meas] = false;
+    	}
+    	gps_mutex.unlock();
+
+    	if ( gps.decodeSingleMessage(Ublox::NAV_POSLLH, pos_data) == 1 && gps_3d_fix && ( gps_fix_count > n_valid_gps_count ))
+        	{
+        		ned_pos_meas = Geodetic2Ned( (pos_data[2] * DEG2RAD)/10000000,
+        											  (pos_data[1] * DEG2RAD)/10000000,
+        											   pos_data[3]/1000, lat_ref, lon_ref,
+        											   height_ref);
+
+        		gps_mutex.lock();
+        		for( size_t idx_meas = 0; idx_meas < 3; idx_meas++ ){
+    				gps_meas_indices[idx_meas] = true;
+    				ned_pos_and_vel_meas(idx_meas) = ned_pos_meas(idx_meas);
+    			}
+    			gps_mutex.unlock();
+        	}  
+
+        	if (gps.decodeSingleMessage(Ublox::NAV_VELNED, vel_data) == 1 && gps_3d_fix && ( gps_fix_count > n_valid_gps_count ))
+        	{
+        		gps_mutex.lock();
+        		for( size_t idx_meas = 3; idx_meas < 6; idx_meas++ ){
+    				gps_meas_indices[idx_meas] = true;
+    				ned_pos_and_vel_meas(idx_meas) = (float)(vel_data[idx_meas - 2]/100);
+    			}
+    			gps_mutex.unlock();
+        	}  
+
+        	if (gps.decodeSingleMessage(Ublox::NAV_STATUS, fix_data) == 1){
+        		switch((int)fix_data[0]){
+        			case 0x03:
+        				if (gps_fix_count <= n_valid_gps_count)
+        					gps_fix_count++;
+        				gps_3d_fix = true;
+        				break;
+        			default:
+        				if (gps_fix_count != 0)
+        					gps_fix_count--;
+        				gps_3d_fix = false;
+        		}
+        	}
+    }
+
+}
+
 int main(int argc, char *argv[]){
 
 	auto sensor = get_inertial_sensor("mpu");
@@ -39,11 +224,13 @@ int main(int argc, char *argv[]){
     }
     sensor->initialize();
 
+    thread gps_thread(GetGpsData);
+
     float ax, ay, az;
     float gx, gy, gz;
     float mx, my, mz;
 
-	MatrixInv<float> initial_state(15, 1);
+    MatrixInv<float> initial_state(15, 1);
 	MatrixInv<float> sensor_meas(9, 1);
 	MatrixInv<float> state_sensor_val(6, 1);
 	MatrixInv<float> process_noise_q(15, 15, "eye");
@@ -56,6 +243,10 @@ int main(int argc, char *argv[]){
 	MatrixInv<float> state_jacobian(1, 15);
 	MatrixInv<float> computed_meas(7, 1);
 
+	bool meas_indices[] = {false,
+						   false, false, false,
+						   false, false, false};
+
 	//Compute initial heading
 	float magnetic_declination = 13.01*DEG2RAD;
 
@@ -64,25 +255,6 @@ int main(int argc, char *argv[]){
 	MatrixInv<float> mag_scale = {{0.9652, 0, 0}, {0, 1.09, 0}, {0, 0, 0.9556}};
 
 
-	/*sensor->read_magnetometer(&mx, &my, &mz);
-	initial_state(2) = atan2( -my, mx) + magnetic_declination/RAD2DEG;
-	printf("My = %+7.3f, Mx = %+7.3f\n", my, mx);
-	printf("Initial Heading: %+7.3f\n", initial_state(2));*/
-	// process_noise_q = process_noise_q*0.1;
-	// process_noise_q(0, 0) = 0.01;
-	// process_noise_q(1, 1) = 0.01;
-	// process_noise_q(2, 2) = 0.01;
-
-	// process_noise_q(6, 6) = 1;
-	// process_noise_q(7, 7) = 1;
-	// process_noise_q(8, 8) = 1;
-	// process_noise_q(9, 9) = 1;
-	// process_noise_q(10, 10) = 1;
-	// process_noise_q(11, 11) = 1;
-
-	// process_noise_q(12, 12) = 0.01;
-	// process_noise_q(12, 12) = 0.01;
-	// process_noise_q(12, 12) = 0.01;
 	size_t count = 0;
 	int t_idx = atoi(argv[1]);
  	cout<<t_idx<<endl;
@@ -134,8 +306,13 @@ int main(int argc, char *argv[]){
 	MatrixInv<float> mag2d = mag2d_projection*mag_vector;
 	initial_state(2) = atan2(-mag2d(1), mag2d(0)) + magnetic_declination;
 
-	// initial_state(2) = atan2( -(sum_my/200/avg_gaus_mag)*cos(initial_state(0)) + (sum_mz/200/avg_gaus_mag)*sin(initial_state(0)), (sum_mx/200/avg_gaus_mag)*cos(initial_state(1)) + 
-	// 	((sum_my/200/avg_gaus_mag)*sin(initial_state(0)) + (sum_mz/200/avg_gaus_mag)*cos(initial_state(0)))*sin(initial_state(1)) ) + magnetic_declination;
+	// Wait for gps to initialize
+	cout<<"Waiting for 3D GPS Fix: "<<endl;
+	while(!is_gps_initialized){cout<<is_gps_initialized<<endl; usleep(1000000);}
+
+	initial_state(9) = vned_init[0];
+	initial_state(10) = vned_init[1];
+	initial_state(11) = vned_init[2];
 
 	printf("Initial Roll: %g [deg], Initial Pitch: %g [deg], Initial Yaw: %g [deg]\n", initial_state(0)*RAD2DEG, initial_state(1)*RAD2DEG, initial_state(2)*RAD2DEG);
 
@@ -165,26 +342,19 @@ int main(int argc, char *argv[]){
              << 0 << ", "<< 0 << ", " << 0
              << "\n";
 
-	double avg_duration = 0;
-    while(count < 1000000) {
-/*    	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-*/
-		// auto start = std::chrono::high_resolution_clock::now();
+	double avg_duration = 0;	
+	meas_indices[0] = true;
+    while(1) {
+    	auto start = std::chrono::high_resolution_clock::now();
+		for( size_t idx_meas = 1; idx_meas < 7; idx_meas++ ){
+    		meas_indices[idx_meas] = false;
+    	}
+
 	    sensor->update();
 	    sensor->read_accelerometer(&ax, &ay, &az);
 	    sensor->read_gyroscope(&gx, &gy, &gz);
 	    sensor->read_magnetometer(&mx, &my, &mz);
-	   //  //printf("Acc: %+7.3f %+7.3f %+7.3f  \n", ax, ay, az);
-	   //  //printf("Gyr: %+8.3f %+8.3f %+8.3f  \n", gy, gx, -gz);
-	   // //printf("Mag: %+7.3f %+7.3f %+7.3f\n", mx, my, mz);
 
-	    // fout << gy << ", "
-     //         << gx << ", "
-     //         << -gz << ", "
-     //         << ay << ", "
-     //         << ax << ", "
-     //         << az
-     //         << "\n";
 	    state_sensor_val(0) = gy;
 	    state_sensor_val(1) = gx;
 	    state_sensor_val(2) = -gz;
@@ -199,44 +369,34 @@ int main(int argc, char *argv[]){
 	    sensor_meas(0) = temp_mag(0);
 	    sensor_meas(1) = temp_mag(1);
 	    sensor_meas(2) = temp_mag(2);
-	    imu_gps_ekf.Run(state_sensor_val, sensor_meas);
-	    state_jacobian = imu_gps_ekf.GetCovariance();
-	    //state_jacobian = imu_gps_ekf.GetStateJacobian();
-	    computed_meas = imu_gps_ekf.GetSensorMeasurement();
-	    current_state = imu_gps_ekf.GetCurrentState();
-	    //current_state(0)*RAD2DEG
 
+	    for(size_t idx_meas = 0; idx_meas < 6; idx_meas++){
+	    	if(gps_meas_indices[idx_meas]){
+	    		sensor_meas(idx_meas + 3) = ned_pos_and_vel_meas(idx_meas);
+	    		meas_indices[idx_meas + 1] = true;
+	    	}
+	    }
 
-
-	    printf("Roll [deg]: %+7.3f, Pitch[deg]: %+7.3f, Yaw[deg]: %+7.3f\n", current_state(0)*RAD2DEG, current_state(1)*RAD2DEG, current_state(2)*RAD2DEG);
+	    imu_gps_ekf.Run(state_sensor_val, sensor_meas, meas_indices);
+        current_state = imu_gps_ekf.GetCurrentState();
+	    if (gps_meas_indices[1]){
+	    	printf("Roll [deg]: %+7.3f, Pitch[deg]: %+7.3f, Yaw[deg]: %+7.3f\n", current_state(0)*RAD2DEG, current_state(1)*RAD2DEG, current_state(2)*RAD2DEG);
+	    	printf("Pos N [m]: %+7.3f, Pos E [m]: %+7.3f, Pos D[m]: %+7.3f\n", current_state(6), current_state(7), current_state(8));
+	    	printf("Vel N [m]: %+7.3f, Vel E [m]: %+7.3f, Vel D[m]: %+7.3f\n", current_state(9), current_state(10), current_state(11));
+	    	printf("############################################\n");
+		}
 
 	    usleep(7100);
-	      // fout << gy << ", "
-       //       << gx << ", "
-       //       << -gz << ", "
-       //       << ay << ", "
-       //       << ax << ", "
-       //       << -az << ","
-       //       << mx << ", "
-       //       << my << ", "
-       //       << mz << ", "
-       //       << current_state(0) << ", "
-       //       << current_state(1) << ", "
-       //       << current_state(2) << ", "
-       //       << state_jacobian(t_idx, 0) << ", " <<state_jacobian(t_idx, 1)<<", "<<state_jacobian(t_idx, 2)<<", "<<state_jacobian(t_idx, 3)<<", "<<state_jacobian(t_idx, 4)<<", "<<state_jacobian(t_idx, 5)<<", "
-       //       << state_jacobian(t_idx, 6) << ", " <<state_jacobian(t_idx, 7)<<", "<<state_jacobian(t_idx, 8)<<", "<<state_jacobian(t_idx, 9)<<", "<<state_jacobian(t_idx, 10)<<", "<<state_jacobian(t_idx, 11)<<", "
-       //       << state_jacobian(t_idx, 12) << ", " <<state_jacobian(t_idx, 13)<<", "<<state_jacobian(t_idx, 14)
-       //       << "\n";
-
 
 	    count++;
-	    // auto stop = std::chrono::high_resolution_clock::now();
-	    // auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-	    // avg_duration = avg_duration + duration.count();
-	    // cout<<"duration.count(): "<<duration.count()<<endl;
+	    auto stop = std::chrono::high_resolution_clock::now();
+	    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+	    avg_duration = avg_duration + duration.count();
+	    //cout<<"duration.count(): "<<duration.count()<<endl;
 	}
 	cout<<"Avg Execution Time: "<<avg_duration/100<<endl;
 	fout.flush();
+	gps_thread.join();
 
 
 	return 0;
