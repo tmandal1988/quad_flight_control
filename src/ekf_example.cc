@@ -85,8 +85,8 @@ void GetGpsData(){
     size_t gps_pos_count = 0;
     size_t gps_vel_count = 0;
     size_t gps_fix_count = 0;
-    size_t n_gps_meas_count = 1;
-    size_t n_valid_gps_count = 1;
+    size_t n_gps_meas_count = 10;
+    size_t n_valid_gps_count = 10;
     bool gps_3d_fix = false;
     double lat_ref = 0;
     double lon_ref = 0;
@@ -147,7 +147,6 @@ void GetGpsData(){
     }
 
     gps_mutex.lock();
-    cout<<"Done GPS Init"<<endl;
     gps_mutex.unlock();
     lat_ref = (lat_ref * DEG2RAD)/n_gps_meas_count;
     lon_ref = (lon_ref * DEG2RAD)/n_gps_meas_count;
