@@ -1,10 +1,16 @@
 # Minimum version of CMake required to build this project
 cmake_minimum_required(VERSION 3.16.2)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(PROJECT_NAME IMUGPSEKF)
+
+# Set name of the project
+project(${PROJECT_NAME})
+
+
+find_package(Threads REQUIRED)
 
 set(PROJECT_SOURCE_DIR
 	src
@@ -31,19 +37,23 @@ set(PROJECT_LIBRARIES_SUBDIR
     Navio/Navio2
     Ekf
 )
+
+# To enable threading
+set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+
+
 # Disbale ABI change warning
 SET(GCC_NO_ABI_WARNING_FLAG "-Wno-psabi")
 # Enable gprof profiling
 SET(GCC_TURN_ON_GPROF_FLAG "-pg")
 # Set GCC Optimization Level
 SET(GCC_OPT_FLAG "-Ofast")
-# Turn on threading
-SET(GCC_ENABLE_THREAD "-pthread")
 # Set Statis libraries for gprof
-SET(LINKER_ALL_STATIC_FLAG "--static")
+# SET(LINKER_ALL_STATIC_FLAG "--static")
 
-# SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_NO_ABI_WARNING_FLAG} ${GCC_TURN_ON_GPROF_FLAG} ${GCC_OPT_FLAG} ${GCC_ENABLE_THREAD}")
-SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_NO_ABI_WARNING_FLAG} ${GCC_OPT_FLAG} ${GCC_ENABLE_THREAD}")
+#SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_NO_ABI_WARNING_FLAG} ${GCC_TURN_ON_GPROF_FLAG} ${GCC_OPT_FLAG}")
+SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_NO_ABI_WARNING_FLAG} ${GCC_OPT_FLAG}")
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LINKER_ALL_STATIC_FLAG}")
 
 include(FetchContent)
@@ -58,13 +68,10 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-# Set name of the project
-project(${PROJECT_NAME})
-
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCE})
 
 foreach(LIBRARY ${PROJECT_LIBRARIES_SUBDIR})
     add_subdirectory("${PROJECT_LIBRARIES_DIR}/${LIBRARY}")
 endforeach(LIBRARY)
 
-target_link_libraries(${PROJECT_NAME} ${PROJECT_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${PROJECT_LIBRARIES} Threads::Threads)

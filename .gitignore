@@ -10,3 +10,5 @@ build
 ._.DS_Store
 .DS_Store
 *.csv
+# Don't include data files
+*.dat

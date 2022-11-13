@@ -14,6 +14,8 @@
 // Standard C++ Libraries for multi-threading
 #include <thread>
 #include <mutex>
+#include <atomic>
+#include <signal.h>
 
 // Variable to store gps measured position and velocity, this is shared between threads
 MatrixInv<float> ned_pos_and_vel_meas = {{0}, {0}, {0}, {0}, {0}, {0}};
@@ -22,6 +24,9 @@ float vned_init[] = {0, 0, 0};
 
 // Variable to indicate if GPS has been initialized, this is shared between threads
 bool is_gps_initialized = false;
+
+// Variable to indicate if main is done
+static atomic<bool> main_done;
 
 /* Variable to indicate which GPS measurement has been updated
 first 3 indices are for position and last 3 indices are for velocities,
@@ -32,7 +37,46 @@ bool gps_meas_indices[] = {false, false, false,
 
 
 // Mutex to guard resource access between threads
-std::mutex gps_mutex;
+static mutex gps_mutex;
+
+// Mutex to guard the array used to save data to the disk
+static mutex data_write_mutex;
+
+// Mutex to guard cout
+static mutex cout_mutex;
+
+// To catch SIGINT
+volatile sig_atomic_t sigint_flag = 0;
+
+void sigint_handler(int sig){ // can be called asynchronously
+  sigint_flag = 1; // set flag
+}
+
+// Struct defining what data to save
+struct data_fields{
+	// Time it took for the EKF to run
+	float dt_s;
+	// GPS Time if available
+	float time_of_week_ms;
+	// Raw Sensor Data
+	float accel_mps2[3];
+	float gyro_radps[3];
+	// Corrected mag data for alignment and offset error
+	float mag_t[3];
+	// GPS NED position and velocity if available;
+	float ned_pos_m[3];
+	float ned_vel_mps[3];
+	// Current EKF State
+	float ekf_current_state[15];
+
+};
+
+// Create two buffers to store the data to save before writing
+data_fields data_to_save1[1024];
+data_fields data_to_save2[1024];
+// Create two flags to indicate if the above buffers are full or not
+static bool is_data_buff1_full = false;
+static bool is_data_buff2_full = false;
 
 // Function to construct an object of inertial sensor class for a given IMU type
 std::unique_ptr <InertialSensor> get_inertial_sensor( std::string sensor_name)
@@ -134,9 +178,9 @@ void GetGpsData(){
     // ned velocity data to be used in EKF initialization
     size_t gps_fix_count = 0;
     // Number of valid llh position data to use for EKF initialization
-    size_t n_gps_meas_count = 10;
+    size_t n_gps_meas_count = 2;
     // Number of valid 3d GPS fixes required before capturing llh position and ned velocity data for EKF initialization
-    size_t n_valid_gps_count = 10;
+    size_t n_valid_gps_count = 2;
     // Flag to indicate if GPS has a valid 3D fix or not
     bool gps_3d_fix = false;
 
@@ -190,9 +234,8 @@ void GetGpsData(){
         	switch((int)fix_data[0]){
         		case 0x03:
         			if (!gps_3d_fix){
-        				gps_mutex.lock();
+        				unique_lock<mutex> cout_lock(cout_mutex);
         				cout<<"GPS 3D FIX OK"<<endl;
-        				gps_mutex.unlock();
         			}
         			gps_3d_fix = true;
         			// Increment the count that keeps track of how many valid 3D GPS fixes we have got so far
@@ -201,9 +244,8 @@ void GetGpsData(){
         			break;
         		default:
         			if (gps_3d_fix){
-        				gps_mutex.lock();
+        				unique_lock<mutex> cout_lock(cout_mutex);
         				cout<<"GPS 3D FIX FAILED"<<endl;
-        				gps_mutex.unlock();
         			}
         			// Decrement the count that keeps track of how many valid 3D GPS fixes we have got so far if we loose the
         			// 3D GPS fix during initialization
@@ -212,9 +254,11 @@ void GetGpsData(){
         			gps_3d_fix = false;
         	}
         }
-        gps_mutex.lock();
-        printf("GPS INITIALIZATION PROGRESS: %g%%\r", ( (float)(gps_pos_count + gps_vel_count) * 100 )/(2*n_gps_meas_count) );
-        gps_mutex.unlock();
+        {
+        	unique_lock<mutex> cout_lock(cout_mutex);
+        	printf("GPS INITIALIZATION PROGRESS: %g%%\r", ( (float)(gps_pos_count + gps_vel_count) * 100 )/(2*n_gps_meas_count) );
+        }
+
     }
 
   	// Compute the initial llh position and initial NED velocity
@@ -222,22 +266,24 @@ void GetGpsData(){
     lon_ref = (lon_ref * DEG2RAD)/n_gps_meas_count;
     height_ref = height_ref/n_gps_meas_count;
 
-    gps_mutex.lock();
-    vned_init[0] = vn_init/n_gps_meas_count;
-    vned_init[1] = ve_init/n_gps_meas_count;
-    vned_init[2] = vd_init/n_gps_meas_count;    
-    // Set the flag that indicates that GPS has been initialized
-    is_gps_initialized = true;
-    gps_mutex.unlock();
+    {
+    	unique_lock<mutex> save_data_lock(gps_mutex);
+    	vned_init[0] = vn_init/n_gps_meas_count;
+    	vned_init[1] = ve_init/n_gps_meas_count;
+    	vned_init[2] = vd_init/n_gps_meas_count;    
+    	// Set the flag that indicates that GPS has been initialized
+    	is_gps_initialized = true;
+    }
 
     // Keep reading the GPS data forever
     while(1){
     	// Set all the flags to false to show position and velocity data hasn't been received
-    	gps_mutex.lock();
-    	for( size_t idx_meas = 0; idx_meas < 6; idx_meas++ ){
-    		gps_meas_indices[idx_meas] = false;
+    	{
+    		unique_lock<mutex> gps_data_lock(data_write_mutex);
+    		for( size_t idx_meas = 0; idx_meas < 6; idx_meas++ ){
+    			gps_meas_indices[idx_meas] = false;
+    		}
     	}
-    	gps_mutex.unlock();
 
     	// Check for llh position data if we have valid 3D GPS fix and number of 3D GPS fix is more than the required number of 3D GPS fixes
     	if ( gps.decodeSingleMessage(Ublox::NAV_POSLLH, pos_data) == 1 && gps_3d_fix && ( gps_fix_count > n_valid_gps_count ))
@@ -250,12 +296,13 @@ void GetGpsData(){
 
         		// Set the flags to indicate llh position data is updated and assign data position data to the variables shared
         		// between threads
-        		gps_mutex.lock();
-        		for( size_t idx_meas = 0; idx_meas < 3; idx_meas++ ){
-    				gps_meas_indices[idx_meas] = true;
-    				ned_pos_and_vel_meas(idx_meas) = ned_pos_meas(idx_meas);
+        		{
+        			unique_lock<mutex> gps_data_lock(data_write_mutex);
+        			for( size_t idx_meas = 0; idx_meas < 3; idx_meas++ ){
+    					gps_meas_indices[idx_meas] = true;
+    					ned_pos_and_vel_meas(idx_meas) = ned_pos_meas(idx_meas);
+    				}
     			}
-    			gps_mutex.unlock();
         	}  
 
         	// Check for NED velocity data if we have valid 3D GPS fix and number of 3D GPS fix is more than the required number of 3D GPS fixes
@@ -263,12 +310,11 @@ void GetGpsData(){
         	{
         		// Set the flags to indicate NED velocity data is updated and assign data position data to the variables shared
         		// between threads
-        		gps_mutex.lock();
+        		unique_lock<mutex> gps_data_lock(data_write_mutex);
         		for( size_t idx_meas = 3; idx_meas < 6; idx_meas++ ){
     				gps_meas_indices[idx_meas] = true;
     				ned_pos_and_vel_meas(idx_meas) = (float)(vel_data[idx_meas - 2]/100);
     			}
-    			gps_mutex.unlock();
         	}  
 
         	// Verify that we have valid 3D GPS fix
@@ -285,12 +331,48 @@ void GetGpsData(){
         				gps_3d_fix = false;
         		}
         	}
+        	if(main_done.load()){
+				break;
+        	}
+
+    }
+    {
+    	unique_lock<mutex> cout_lock(cout_mutex);
+    	cout<<"GPS Thread Done"<<"\n";
     }
 
 }
 
-int main(int argc, char *argv[]){
+void WriteToFile(){
+	const size_t bufsize = 1024 * 1024;
+	unique_ptr<char[]> buf(new char[bufsize]);
+	ofstream data_file("data_file.dat", ios::out | ios::binary);
+	data_file.rdbuf()->pubsetbuf(buf.get(), bufsize);
+	while(!main_done.load()){
+		if(is_data_buff1_full){
+			data_file.write((char*)data_to_save1, 1024*sizeof(data_fields));
+			is_data_buff1_full = false;
+		}else if(is_data_buff2_full){
+			data_file.write((char*)data_to_save2, 1024*sizeof(data_fields));
+			is_data_buff2_full = false;
+		}else{
+			usleep(1000000);
+		}
+		if(main_done.load())
+			break;
+	}
+	data_file.close();
+	{
+		unique_lock<mutex> cout_lock(cout_mutex);
+		cout<<"Write Thread Done"<<"\n";
+	}
+	
+}
 
+int main(int argc, char *argv[]){
+	main_done.store(false);
+	// Register signals 
+  	signal(SIGINT, sigint_handler); 
 	// Create IMU sensor object
 	auto sensor = get_inertial_sensor("mpu");
 
@@ -311,6 +393,9 @@ int main(int argc, char *argv[]){
 
     // Create a seperate thread to received and update GPS data for the EKF
     thread gps_thread(GetGpsData);
+
+    // Create a thread to write data to file
+    thread write_thread(WriteToFile);
 
     // Variables to read data from the IMU
     // Accels
@@ -410,7 +495,10 @@ int main(int argc, char *argv[]){
 	initial_state(2) = atan2(-mag2d(1), mag2d(0)) + magnetic_declination;
 
 	// Wait for gps to initialize
-	cout<<"Waiting for 3D GPS Fix: "<<endl;
+	{
+		unique_lock<mutex> cout_lock(cout_mutex);
+		cout<<"Waiting for 3D GPS Fix: "<<"\n";
+	}
 	while(!is_gps_initialized){usleep(1000000);}
 
 	// Initial NED velocity
@@ -422,35 +510,14 @@ int main(int argc, char *argv[]){
 	// Create an 15 state EKF object
 	Ekf15Dof<float> imu_gps_ekf(0.01, initial_state, process_noise_q*0.00001, meas_noise_r*0.01);
 
-	// file pointer to save data to if needed
-    fstream fout;
-  
- 	// opens an existing csv file or creates a new file.
-    fout.open("imu.csv", ios::out | ios::app);
-
-    // Save the initial state in the first row
-    fout << 0 << ", "
-             << 0 << ", "
-             << 0 << ", "
-             << 0 << ", "
-             << 0 << ", "
-             << 0 << ","
-             << 0 << ", "
-             << 0 << ", "
-             << 0 << ", "
-             << initial_state(0) << ", "
-             << initial_state(1) << ", "
-             << initial_state(2) << ", "
-             << 0 << ", "<< 0 << ", " << 0 << ", " << 0 << ", " << 0 << ", " << 0 << ", " << 0 << ", " << 0 << ", " << 0 << ", " << 0 << ", " << 0 << ", " << 0 << ", "
-             << 0 << ", "<< 0 << ", " << 0
-             << "\n";
-
 	// Make sure EKF always uses Magnetometer in the update step
 	meas_indices[0] = true;
 
 	// Loop counter
 	size_t loop_count = 0;
-    while(1) {
+	size_t data_buff_idx1 = 0;
+	size_t data_buff_idx2 = 0;
+    while(loop_count < 100) {
     	// Get the current time
     	auto start = std::chrono::high_resolution_clock::now();
     	// Make all the measurement flags corresponding to position and velocity false
@@ -472,7 +539,7 @@ int main(int argc, char *argv[]){
 	    state_sensor_val(4) = ax;
 	    state_sensor_val(5) = -az;
 
-	    // Correct and assign mad data to the sensor measurement array
+	    // // Correct and assign mad data to the sensor measurement array
 	    temp_mag(0) = mx;
 	    temp_mag(1) = my;
 	    temp_mag(2) = mz;
@@ -489,30 +556,128 @@ int main(int argc, char *argv[]){
 	    	}
 	    }
 
-	    // Run one step of EKF
+	    // Struct defining what data to save
+		// struct data_fields{
+		// 	// Time it took for the EKF to run
+		// 	float dt_s;
+		// 	// GPS Time if available
+		// 	float time_of_week_ms;
+		// 	// Raw Sensor Data
+		// 	float accel_mps2[3];
+		// 	float gyro_radps[3];
+		// 	// Corrected mag data for alignment and offset error
+		// 	float mag_nd[3];
+		// 	// GPS NED position and velocity if available;
+		// 	float ned_pos_m[3];
+		// 	float ned_vel_mps[3];
+		// 	// Current EKF State
+		// 	float ekf_current_state[15];
+
+		// };
+	   	// Run one step of EKF
 	    imu_gps_ekf.Run(state_sensor_val, sensor_meas, meas_indices);
 	    // Get the state after EKF run
         current_state = imu_gps_ekf.GetCurrentState();
+
+	    if(data_buff_idx2 == 0 && data_buff_idx1 != 1024){
+	    	{
+	    		unique_lock<mutex> save_data_lock(data_write_mutex);
+	    		data_to_save1[data_buff_idx1].dt_s = 0;
+	    		data_to_save1[data_buff_idx1].time_of_week_ms = 0.01;
+
+	    		data_to_save1[data_buff_idx1].accel_mps2[0] 	= ay;
+	    		data_to_save1[data_buff_idx1].accel_mps2[1] 	= ax;
+	    		data_to_save1[data_buff_idx1].accel_mps2[2] 	= -az;
+
+	    		data_to_save1[data_buff_idx1].gyro_radps[0] 	= gy;
+	    		data_to_save1[data_buff_idx1].gyro_radps[1] 	= gx;
+	    		data_to_save1[data_buff_idx1].gyro_radps[2] 	= gz;
+
+	    		data_to_save1[data_buff_idx1].mag_t[0] 	   	= sensor_meas(0);
+	    		data_to_save1[data_buff_idx1].mag_t[1] 	   	= sensor_meas(1);
+	    		data_to_save1[data_buff_idx1].mag_t[2] 	   	= sensor_meas(2);
+
+	    		data_to_save1[data_buff_idx1].ned_pos_m[0]  	= sensor_meas(3);
+	    		data_to_save1[data_buff_idx1].ned_pos_m[1]  	= sensor_meas(4);
+	    		data_to_save1[data_buff_idx1].ned_pos_m[2]  	= sensor_meas(5);
+
+	    		data_to_save1[data_buff_idx1].ned_vel_mps[0]	= sensor_meas(6);
+	    		data_to_save1[data_buff_idx1].ned_vel_mps[1]	= sensor_meas(7);
+	    		data_to_save1[data_buff_idx1].ned_vel_mps[2]	= sensor_meas(8);
+
+	    		for(size_t d_idx = 0; d_idx < 15; d_idx++){
+	    			data_to_save1[data_buff_idx1].ekf_current_state[d_idx] = current_state (d_idx);
+	    		}
+
+	    		data_buff_idx1++;
+	    		if (data_buff_idx1 == 1024){
+	    			is_data_buff1_full = true;
+	    			data_buff_idx2 = 0;
+	    		}
+	    	}
+	    }else if(data_buff_idx1  == 1024){
+	    	{
+	    		unique_lock<mutex> save_data_lock(data_write_mutex);
+	    		data_to_save2[data_buff_idx2].dt_s = 0;
+	    		data_to_save2[data_buff_idx2].time_of_week_ms = 0.01;
+
+	    		data_to_save2[data_buff_idx2].accel_mps2[0] 	= ay;
+	    		data_to_save2[data_buff_idx2].accel_mps2[1] 	= ax;
+	    		data_to_save2[data_buff_idx2].accel_mps2[2] 	= -az;
+
+	    		data_to_save2[data_buff_idx2].gyro_radps[0] 	= gy;
+	    		data_to_save2[data_buff_idx2].gyro_radps[1] 	= gx;
+	    		data_to_save2[data_buff_idx2].gyro_radps[2] 	= gz;
+
+	    		data_to_save2[data_buff_idx2].mag_t[0] 	   	= sensor_meas(0);
+	    		data_to_save2[data_buff_idx2].mag_t[1] 	   	= sensor_meas(1);
+	    		data_to_save2[data_buff_idx2].mag_t[2] 	   	= sensor_meas(2);
+
+	    		data_to_save2[data_buff_idx2].ned_pos_m[0]  	= sensor_meas(3);
+	    		data_to_save2[data_buff_idx2].ned_pos_m[1]  	= sensor_meas(4);
+	    		data_to_save2[data_buff_idx2].ned_pos_m[2]  	= sensor_meas(5);
+
+	    		data_to_save2[data_buff_idx2].ned_vel_mps[0]	= sensor_meas(6);
+	    		data_to_save2[data_buff_idx2].ned_vel_mps[1]	= sensor_meas(7);
+	    		data_to_save2[data_buff_idx2].ned_vel_mps[2]	= sensor_meas(8);
+
+	    		for(size_t d_idx = 0; d_idx < 15; d_idx++){
+	    			data_to_save2[data_buff_idx2].ekf_current_state[d_idx] = current_state (d_idx);
+	    		}
+
+	    		data_buff_idx2++;
+	    		if (data_buff_idx2 == 1024){
+	    			is_data_buff2_full = true;
+	    			data_buff_idx1 = 0;
+	    			data_buff_idx2 = 0;
+	    		}
+	    	}
+	    }
+
+
 	    if (remainder(loop_count, 50) == 0){
-	    	printf("Roll [deg]: %+7.3f, Pitch[deg]: %+7.3f, Yaw[deg]: %+7.3f\n", current_state(0)*RAD2DEG, current_state(1)*RAD2DEG, current_state(2)*RAD2DEG);
-	    	printf("Pos N [m]: %+7.3f, Pos E [m]: %+7.3f, Pos D[m]: %+7.3f\n", current_state(6), current_state(7), current_state(8));
-	    	printf("Vel N [m]: %+7.3f, Vel E [m]: %+7.3f, Vel D[m]: %+7.3f\n", current_state(9), current_state(10), current_state(11));
-	    	printf("############################################\n");
+	    	// printf("Roll [deg]: %+7.3f, Pitch[deg]: %+7.3f, Yaw[deg]: %+7.3f\n", current_state(0)*RAD2DEG, current_state(1)*RAD2DEG, current_state(2)*RAD2DEG);
+	    	// printf("Pos N [m]: %+7.3f, Pos E [m]: %+7.3f, Pos D[m]: %+7.3f\n", current_state(6), current_state(7), current_state(8));
+	    	// printf("Vel N [m]: %+7.3f, Vel E [m]: %+7.3f, Vel D[m]: %+7.3f\n", current_state(9), current_state(10), current_state(11));
+	    	// printf("############################################\n");
 		}
 
 		loop_count++;
 		// This sleep number was tuned to get ~100Hz of loop execution time
-	    usleep(7100);
+	    usleep(7000);
 
 	    // Get the stop time and compute the duration
 	    auto stop = std::chrono::high_resolution_clock::now();
 
 	    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+	   	//cout<<loop_count<<"\n";
+	   	if(sigint_flag == 1)
+	   		break;
 	}
 
-	// Wait for GPS thread to finish
+	main_done.store(true);
 	gps_thread.join();
-
+	write_thread.join();
 
 	return 0;
 }
