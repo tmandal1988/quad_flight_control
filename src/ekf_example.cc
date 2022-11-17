@@ -13,9 +13,11 @@
 #include <chrono>
 // Standard C++ Libraries for multi-threading
 #include <thread>
+#include <pthread.h>
 #include <mutex>
 #include <atomic>
 #include <signal.h>
+#include <sys/mman.h>
 
 // Variable to store gps measured position and velocity, this is shared between threads
 MatrixInv<float> ned_pos_and_vel_meas = {{0}, {0}, {0}, {0}, {0}, {0}};
@@ -178,9 +180,9 @@ void GetGpsData(){
     // ned velocity data to be used in EKF initialization
     size_t gps_fix_count = 0;
     // Number of valid llh position data to use for EKF initialization
-    size_t n_gps_meas_count = 2;
+    size_t n_gps_meas_count = 10;
     // Number of valid 3d GPS fixes required before capturing llh position and ned velocity data for EKF initialization
-    size_t n_valid_gps_count = 2;
+    size_t n_valid_gps_count = 10;
     // Flag to indicate if GPS has a valid 3D fix or not
     bool gps_3d_fix = false;
 
@@ -370,6 +372,25 @@ void WriteToFile(){
 }
 
 int main(int argc, char *argv[]){
+	sched_param sch;
+	int policy;
+
+	system("sudo echo -1 >/proc/sys/kernel/sched_rt_runtime_us");
+
+	// Variables to set CPU affinity
+	cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    CPU_SET(3, &cpuset);
+
+	pthread_getschedparam(pthread_self(), &policy, &sch);
+	sch.sched_priority = sched_get_priority_max(SCHED_FIFO);
+	pthread_setschedparam(pthread_self(), SCHED_FIFO, &sch);
+	int rc = pthread_setaffinity_np(pthread_self(),
+                                    sizeof(cpu_set_t), &cpuset);    
+	if (rc != 0) {
+      std::cerr << "Error calling pthread_setaffinity_np on main(): " << rc << "\n";
+    }
+
 	main_done.store(false);
 	// Register signals 
   	signal(SIGINT, sigint_handler); 
@@ -393,9 +414,31 @@ int main(int argc, char *argv[]){
 
     // Create a seperate thread to received and update GPS data for the EKF
     thread gps_thread(GetGpsData);
+    pthread_getschedparam(gps_thread.native_handle(), &policy, &sch);
+	sch.sched_priority = 20;
+    pthread_setschedparam(gps_thread.native_handle(), SCHED_FIFO, &sch);
+    CPU_ZERO(&cpuset);
+    CPU_SET(0, &cpuset);
+    rc = pthread_setaffinity_np(gps_thread.native_handle(),
+                                    sizeof(cpu_set_t), &cpuset);    
+	if (rc != 0) {
+      std::cerr << "Error calling pthread_setaffinity_np on gps_thread(): " << rc << "\n";
+    }
 
     // Create a thread to write data to file
     thread write_thread(WriteToFile);
+    pthread_getschedparam(write_thread.native_handle(), &policy, &sch);
+	sch.sched_priority = 5;
+    pthread_setschedparam(write_thread.native_handle(), SCHED_FIFO, &sch);
+    CPU_ZERO(&cpuset);
+    CPU_SET(1, &cpuset);
+    CPU_SET(2, &cpuset);
+
+    rc = pthread_setaffinity_np(write_thread.native_handle(),
+                                    sizeof(cpu_set_t), &cpuset);    
+	if (rc != 0) {
+      std::cerr << "Error calling pthread_setaffinity_np on write_thread(): " << rc << "\n";
+    }
 
     // Variables to read data from the IMU
     // Accels
@@ -413,8 +456,58 @@ int main(int argc, char *argv[]){
 	MatrixInv<float> state_sensor_val(6, 1);
 	// Q matrix of the EKF
 	MatrixInv<float> process_noise_q(15, 15, "eye");
+	// P matrix initial
+	MatrixInv<float> initial_covariance_p(15, 15, "eye");
+	// Angle process noise
+	process_noise_q(0, 0) = 0.000001;
+	process_noise_q(1, 1) = 0.000001;
+	process_noise_q(2, 2) = 0.000001;
+	// Angular rate bias process noise
+	process_noise_q(3, 3) = 0.000000001;
+	process_noise_q(4, 4) = 0.000000001;
+	process_noise_q(5, 5) = 0.000000001;
+	// Pos process noise
+	process_noise_q(6, 6) = 0.000000001;
+	process_noise_q(7, 7) = 0.000000001;
+	process_noise_q(8, 8) = 0.000000001;
+	// Vel Process noise
+	process_noise_q(9, 9) = 0.000001;
+	process_noise_q(10, 10) = 0.000001;
+	process_noise_q(11, 11) = 0.000001;
+	// Accel bias process noise
+	process_noise_q(12, 12) = 0.000000001;
+	process_noise_q(13, 13) = 0.000000001;
+	process_noise_q(14, 14) = 0.000000001;
 	// R matrix of the EKF
 	MatrixInv<float> meas_noise_r(7, 7, "eye");
+	meas_noise_r(0, 0) = 0.01;
+	meas_noise_r(1, 1) = 0.01;
+	meas_noise_r(2, 2) = 0.01;
+	meas_noise_r(3, 3) = 0.01;
+	meas_noise_r(4, 4) = 0.01;
+	meas_noise_r(5, 5) = 0.01;
+	meas_noise_r(6, 6) = 0.01;
+	// P init
+	initial_covariance_p(0, 0) = 30*DEG2RAD;
+	initial_covariance_p(1, 1) = 30*DEG2RAD;
+	initial_covariance_p(2, 2) = 30*DEG2RAD;
+	// Angular rate bias process noise
+	initial_covariance_p(3, 3) = 0.01;
+	initial_covariance_p(4, 4) = 0.01;
+	initial_covariance_p(5, 5) = 0.01;
+	// Pos process noise
+	initial_covariance_p(6, 6) = 100;
+	initial_covariance_p(7, 7) = 100;
+	initial_covariance_p(8, 8) = 100;
+	// Vel Process noise
+	initial_covariance_p(9, 9) = 10;
+	initial_covariance_p(10, 10) = 10;
+	initial_covariance_p(11, 11) = 10;
+	// Accel bias process noise
+	initial_covariance_p(12, 12) = 0.1;
+	initial_covariance_p(13, 13) = 0.1;
+	initial_covariance_p(14, 14) = 0.1;
+
 
 	// Variable to store calibrated mag data
 	MatrixInv<float> temp_mag(3, 1);
@@ -508,7 +601,7 @@ int main(int argc, char *argv[]){
 
 
 	// Create an 15 state EKF object
-	Ekf15Dof<float> imu_gps_ekf(0.01, initial_state, process_noise_q*0.00001, meas_noise_r*0.01);
+	Ekf15Dof<float> imu_gps_ekf(0.004, initial_state, process_noise_q, meas_noise_r, initial_covariance_p);
 
 	// Make sure EKF always uses Magnetometer in the update step
 	meas_indices[0] = true;
@@ -517,9 +610,21 @@ int main(int argc, char *argv[]){
 	size_t loop_count = 0;
 	size_t data_buff_idx1 = 0;
 	size_t data_buff_idx2 = 0;
-    while(loop_count < 100) {
-    	// Get the current time
-    	auto start = std::chrono::high_resolution_clock::now();
+	// initialize the duration
+	chrono::microseconds delta (4000); 
+	auto duration = chrono::duration_cast<chrono::microseconds> (delta);
+	// start time
+	auto time_point_start = chrono::high_resolution_clock::now();
+	chrono::microseconds time_start_us = chrono::duration_cast<chrono::microseconds>(time_point_start.time_since_epoch());
+	auto time_start_us_count = time_start_us.count();
+	// loop
+    while(1) {
+    	auto loop_start = chrono::high_resolution_clock::now();
+    	auto time_since_loop_start_us = chrono::duration_cast<chrono::microseconds>(loop_start.time_since_epoch()).count();
+    	while (  time_since_loop_start_us < (time_start_us_count + 4000) ){
+    		time_since_loop_start_us = chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now().time_since_epoch()).count();
+    	}
+
     	// Make all the measurement flags corresponding to position and velocity false
 		for( size_t idx_meas = 1; idx_meas < 7; idx_meas++ ){
     		meas_indices[idx_meas] = false;
@@ -578,98 +683,98 @@ int main(int argc, char *argv[]){
 	    imu_gps_ekf.Run(state_sensor_val, sensor_meas, meas_indices);
 	    // Get the state after EKF run
         current_state = imu_gps_ekf.GetCurrentState();
+        if(remainder(loop_count, 5) == 0){
+	    	if(data_buff_idx2 == 0 && data_buff_idx1 != 1024){
+	    		{
+	    			unique_lock<mutex> save_data_lock(data_write_mutex);
+	    			data_to_save1[data_buff_idx1].dt_s = static_cast< float >(duration.count());
+	    			data_to_save1[data_buff_idx1].time_of_week_ms = static_cast< float >(loop_count);
 
-	    if(data_buff_idx2 == 0 && data_buff_idx1 != 1024){
-	    	{
-	    		unique_lock<mutex> save_data_lock(data_write_mutex);
-	    		data_to_save1[data_buff_idx1].dt_s = 0;
-	    		data_to_save1[data_buff_idx1].time_of_week_ms = 0.01;
+	    			data_to_save1[data_buff_idx1].accel_mps2[0] 	= ay;
+	    			data_to_save1[data_buff_idx1].accel_mps2[1] 	= ax;
+	    			data_to_save1[data_buff_idx1].accel_mps2[2] 	= -az;
 
-	    		data_to_save1[data_buff_idx1].accel_mps2[0] 	= ay;
-	    		data_to_save1[data_buff_idx1].accel_mps2[1] 	= ax;
-	    		data_to_save1[data_buff_idx1].accel_mps2[2] 	= -az;
+	    			data_to_save1[data_buff_idx1].gyro_radps[0] 	= gy;
+	    			data_to_save1[data_buff_idx1].gyro_radps[1] 	= gx;
+	    			data_to_save1[data_buff_idx1].gyro_radps[2] 	= gz;
 
-	    		data_to_save1[data_buff_idx1].gyro_radps[0] 	= gy;
-	    		data_to_save1[data_buff_idx1].gyro_radps[1] 	= gx;
-	    		data_to_save1[data_buff_idx1].gyro_radps[2] 	= gz;
+	    			data_to_save1[data_buff_idx1].mag_t[0] 	   	= sensor_meas(0);
+	    			data_to_save1[data_buff_idx1].mag_t[1] 	   	= sensor_meas(1);
+	    			data_to_save1[data_buff_idx1].mag_t[2] 	   	= sensor_meas(2);
 
-	    		data_to_save1[data_buff_idx1].mag_t[0] 	   	= sensor_meas(0);
-	    		data_to_save1[data_buff_idx1].mag_t[1] 	   	= sensor_meas(1);
-	    		data_to_save1[data_buff_idx1].mag_t[2] 	   	= sensor_meas(2);
+	    			data_to_save1[data_buff_idx1].ned_pos_m[0]  	= sensor_meas(3);
+	    			data_to_save1[data_buff_idx1].ned_pos_m[1]  	= sensor_meas(4);
+	    			data_to_save1[data_buff_idx1].ned_pos_m[2]  	= sensor_meas(5);
 
-	    		data_to_save1[data_buff_idx1].ned_pos_m[0]  	= sensor_meas(3);
-	    		data_to_save1[data_buff_idx1].ned_pos_m[1]  	= sensor_meas(4);
-	    		data_to_save1[data_buff_idx1].ned_pos_m[2]  	= sensor_meas(5);
+	    			data_to_save1[data_buff_idx1].ned_vel_mps[0]	= sensor_meas(6);
+	    			data_to_save1[data_buff_idx1].ned_vel_mps[1]	= sensor_meas(7);
+	    			data_to_save1[data_buff_idx1].ned_vel_mps[2]	= sensor_meas(8);
 
-	    		data_to_save1[data_buff_idx1].ned_vel_mps[0]	= sensor_meas(6);
-	    		data_to_save1[data_buff_idx1].ned_vel_mps[1]	= sensor_meas(7);
-	    		data_to_save1[data_buff_idx1].ned_vel_mps[2]	= sensor_meas(8);
+	    			for(size_t d_idx = 0; d_idx < 15; d_idx++){
+	    				data_to_save1[data_buff_idx1].ekf_current_state[d_idx] = current_state (d_idx);
+	    			}
 
-	    		for(size_t d_idx = 0; d_idx < 15; d_idx++){
-	    			data_to_save1[data_buff_idx1].ekf_current_state[d_idx] = current_state (d_idx);
+	    			data_buff_idx1++;
+	    			if (data_buff_idx1 == 1024){
+	    				is_data_buff1_full = true;
+	    				data_buff_idx2 = 0;
+	    			}
 	    		}
+	    	}else if(data_buff_idx1  == 1024){
+	    		{
+	    			unique_lock<mutex> save_data_lock(data_write_mutex);
+	    			data_to_save2[data_buff_idx2].dt_s = static_cast< float >(duration.count());
+	    			data_to_save2[data_buff_idx2].time_of_week_ms = static_cast< float >(loop_count);
 
-	    		data_buff_idx1++;
-	    		if (data_buff_idx1 == 1024){
-	    			is_data_buff1_full = true;
-	    			data_buff_idx2 = 0;
+	    			data_to_save2[data_buff_idx2].accel_mps2[0] 	= ay;
+	    			data_to_save2[data_buff_idx2].accel_mps2[1] 	= ax;
+	    			data_to_save2[data_buff_idx2].accel_mps2[2] 	= -az;
+
+	    			data_to_save2[data_buff_idx2].gyro_radps[0] 	= gy;
+	    			data_to_save2[data_buff_idx2].gyro_radps[1] 	= gx;
+	    			data_to_save2[data_buff_idx2].gyro_radps[2] 	= gz;
+
+	    			data_to_save2[data_buff_idx2].mag_t[0] 	   	= sensor_meas(0);
+	    			data_to_save2[data_buff_idx2].mag_t[1] 	   	= sensor_meas(1);
+	    			data_to_save2[data_buff_idx2].mag_t[2] 	   	= sensor_meas(2);
+
+	    			data_to_save2[data_buff_idx2].ned_pos_m[0]  	= sensor_meas(3);
+	    			data_to_save2[data_buff_idx2].ned_pos_m[1]  	= sensor_meas(4);
+	    			data_to_save2[data_buff_idx2].ned_pos_m[2]  	= sensor_meas(5);
+
+	    			data_to_save2[data_buff_idx2].ned_vel_mps[0]	= sensor_meas(6);
+	    			data_to_save2[data_buff_idx2].ned_vel_mps[1]	= sensor_meas(7);
+	    			data_to_save2[data_buff_idx2].ned_vel_mps[2]	= sensor_meas(8);
+
+	    			for(size_t d_idx = 0; d_idx < 15; d_idx++){
+	    				data_to_save2[data_buff_idx2].ekf_current_state[d_idx] = current_state (d_idx);
+	    			}
+
+	    			data_buff_idx2++;
+	    			if (data_buff_idx2 == 1024){
+	    				is_data_buff2_full = true;
+	    				data_buff_idx1 = 0;
+	    				data_buff_idx2 = 0;
+	    			}
 	    		}
 	    	}
-	    }else if(data_buff_idx1  == 1024){
-	    	{
-	    		unique_lock<mutex> save_data_lock(data_write_mutex);
-	    		data_to_save2[data_buff_idx2].dt_s = 0;
-	    		data_to_save2[data_buff_idx2].time_of_week_ms = 0.01;
 
-	    		data_to_save2[data_buff_idx2].accel_mps2[0] 	= ay;
-	    		data_to_save2[data_buff_idx2].accel_mps2[1] 	= ax;
-	    		data_to_save2[data_buff_idx2].accel_mps2[2] 	= -az;
-
-	    		data_to_save2[data_buff_idx2].gyro_radps[0] 	= gy;
-	    		data_to_save2[data_buff_idx2].gyro_radps[1] 	= gx;
-	    		data_to_save2[data_buff_idx2].gyro_radps[2] 	= gz;
-
-	    		data_to_save2[data_buff_idx2].mag_t[0] 	   	= sensor_meas(0);
-	    		data_to_save2[data_buff_idx2].mag_t[1] 	   	= sensor_meas(1);
-	    		data_to_save2[data_buff_idx2].mag_t[2] 	   	= sensor_meas(2);
-
-	    		data_to_save2[data_buff_idx2].ned_pos_m[0]  	= sensor_meas(3);
-	    		data_to_save2[data_buff_idx2].ned_pos_m[1]  	= sensor_meas(4);
-	    		data_to_save2[data_buff_idx2].ned_pos_m[2]  	= sensor_meas(5);
-
-	    		data_to_save2[data_buff_idx2].ned_vel_mps[0]	= sensor_meas(6);
-	    		data_to_save2[data_buff_idx2].ned_vel_mps[1]	= sensor_meas(7);
-	    		data_to_save2[data_buff_idx2].ned_vel_mps[2]	= sensor_meas(8);
-
-	    		for(size_t d_idx = 0; d_idx < 15; d_idx++){
-	    			data_to_save2[data_buff_idx2].ekf_current_state[d_idx] = current_state (d_idx);
-	    		}
-
-	    		data_buff_idx2++;
-	    		if (data_buff_idx2 == 1024){
-	    			is_data_buff2_full = true;
-	    			data_buff_idx1 = 0;
-	    			data_buff_idx2 = 0;
-	    		}
-	    	}
 	    }
 
-
-	    if (remainder(loop_count, 50) == 0){
-	    	// printf("Roll [deg]: %+7.3f, Pitch[deg]: %+7.3f, Yaw[deg]: %+7.3f\n", current_state(0)*RAD2DEG, current_state(1)*RAD2DEG, current_state(2)*RAD2DEG);
-	    	// printf("Pos N [m]: %+7.3f, Pos E [m]: %+7.3f, Pos D[m]: %+7.3f\n", current_state(6), current_state(7), current_state(8));
-	    	// printf("Vel N [m]: %+7.3f, Vel E [m]: %+7.3f, Vel D[m]: %+7.3f\n", current_state(9), current_state(10), current_state(11));
-	    	// printf("############################################\n");
-		}
+	 //    if (remainder(loop_count, 50) == 0){
+	 //    	printf("Roll [deg]: %+7.3f, Pitch[deg]: %+7.3f, Yaw[deg]: %+7.3f\n", current_state(0)*RAD2DEG, current_state(1)*RAD2DEG, current_state(2)*RAD2DEG);
+	 //    	printf("Pos N [m]: %+7.3f, Pos E [m]: %+7.3f, Pos D[m]: %+7.3f\n", current_state(6), current_state(7), current_state(8));
+	 //    	printf("Vel N [m]: %+7.3f, Vel E [m]: %+7.3f, Vel D[m]: %+7.3f\n", current_state(9), current_state(10), current_state(11));
+	 //    	printf("############################################\n");
+		// }
 
 		loop_count++;
-		// This sleep number was tuned to get ~100Hz of loop execution time
-	    usleep(7000);
 
 	    // Get the stop time and compute the duration
-	    auto stop = std::chrono::high_resolution_clock::now();
+	    auto loop_end = std::chrono::high_resolution_clock::now();
 
-	    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+	    duration = chrono::duration_cast<chrono::microseconds>(loop_end - loop_start);
+	    time_start_us_count = time_start_us_count + 4000;
 	   	//cout<<loop_count<<"\n";
 	   	if(sigint_flag == 1)
 	   		break;

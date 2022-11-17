@@ -26,7 +26,7 @@ template <typename T>
 class Ekf15Dof:public EkfBase<T>{
 	public:
 		// constructors
-		Ekf15Dof(T sample_time_s, MatrixInv<T> initial_state, MatrixInv<T> process_noise_q, MatrixInv<T> meas_noise_r);
+		Ekf15Dof(T sample_time_s, MatrixInv<T> initial_state, MatrixInv<T> process_noise_q, MatrixInv<T> meas_noise_r, MatrixInv<T> initial_covariance_p);
 
 		// destructor
 		~Ekf15Dof();	

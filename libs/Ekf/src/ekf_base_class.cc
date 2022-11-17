@@ -2,7 +2,7 @@
 
 template <typename T>
 EkfBase<T>::EkfBase(size_t num_states, size_t num_meas, size_t num_states_sensor, T sample_time_s,
-					MatrixInv<T> initial_state, MatrixInv<T> process_noise_q, MatrixInv<T> meas_noise_r):
+					MatrixInv<T> initial_state, MatrixInv<T> process_noise_q, MatrixInv<T> meas_noise_r, MatrixInv<T> initial_covariance_p):
 			 num_states_(num_states),
 			 num_meas_(num_meas),
 			 num_states_sensor_(num_states_sensor),
@@ -14,7 +14,7 @@ EkfBase<T>::EkfBase(size_t num_states, size_t num_meas, size_t num_states_sensor
 		current_state_ = initial_state;
 		computed_meas_ = MatrixInv<T> (num_meas_, 1);
 
-		covariance_p_ = process_noise_q;
+		covariance_p_ = initial_covariance_p;
 
 		state_jacobian_ = MatrixInv<T> (num_states_, num_states_);
 		state_noise_jacobian_ = MatrixInv<T> (num_states_, num_states_, "eye");

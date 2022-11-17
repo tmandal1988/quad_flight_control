@@ -1,8 +1,8 @@
 #include "ekf_15dof_class.h"
 
 template <typename T>
-Ekf15Dof<T>::Ekf15Dof(T sample_time_s, MatrixInv<T> initial_state, MatrixInv<T> process_noise_q, MatrixInv<T> meas_noise_r):
-			EkfBase<T>(NUM_STATES, NUM_MEAS, NUM_STATES_SENSOR, sample_time_s, initial_state, process_noise_q, meas_noise_r){	
+Ekf15Dof<T>::Ekf15Dof(T sample_time_s, MatrixInv<T> initial_state, MatrixInv<T> process_noise_q, MatrixInv<T> meas_noise_r, MatrixInv<T> initial_covariance_p):
+			EkfBase<T>(NUM_STATES, NUM_MEAS, NUM_STATES_SENSOR, sample_time_s, initial_state, process_noise_q, meas_noise_r, initial_covariance_p){	
 
 	this->meas_jacobian_(0, 2) = 1;
 	this->meas_jacobian_(1, 6) = 1;

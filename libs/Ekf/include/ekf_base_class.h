@@ -17,7 +17,7 @@ class EkfBase{
 	public:
 		// constructors
 		EkfBase(size_t num_states, size_t num_meas, size_t num_states_sensor, T sample_time_s, 
-			MatrixInv<T> initial_state, MatrixInv<T> process_noise_q_, MatrixInv<T> meas_noise_r_);
+			MatrixInv<T> initial_state, MatrixInv<T> process_noise_q, MatrixInv<T> meas_noise_r, MatrixInv<T> initial_covariance_p);
 
 		// destructor
 		~EkfBase();
