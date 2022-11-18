@@ -4,7 +4,7 @@
 
 #include<iostream>
 #include<string>
-#include <vector>
+#include<vector>
 
 using namespace std;
 
@@ -23,6 +23,7 @@ class MatrixBase{
 		MatrixBase(const MatrixBase<T>& matrix_to_copy);
 		
 		// member functions
+		void Diag(initializer_list< T > diag_data);
 		void PrintMatrix() const;
 		void PrintRow(size_t r_idx) const;
 		void PrintCol(size_t c_idx) const;

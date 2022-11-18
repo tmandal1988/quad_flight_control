@@ -38,7 +38,7 @@ void EkfBase<T>::Run(MatrixInv<T> state_sensor_val, MatrixInv<T> meas_sensor_val
 	PropagateState(state_sensor_val);
 	ComputeStateJacobian(state_sensor_val);
 	GetMeas(meas_sensor_val);
-	
+
 	//P = F*P*F' + L*Q*L';
 	covariance_p_ = state_jacobian_*covariance_p_*state_jacobian_.Transpose() + process_noise_q_;
 

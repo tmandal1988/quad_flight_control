@@ -97,6 +97,27 @@ MatrixBase<T>::~MatrixBase(){
 
 // member functions
 template <typename T>
+void MatrixBase<T>::Diag(initializer_list< T > diag_data){
+	// get the number of elements in a initializer list
+	size_t input_num_cols = diag_data.size();
+
+	if(nrows_ != input_num_cols && ncols_ != input_num_cols){
+		throw invalid_argument("Matrix must be square and its dimension shoud me same as Initializer list's dimensions");
+	}
+
+	size_t current_row_idx = 0;
+	for (auto element : diag_data){
+		for(size_t idx_c = 0; idx_c < ncols_; idx_c++){
+			matrix_[current_row_idx][idx_c] = 0;
+		}
+		matrix_[current_row_idx][current_row_idx] =  element;
+		current_row_idx++;
+	}
+
+}
+
+// member functions
+template <typename T>
 void MatrixBase<T>::PrintMatrix() const{
 	printf("*****************************\n");
 	for(size_t idx_r = 0; idx_r < nrows_; idx_r++){

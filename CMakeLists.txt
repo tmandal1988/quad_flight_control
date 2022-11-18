@@ -28,6 +28,7 @@ set(PROJECT_LIBRARIES
     Matrix
     NavioCommon
     NavioNavio2
+    CommonUtils
     Ekf
 )
 
@@ -35,6 +36,7 @@ set(PROJECT_LIBRARIES_SUBDIR
     Matrix
     Navio/Common
     Navio/Navio2
+    CommonUtils
     Ekf
 )
 

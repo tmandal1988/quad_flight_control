@@ -17,11 +17,6 @@ using namespace std;
 accelerometers measurement without the gravity resolved in body frame*/
 #define NUM_STATES_SENSOR 	6 
 
-#define PI 					3.14159265358979
-#define PIx2 				6.28318530717959
-#define RAD2DEG			    57.2957795130823
-#define DEG2RAD 			0.0174532925199433
-
 template <typename T>
 class Ekf15Dof:public EkfBase<T>{
 	public:

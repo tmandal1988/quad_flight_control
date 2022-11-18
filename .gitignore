@@ -12,3 +12,5 @@ build
 *.csv
 # Don't include data files
 *.dat
+# Don't include MAC auto files
+._*
