@@ -276,12 +276,10 @@ void Ekf15Dof<T>::GetMeas(MatrixInv<T> meas_sensor_val){
 	T m2 = meas_sensor_val(1);
 	T m3 = meas_sensor_val(2);
 
-	T avg_gaus_mag = sqrt(pow(m1, 2) + pow(m2, 2) + pow(m3, 2));
-
 	MatrixInv<T> mag2d_projection = { {c_theta, s_theta*s_phi, s_theta*c_phi},
-										  {0, c_phi, -s_phi} };
+									  {   0   ,     c_phi    ,   -s_phi     } };
 
-	MatrixInv<T> mag_vector = { {m1/avg_gaus_mag}, {m2/avg_gaus_mag}, {m3/avg_gaus_mag} };
+	MatrixInv<T> mag_vector = { {m1}, {m2}, {m3} };
 
 
 	//Assume we are in bay area and use a declination 

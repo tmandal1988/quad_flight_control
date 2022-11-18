@@ -8,9 +8,9 @@ public:
     virtual void update() = 0;
 
     float read_temperature() {return temperature;};
-    void read_accelerometer(float *ax, float *ay, float *az) {*ax = _ax; *ay = _ay; *az = _az;};
-    void read_gyroscope(float *gx, float *gy, float *gz) {*gx = _gx; *gy = _gy; *gz = _gz;};
-    void read_magnetometer(float *mx, float *my, float *mz) {*mx = _mx; *my = _my; *mz = _mz;};
+    void read_accelerometer(float (&accel)[3]) {accel[1] = _ax; accel[0] = _ay; accel[2] = -_az;};
+    void read_gyroscope(float (&gyro)[3]) {gyro[1] = _gx; gyro[0] = _gy; gyro[2] = -_gz;};
+    void read_magnetometer(float (&mag)[3]) {mag[0] = _mx; mag[1] = _my; mag[2] = _mz;};
 
 protected:
     float temperature;
