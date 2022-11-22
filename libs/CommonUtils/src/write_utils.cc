@@ -56,8 +56,8 @@ void WriteHelper::UpdateDataBuffer(long long dt_ms, size_t count, float imu_data
 			data_to_save1_[data_buff_idx1_].time_of_week_ms = static_cast< float >(count);
 			for(size_t imu_idx = 0; imu_idx < 3; imu_idx++){
 				data_to_save1_[data_buff_idx1_].imu_data[imu_idx] = imu_data[imu_idx];
-				data_to_save1_[data_buff_idx1_].imu_data[imu_idx] = imu_data[imu_idx + 3];
-				data_to_save1_[data_buff_idx1_].imu_data[imu_idx] = imu_data[imu_idx + 6];
+				data_to_save1_[data_buff_idx1_].imu_data[imu_idx + 3] = imu_data[imu_idx + 3];
+				data_to_save1_[data_buff_idx1_].imu_data[imu_idx + 6] = imu_data[imu_idx + 6];
 				data_to_save1_[data_buff_idx1_].ned_pos_m[imu_idx] = sensor_meas(imu_idx + 3);
 				data_to_save1_[data_buff_idx1_].ned_vel_mps[imu_idx] = sensor_meas(imu_idx + 6);
 			}
@@ -79,8 +79,8 @@ void WriteHelper::UpdateDataBuffer(long long dt_ms, size_t count, float imu_data
 			data_to_save2_[data_buff_idx2_].time_of_week_ms = static_cast< float >(count);
 			for(size_t imu_idx = 0; imu_idx < 3; imu_idx++){
 				data_to_save2_[data_buff_idx2_].imu_data[imu_idx] = imu_data[imu_idx];
-				data_to_save2_[data_buff_idx2_].imu_data[imu_idx] = imu_data[imu_idx + 3];
-				data_to_save2_[data_buff_idx2_].imu_data[imu_idx] = imu_data[imu_idx + 6];
+				data_to_save2_[data_buff_idx2_].imu_data[imu_idx + 3] = imu_data[imu_idx + 3];
+				data_to_save2_[data_buff_idx2_].imu_data[imu_idx + 6] = imu_data[imu_idx + 6];
 				data_to_save2_[data_buff_idx2_].ned_pos_m[imu_idx] = sensor_meas(imu_idx + 3);
 				data_to_save2_[data_buff_idx2_].ned_vel_mps[imu_idx] = sensor_meas(imu_idx + 6);
 			}

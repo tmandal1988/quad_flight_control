@@ -126,7 +126,6 @@ int main(int argc, char *argv[]){
 		initial_state(i_idx + 9) = vned_init[i_idx];
 	}
 
-
 	// Create an 15 state EKF object
 	Ekf15Dof<float> imu_gps_ekf(0.004, initial_state, process_noise_q, meas_noise_r, initial_covariance_p);
 
