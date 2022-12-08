@@ -199,22 +199,6 @@ bool GpsHelper::GetLlhPos(){
 	}
 }
 
-double* GpsHelper::GetInitNedVel(){
-	return vned_init_;
-}
-
-void GpsHelper::StopGpsReadLoop(){
-	// Stop the GPS reading loop
-	stop_gps_read_loop_.store(true);
-}
-
-void GpsHelper::GetGpsNedPosAndVel(float (&ned_pos_and_vel_meas)[6], bool (&gps_meas_indices)[6]){
-	for(size_t idx = 0; idx < 6; idx++){
-		ned_pos_and_vel_meas[idx] = ned_pos_and_vel_meas_[idx];
-		gps_meas_indices[idx] = gps_meas_indices_[idx];
-	}
-}
-
 void GpsHelper::CreateGpsThread(){
 	gps_thread_ = thread(&GpsHelper::GpsReadLoop, this);
 

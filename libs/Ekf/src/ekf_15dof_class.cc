@@ -34,7 +34,7 @@ Ekf15Dof<T>::~Ekf15Dof(){
 }
 
 template <typename T>
-void Ekf15Dof<T>::ComputeTrignometricValues(){
+inline void Ekf15Dof<T>::ComputeTrignometricValues(){
 	// precalculate trignometric values
 	s_phi = sin(this->current_state_(0));
 	c_phi = cos(this->current_state_(0));
@@ -314,7 +314,7 @@ void Ekf15Dof<T>::ComputeMeasNoiseJacobian(MatrixInv<T> meas_sensor_val){
 }
 
 template <typename T>
-void Ekf15Dof<T>::ComputeMeasFromState(MatrixInv<T> time_propagated_state){
+inline void Ekf15Dof<T>::ComputeMeasFromState(MatrixInv<T> time_propagated_state){
 	// In this case it is y = H*x
 	this->meas_from_propogated_state_ = this->meas_jacobian_*this->time_propagated_state_;
 }

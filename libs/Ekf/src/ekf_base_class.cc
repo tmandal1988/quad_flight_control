@@ -57,7 +57,7 @@ void EkfBase<T>::Run(MatrixInv<T> state_sensor_val, MatrixInv<T> meas_sensor_val
 }
 
 template <typename T>
-void EkfBase<T>::ComputeKalmanGainSequential(size_t r_idx){
+inline void EkfBase<T>::ComputeKalmanGainSequential(size_t r_idx){
 	kalman_gain_seq_ = covariance_p_*meas_jacobian_.Transpose().GetCol(r_idx);
 	MatrixInv<T> k_denominator = meas_jacobian_.GetRow(r_idx)*kalman_gain_seq_ + meas_noise_r_(r_idx, r_idx);
 	kalman_gain_seq_ = kalman_gain_seq_/k_denominator(0);

@@ -93,13 +93,6 @@ MatrixInv<float> ImuHelper::GetMag3DTo2DProj(float roll, float pitch){
 	return mag2d_projection;
 }
 
-void ImuHelper::SetMagParams(float mag_dec, MatrixInv<float> mag_a, MatrixInv<float> mag_offset, MatrixInv<float> mag_scale){
-	MAG_DEC_ = mag_dec;
-	MAG_A_ = mag_a;
-	MAG_OFFSET_ = mag_offset;
-	MAG_SCALE_ = mag_scale;
-}
-
 float* ImuHelper::GetImuData(){
 	ReadRawImu();
 

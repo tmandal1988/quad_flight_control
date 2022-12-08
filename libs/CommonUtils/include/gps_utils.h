@@ -36,13 +36,23 @@ class GpsHelper{
 		void CreateGpsThread();
 
 		// Get init NED Vel
-		double* GetInitNedVel();
+		double* GetInitNedVel(){
+			return vned_init_;
+		}
 
 		// Get NED position and velocity
-		void GetGpsNedPosAndVel(float (&ned_pos_and_vel_meas)[6], bool (&gps_meas_indices)[6]);
+		void GetGpsNedPosAndVel(float (&ned_pos_and_vel_meas)[6], bool (&gps_meas_indices)[6]){
+			for(size_t idx = 0; idx < 6; idx++){
+				ned_pos_and_vel_meas[idx] = ned_pos_and_vel_meas_[idx];
+				gps_meas_indices[idx] = gps_meas_indices_[idx];
+			}
+		}
 
 		// Stops the above loop
-		void StopGpsReadLoop();
+		void StopGpsReadLoop(){
+			// Stop the GPS reading loop
+			stop_gps_read_loop_.store(true);
+		}
 
 	private:
 		// Create a thread
