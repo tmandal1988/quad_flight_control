@@ -34,7 +34,7 @@ class Ekf15Dof:public EkfBase<T>{
 		void GetMeas(MatrixInv<T> meas_sensor_val);
 		void ComputeMeasJacobian(MatrixInv<T> meas_sensor_val);
 		void ComputeMeasNoiseJacobian(MatrixInv<T> meas_sensor_val);
-		void ComputeMeasFromState(MatrixInv<T> time_propagated_state);
+		void ComputeMeasFromState();
 
 		void ComputeTrignometricValues();
 

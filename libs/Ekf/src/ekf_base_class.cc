@@ -37,20 +37,21 @@ template <typename T>
 void EkfBase<T>::Run(MatrixInv<T> state_sensor_val, MatrixInv<T> meas_sensor_val, bool meas_indices[]){
 	PropagateState(state_sensor_val);
 	ComputeStateJacobian(state_sensor_val);
+
 	GetMeas(meas_sensor_val);
+	ComputeMeasFromState();
+	ComputeMeasJacobian(meas_sensor_val);
 
 	//P = F*P*F' + L*Q*L';
 	covariance_p_ = state_jacobian_*covariance_p_*state_jacobian_.Transpose() + process_noise_q_;
 
 	current_state_ = time_propagated_state_;
-
 	// sequentially update state with measurement
 	for(size_t idx_r = 0; idx_r < num_meas_; idx_r++){
 		if (meas_indices[idx_r]){
 			ComputeKalmanGainSequential(idx_r);
 			MatrixInv<T> meas_jacobian_row = meas_jacobian_.GetRow(idx_r);
-			MatrixInv<T> temp = meas_jacobian_row*current_state_;
-			current_state_ = current_state_ + kalman_gain_seq_*( computed_meas_(idx_r) - temp(0) );
+			current_state_ = current_state_ + kalman_gain_seq_*( computed_meas_(idx_r) - meas_from_propogated_state_(idx_r) );
 			covariance_p_ = covariance_p_ - kalman_gain_seq_*meas_jacobian_row*covariance_p_;
 		}
 	}
