@@ -20,7 +20,8 @@ class WriteHelper{
 
 		// Thread to loop and data to file
 		void StopWriteLoop();
-		void UpdateDataBuffer(long long dt_ms, size_t count, float imu_data[9], MatrixInv<float> sensor_meas, MatrixInv<float> ekf_current_state);
+		void UpdateDataBuffer(long long dt_ms, size_t count, float imu_data[9], MatrixInv<float> sensor_meas, MatrixInv<float> ekf_current_state, 
+			bool gps_valid_flag[6]);
 		void StartFileWriteThread();
 	private:
 		// Struct defining what data to save
@@ -35,7 +36,17 @@ class WriteHelper{
 			float ned_pos_m[3];
 			float ned_vel_mps[3];
 			// Current EKF State
-			float ekf_current_state[15];
+			float ekf_current_state[16];
+			// GPS Valid Flag
+			float gps_valid_flag[6];
+			// Debug Data
+			// float ekf_state_jacobian[16*16];
+			// // computed meas
+			// float computed_meas[9];
+			// // Debug Data
+			// float ekf_meas_jacobian[9*16];
+			// //Debug Data
+			// float ekf_computed_meas[9];
 
 		};
 

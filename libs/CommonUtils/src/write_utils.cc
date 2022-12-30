@@ -48,7 +48,7 @@ WriteHelper::~WriteHelper(){
 }
 
 void WriteHelper::UpdateDataBuffer(long long dt_ms, size_t count, float imu_data[9], 
-	MatrixInv<float> sensor_meas, MatrixInv<float> ekf_current_state){
+	MatrixInv<float> sensor_meas, MatrixInv<float> ekf_current_state, bool gps_valid_flag[6]){
 	if(data_buff_idx2_ == 0 && data_buff_idx1_ != MAX_BUFF_SIZE){
 		{
 			unique_lock<mutex> save_data_lock(data_mutex_);
@@ -62,9 +62,39 @@ void WriteHelper::UpdateDataBuffer(long long dt_ms, size_t count, float imu_data
 				data_to_save1_[data_buff_idx1_].ned_vel_mps[imu_idx] = sensor_meas(imu_idx + 6);
 			}
 
-			for(size_t d_idx = 0; d_idx < 15; d_idx++){
+			for(size_t d_idx = 0; d_idx < ekf_current_state.get_nrows(); d_idx++){
 				data_to_save1_[data_buff_idx1_].ekf_current_state[d_idx] = ekf_current_state(d_idx);
 			}
+
+			for(size_t g_idx = 0; g_idx < 6; g_idx++){
+				data_to_save1_[data_buff_idx1_].gps_valid_flag[g_idx] = gps_valid_flag[g_idx];
+			}
+
+			/* To save ekf debugging messsages
+			// size_t ekfdb_idx = 0;
+			// for(size_t dbr_idx = 0; dbr_idx < ekf_state_jacobian.get_nrows(); dbr_idx++){
+			// 	for(size_t dbc_idx = 0; dbc_idx < ekf_state_jacobian.get_ncols(); dbc_idx++){
+			// 		data_to_save1_[data_buff_idx1_].ekf_state_jacobian[ekfdb_idx] = ekf_state_jacobian(dbr_idx, dbc_idx);
+			// 		ekfdb_idx++;
+			// 	}
+			// }
+
+			// for(size_t cm_idx = 0; cm_idx < 9; cm_idx++){
+			// 	data_to_save1_[data_buff_idx1_].computed_meas[cm_idx] = computed_meas(cm_idx);
+			// }
+
+			// size_t ekfmj_idx = 0;
+			// for(size_t dbr_idx = 0; dbr_idx < ekf_meas_jacobian.get_nrows(); dbr_idx++){
+			// 	for(size_t dbc_idx = 0; dbc_idx < ekf_meas_jacobian.get_ncols(); dbc_idx++){
+			// 		data_to_save1_[data_buff_idx1_].ekf_meas_jacobian[ekfmj_idx] = ekf_meas_jacobian(dbr_idx, dbc_idx);
+			// 		ekfmj_idx++;
+			// 	}
+			// }
+
+			// for(size_t tt_idx = 0; tt_idx < ekf_computed_meas.get_nrows(); tt_idx++){
+			// 	data_to_save1_[data_buff_idx1_].ekf_computed_meas[tt_idx] = ekf_computed_meas(tt_idx);
+			// }
+			*/
 
 			data_buff_idx1_++;
 			if (data_buff_idx1_ == MAX_BUFF_SIZE){
@@ -85,9 +115,39 @@ void WriteHelper::UpdateDataBuffer(long long dt_ms, size_t count, float imu_data
 				data_to_save2_[data_buff_idx2_].ned_vel_mps[imu_idx] = sensor_meas(imu_idx + 6);
 			}
 
-			for(size_t d_idx = 0; d_idx < 15; d_idx++){
+			for(size_t d_idx = 0; d_idx < ekf_current_state.get_nrows(); d_idx++){
 				data_to_save2_[data_buff_idx2_].ekf_current_state[d_idx] = ekf_current_state(d_idx);
 			}
+
+			for(size_t g_idx = 0; g_idx < 6; g_idx++){
+				data_to_save2_[data_buff_idx2_].gps_valid_flag[g_idx] = gps_valid_flag[g_idx];
+			}
+
+			/* To save ekf debugging messsages
+			// size_t ekfdb_idx = 0;
+			// for(size_t dbr_idx = 0; dbr_idx < ekf_state_jacobian.get_nrows(); dbr_idx++){
+			// 	for(size_t dbc_idx = 0; dbc_idx < ekf_state_jacobian.get_ncols(); dbc_idx++){
+			// 		data_to_save2_[data_buff_idx2_].ekf_state_jacobian[ekfdb_idx] = ekf_state_jacobian(dbr_idx, dbc_idx);
+			// 		ekfdb_idx++;
+			// 	}
+			// }
+
+			// for(size_t cm_idx = 0; cm_idx < 9; cm_idx++){
+			// 	data_to_save2_[data_buff_idx2_].computed_meas[cm_idx] = computed_meas(cm_idx);
+			// }
+
+			// size_t ekfmj_idx = 0;
+			// for(size_t dbr_idx = 0; dbr_idx < ekf_meas_jacobian.get_nrows(); dbr_idx++){
+			// 	for(size_t dbc_idx = 0; dbc_idx < ekf_meas_jacobian.get_ncols(); dbc_idx++){
+			// 		data_to_save2_[data_buff_idx2_].ekf_meas_jacobian[ekfmj_idx] = ekf_meas_jacobian(dbr_idx, dbc_idx);
+			// 		ekfmj_idx++;
+			// 	}
+			// }
+
+			// for(size_t tt_idx = 0; tt_idx < ekf_computed_meas.get_nrows(); tt_idx++){
+			// 	data_to_save2_[data_buff_idx2_].ekf_computed_meas[tt_idx] = ekf_computed_meas(tt_idx);
+			// }
+			*/
 
 			data_buff_idx2_++;
 			if (data_buff_idx2_ == MAX_BUFF_SIZE){

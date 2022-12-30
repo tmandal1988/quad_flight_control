@@ -1,5 +1,5 @@
 // EKF related headers
-#include <ekf_15dof_class.h>
+#include <ekf_16dof_quat_class.h>
 // Matrix library
 #include <Matrix/matrix_factorization_class.h>
 // Navio 2 Utilities
@@ -71,32 +71,32 @@ int main(int argc, char *argv[]){
     //Mags
     float mag[3];
 
-    // Initial State Variable
-    MatrixInv<float> initial_state(15, 1);
-    // Variable used in the measurement update of the EKF
+  // Initial State Variable
+  MatrixInv<float> initial_state(16, 1);
+   // Variable used in the measurement update of the EKF
 	MatrixInv<float> sensor_meas(9, 1);
 	// Sensor values used in the time propagation stage of the EKF
 	MatrixInv<float> state_sensor_val(6, 1);
 	// Q matrix of the EKF
-	MatrixInv<float> process_noise_q(15, 15, "eye");
+	MatrixInv<float> process_noise_q(16, 16, "eye");
 	// P matrix initial
-	MatrixInv<float> initial_covariance_p(15, 15, "eye");
+	MatrixInv<float> initial_covariance_p(16, 16, "eye");
 	// Angle process noise
-	process_noise_q.Diag({0.000001, 0.000001, 0.000001, 0.000000001, 0.000000001, 0.000000001,
-						  0.000000001, 0.000000001, 0.000000001, 0.000001, 0.000001, 0.000001,
-						  0.000000001, 0.000000001, 0.000000001});
+	process_noise_q.Diag({0.000001, 0.000001, 0.000001, 0.000001, 0.000001, 0.000001, 0.000001,
+						  0.000001, 0.000001, 0.000001, 4, 4, 4,
+						  0.000001, 0.000001, 0.000001});
 	// R matrix of the EKF
-	MatrixInv<float> meas_noise_r(7, 7, "eye");
-	meas_noise_r.Diag({0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01});
+	MatrixInv<float> meas_noise_r(9, 9, "eye");
+	meas_noise_r.Diag({6.29, 6.29, 6.29, 400, 400, 400, 100, 100, 100});
 	// P init
-	initial_covariance_p.Diag({30*DEG2RAD, 30*DEG2RAD, 30*DEG2RAD, 0.01, 0.01, 0.01, 100, 100, 100,
-							   10, 10, 10, 0.1, 0.1, 0.1});
+	initial_covariance_p.Diag({0.01, 0.01, 0.01, 0.01, 0.0001, 0.0001, 0.0001, 10000, 10000, 10000,
+							   100, 100, 100, 0.01, 0.01, 0.01});
 
 	// Variable to store current state at the end of each EKF run
-	MatrixInv<float> current_state(15, 1);
+	MatrixInv<float> current_state(16, 1);
 
 	// Array to indicate which measurement has been update
-	bool meas_indices[] = {false,
+	bool meas_indices[] = {false, false, false,
 						   false, false, false,
 						   false, false, false};
 
@@ -121,20 +121,26 @@ int main(int argc, char *argv[]){
 
 	double* vned_init = gps_reader.GetInitNedVel();	
 
+	initial_state(0) = cos(init_att[2]/2)*cos(init_att[1]/2)*cos(init_att[0]/2) + sin(init_att[2]/2)*sin(init_att[1]/2)*sin(init_att[0]/2);
+  initial_state(1) = cos(init_att[2]/2)*cos(init_att[1]/2)*sin(init_att[0]/2) - sin(init_att[2]/2)*sin(init_att[1]/2)*cos(init_att[0]/2);
+  initial_state(2) = cos(init_att[2]/2)*sin(init_att[1]/2)*cos(init_att[0]/2) + sin(init_att[2]/2)*cos(init_att[1]/2)*sin(init_att[0]/2);
+  initial_state(3) = sin(init_att[2]/2)*cos(init_att[1]/2)*cos(init_att[0]/2) - cos(init_att[2]/2)*sin(init_att[1]/2)*sin(init_att[0]/2);
+
 	for(size_t i_idx = 0; i_idx < 3; i_idx++){
-		initial_state(i_idx) = init_att[i_idx];
-		initial_state(i_idx + 9) = vned_init[i_idx];
+		initial_state(i_idx + 10) = vned_init[i_idx];
 	}
 
-	//write the initial state
+	// write the initial state
 	float zero_array[9] = {0};
 	data_writer.UpdateDataBuffer(0, 0, zero_array, sensor_meas, initial_state, gps_meas_indices);
 
-	// Create an 15 state EKF object
-	Ekf15Dof<float> imu_gps_ekf(0.004, initial_state, process_noise_q, meas_noise_r, initial_covariance_p);
+	// Create an 16 state EKF object
+	Ekf16DofQuat<float> imu_gps_ekf_quat(0.004, initial_state, process_noise_q, meas_noise_r, initial_covariance_p);
 
 	// Make sure EKF always uses Magnetometer in the update step
 	meas_indices[0] = true;
+	meas_indices[1] = true;
+	meas_indices[2] = true;
 
 	// Variable to read imu data
 	float* imu_data;
@@ -157,7 +163,7 @@ int main(int argc, char *argv[]){
     	}
 
     	// Make all the measurement flags corresponding to position and velocity false
-		for( size_t idx_meas = 1; idx_meas < 7; idx_meas++ ){
+			for( size_t idx_meas = 3; idx_meas < 9; idx_meas++ ){
     		meas_indices[idx_meas] = false;
     	}
 
@@ -176,23 +182,23 @@ int main(int argc, char *argv[]){
 	    for(size_t idx_meas = 0; idx_meas < 6; idx_meas++){
 	    	if(gps_meas_indices[idx_meas]){
 	    		sensor_meas(idx_meas + 3) = ned_pos_and_vel_meas[idx_meas];
-	    		meas_indices[idx_meas + 1] = true;
+	    		meas_indices[idx_meas + 3] = true;
 	    	}
 	    }
 
 	   	// Run one step of EKF
-	    imu_gps_ekf.Run(state_sensor_val, sensor_meas, meas_indices);
+	    imu_gps_ekf_quat.Run(state_sensor_val, sensor_meas, meas_indices);
 	    // Get the state after EKF run
-        current_state = imu_gps_ekf.GetCurrentState();
-
+        current_state = imu_gps_ekf_quat.GetCurrentState();
         if(remainder(loop_count, 5) == 0){
         	data_writer.UpdateDataBuffer(duration.count(), loop_count, imu_data, sensor_meas, current_state, gps_meas_indices);
 	    }
 
 	    if (remainder(loop_count, 50) == 0){
-	    	printf("Roll [deg]: %+7.3f, Pitch[deg]: %+7.3f, Yaw[deg]: %+7.3f\n", current_state(0)*RAD2DEG, current_state(1)*RAD2DEG, current_state(2)*RAD2DEG);
-	    	printf("Pos N [m]: %+7.3f, Pos E [m]: %+7.3f, Pos D[m]: %+7.3f\n", current_state(6), current_state(7), current_state(8));
-	    	printf("Vel N [m]: %+7.3f, Vel E [m]: %+7.3f, Vel D[m]: %+7.3f\n", current_state(9), current_state(10), current_state(11));
+	    	MatrixInv<float> filt_euler_ang = imu_gps_ekf_quat.GetEulerAngle();
+	    	printf("Roll [deg]: %+7.3f, Pitch[deg]: %+7.3f, Yaw[deg]: %+7.3f\n", filt_euler_ang(0)*RAD2DEG, filt_euler_ang(1)*RAD2DEG, filt_euler_ang(2)*RAD2DEG);
+	    	printf("Pos N [m]: %+7.3f, Pos E [m]: %+7.3f, Pos D[m]: %+7.3f\n", current_state(7), current_state(8), current_state(9));
+	    	printf("Vel N [m]: %+7.3f, Vel E [m]: %+7.3f, Vel D[m]: %+7.3f\n", current_state(10), current_state(11), current_state(12));
 	    	printf("############################################\n");
 		}
 
