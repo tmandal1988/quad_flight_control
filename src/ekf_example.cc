@@ -9,6 +9,7 @@
 #include <gps_utils.h>
 #include <write_utils.h>
 #include <imu_utils.h>
+#include <rc_input_utils.h>
 // Standard C++ Libraries file, time and memory
 #include <memory>
 
@@ -40,6 +41,9 @@ int main(int argc, char *argv[]){
 	imu_reader.InitializeImu();
 
 
+	RcInputHelper rc_reader(8);
+	rc_reader.InitializeRcInput();
+
 	float ned_pos_and_vel_meas[6];
 	bool gps_meas_indices[6];
 	
@@ -48,8 +52,8 @@ int main(int argc, char *argv[]){
 
 	// Variables to set CPU affinity
 	cpu_set_t cpuset;
-    CPU_ZERO(&cpuset);
-    CPU_SET(3, &cpuset);
+  CPU_ZERO(&cpuset);
+  CPU_SET(3, &cpuset);
 
 	pthread_getschedparam(pthread_self(), &policy, &sch);
 	sch.sched_priority = sched_get_priority_max(SCHED_FIFO);
@@ -71,8 +75,8 @@ int main(int argc, char *argv[]){
     //Mags
     float mag[3];
 
-    // Initial State Variable
-    MatrixInv<float> initial_state(15, 1);
+  // Initial State Variable
+  MatrixInv<float> initial_state(15, 1);
     // Variable used in the measurement update of the EKF
 	MatrixInv<float> sensor_meas(9, 1);
 	// Sensor values used in the time propagation stage of the EKF
@@ -118,6 +122,7 @@ int main(int argc, char *argv[]){
 	gps_reader.InitializeGps();
 	gps_reader.CreateGpsThread();
 	data_writer.StartFileWriteThread();
+	rc_reader.CreateRcInputReadThread();
 
 	double* vned_init = gps_reader.GetInitNedVel();	
 
@@ -138,6 +143,9 @@ int main(int argc, char *argv[]){
 
 	// Variable to read imu data
 	float* imu_data;
+
+	//Variable to read rc input data
+	int* rc_periods;
 
 	// Loop counter
 	size_t loop_count = 0;
@@ -189,10 +197,12 @@ int main(int argc, char *argv[]){
         	data_writer.UpdateDataBuffer(duration.count(), loop_count, imu_data, sensor_meas, current_state, gps_meas_indices);
 	    }
 
-	    if (remainder(loop_count, 50) == 0){
-	    	printf("Roll [deg]: %+7.3f, Pitch[deg]: %+7.3f, Yaw[deg]: %+7.3f\n", current_state(0)*RAD2DEG, current_state(1)*RAD2DEG, current_state(2)*RAD2DEG);
-	    	printf("Pos N [m]: %+7.3f, Pos E [m]: %+7.3f, Pos D[m]: %+7.3f\n", current_state(6), current_state(7), current_state(8));
-	    	printf("Vel N [m]: %+7.3f, Vel E [m]: %+7.3f, Vel D[m]: %+7.3f\n", current_state(9), current_state(10), current_state(11));
+	    if (remainder(loop_count, 5) == 0){
+	    	rc_periods = rc_reader.GetRcPeriods();
+	    	// printf("Roll [deg]: %+7.3f, Pitch[deg]: %+7.3f, Yaw[deg]: %+7.3f\n", current_state(0)*RAD2DEG, current_state(1)*RAD2DEG, current_state(2)*RAD2DEG);
+	    	// printf("Pos N [m]: %+7.3f, Pos E [m]: %+7.3f, Pos D[m]: %+7.3f\n", current_state(6), current_state(7), current_state(8));
+	    	// printf("Vel N [m]: %+7.3f, Vel E [m]: %+7.3f, Vel D[m]: %+7.3f\n", current_state(9), current_state(10), current_state(11));
+	    	printf("%d, %d, %d, %d, %d, %d, %d, %d\n", rc_periods[0], rc_periods[1], rc_periods[2], rc_periods[3], rc_periods[4], rc_periods[5], rc_periods[6], rc_periods[7]);
 	    	printf("############################################\n");
 		}
 
