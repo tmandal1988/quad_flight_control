@@ -167,7 +167,7 @@ void WriteHelper::StartFileWriteThread(){
     pthread_setschedparam(write_thread_.native_handle(), SCHED_FIFO, &sch_);
     CPU_ZERO(&cpuset_);
     CPU_SET(1, &cpuset_);
-    CPU_SET(2, &cpuset_);
+    //CPU_SET(2, &cpuset_);
 
     int rc = pthread_setaffinity_np(write_thread_.native_handle(),
                                     sizeof(cpuset_), &cpuset_);    
