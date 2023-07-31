@@ -7,5 +7,6 @@
 
 MatrixInv<float> Geodetic2Ecef(float lat, float lon, float height);
 MatrixInv<float> Geodetic2Ned(float lat, float lon, float height, float lat_ref, float lon_ref, float height_ref);
+MatrixInv<float> GetDcm(float roll, float pitch, float yaw);
 
 #endif

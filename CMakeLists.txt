@@ -17,7 +17,7 @@ set(PROJECT_SOURCE_DIR
 )
 
 set(PROJECT_SOURCE
-    ${PROJECT_SOURCE_DIR}/ekf_example.cc
+    ${PROJECT_SOURCE_DIR}/motor_tests.cc
 )
 
 set(PROJECT_LIBRARIES_DIR
@@ -30,6 +30,7 @@ set(PROJECT_LIBRARIES
     NavioNavio2
     CommonUtils
     Ekf
+    Fcs
 )
 
 set(PROJECT_LIBRARIES_SUBDIR
@@ -38,6 +39,7 @@ set(PROJECT_LIBRARIES_SUBDIR
     Navio/Navio2
     CommonUtils
     Ekf
+    Fcs
 )
 
 # To enable threading

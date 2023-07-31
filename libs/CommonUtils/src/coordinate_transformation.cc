@@ -58,3 +58,32 @@ MatrixInv<float> Geodetic2Ned(float lat, float lon, float height, float lat_ref,
    // Return NED coordinates
    	return ecef2ned*(ecef_cord - ecef_cord_ref);
 }
+
+MatrixInv<float> GetDcm(float roll, float pitch, float yaw){
+	/* This function computes the DCM for a given roll, pitch and yaw angle. The DCM takes from Inertial to Body coordinates.
+	Inputs:
+		roll (float) 						: Roll angle of the body w.r.t inertial frame
+		pitch (float) 						: Pitch angle of the body w.r.t inertial frame
+		yaw (float) 						: Yaw angle of the body w.r.t inertial frame
+	Outputs:
+		MatrixInv<float> 					: 3x3 DCM
+	*/
+
+	// precalculate trignometric values
+	float s_phi = sin(roll);
+	float c_phi = cos(roll);
+
+	float s_theta = sin(pitch);
+	float c_theta = cos(pitch);
+	float t_theta = tan(pitch);
+	float sc_theta = 1/c_theta;
+
+	float s_psi = sin(yaw);
+	float c_psi = cos(yaw);
+
+	MatrixInv<float> c_ned2b = { {c_psi*c_theta, c_theta*s_psi, -s_theta},
+							 {c_psi*s_phi*s_theta - c_phi*s_psi, c_phi*c_psi + s_phi*s_psi*s_theta, c_theta*s_phi},
+							 {s_phi*s_psi + c_phi*c_psi*s_theta, c_phi*s_psi*s_theta - c_psi*s_phi, c_phi*c_theta} };
+
+	return c_ned2b;
+}

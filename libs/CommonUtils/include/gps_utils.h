@@ -40,6 +40,14 @@ class GpsHelper{
 			return vned_init_;
 		}
 
+		// Get Raw Unfiltered Lat Lon and height
+		void GetRawLatLonAlt(float (&raw_lat_lon_alt)[3]){
+			raw_lat_lon_alt[0] = pos_data_[2];
+			raw_lat_lon_alt[1] = pos_data_[1];
+			raw_lat_lon_alt[2] = pos_data_[3];
+
+		}
+
 		// Get NED position and velocity
 		void GetGpsNedPosAndVel(float (&ned_pos_and_vel_meas)[6], bool (&gps_meas_indices)[6]){
 			for(size_t idx = 0; idx < 6; idx++){

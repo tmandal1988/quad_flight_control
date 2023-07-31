@@ -4,10 +4,10 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(PROJECT_NAME
-    CommonUtilsLib
+    FcsLib
 )
 set(LIBRARY_NAME
-    CommonUtils
+    Fcs
 )
 set(LIBRARY_HEADERS_DIR
     include
@@ -19,7 +19,7 @@ set(LIBRARY_SOURCE_DIR
     src
 )
 
-file(GLOB LIBRARY_SOURCE CONFIGURE_DEPENDS "${LIBRARY_SOURCE_DIR}/*.cc")
+file(GLOB LIBRARY_SOURCE CONFIGURE_DEPENDS "${LIBRARY_SOURCE_DIR}/*.cpp")
 
 project(${PROJECT_NAME})
 
@@ -27,6 +27,9 @@ add_library(${LIBRARY_NAME} STATIC
     ${LIBRARY_HEADERS}
     ${LIBRARY_SOURCE}
 )
+#include(CMakePrintHelpers)
+
+#cmake_print_variables(Matrix_SOURCE_DIR})
 
 target_include_directories(${LIBRARY_NAME} PRIVATE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -38,5 +41,4 @@ target_include_directories(${LIBRARY_NAME} PUBLIC
     $<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(CommonUtils Matrix NavioCommon NavioNavio2 Fcs)
-
+target_link_libraries(Fcs)

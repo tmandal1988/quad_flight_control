@@ -1,5 +1,8 @@
 // EKF related headers
 #include <ekf_15dof_class.h>
+// Autocoded FCS Libraries
+#include <fcsModel.h>
+#include <fcs_params.h>
 // Matrix library
 #include <Matrix/matrix_factorization_class.h>
 // Navio 2 Utilities
@@ -22,6 +25,8 @@
 #include <signal.h>
 #include <sys/mman.h>
 #include <iterator>
+
+static fcsModel fcsModel_Obj;          // Instance of FCS model class
 
 // To catch SIGINT
 volatile sig_atomic_t sigint_flag = 0;
@@ -46,6 +51,7 @@ int main(int argc, char *argv[]){
 
 	float ned_pos_and_vel_meas[6];
 	bool gps_meas_indices[6];
+	float raw_lat_lon_alt[3];
 	
 	sched_param sch;
 	int policy;	
@@ -99,6 +105,11 @@ int main(int argc, char *argv[]){
 	// Variable to store current state at the end of each EKF run
 	MatrixInv<float> current_state(15, 1);
 
+	// NED to BODY DCM
+	MatrixInv<float> c_ned2b;
+	// NED to FEP DCM
+	MatrixInv<float> c_ned2fep;
+
 	// Array to indicate which measurement has been update
 	bool meas_indices[] = {false,
 						   false, false, false,
@@ -131,10 +142,6 @@ int main(int argc, char *argv[]){
 		initial_state(i_idx + 9) = vned_init[i_idx];
 	}
 
-	//write the initial state
-	float zero_array[9] = {0};
-	data_writer.UpdateDataBuffer(0, 0, zero_array, sensor_meas, initial_state, gps_meas_indices);
-
 	// Create an 15 state EKF object
 	Ekf15Dof<float> imu_gps_ekf(0.004, initial_state, process_noise_q, meas_noise_r, initial_covariance_p);
 
@@ -146,6 +153,37 @@ int main(int argc, char *argv[]){
 
 	//Variable to read rc input data
 	int* rc_periods;
+
+	//##############################################################
+	// FCS Ctrl Params from fcs_params.h
+	AssignFcsCtrlParams();
+	// fcsModel input variable
+	fcsModel::ExtU_fcsModel_T *ExtU_fcsModel_T_ =  new fcsModel::ExtU_fcsModel_T;
+	
+	// Initialize model
+  fcsModel_Obj.initialize();
+  // RC Cmd Input Variables
+  busRcInCmds rcCmdsIn_;
+  // Sensor inuput to the model
+  busStateEstimate stateEstimate_;
+  // From fcs_params.h
+  ExtU_fcsModel_T_->ctrlParams = fcs_ctrl_params;
+
+  // fcsModel output variable
+  fcsModel::ExtY_fcsModel_T ExtY_fcsModel_T_;
+  // Mutex to guard resource access to fcs outputs
+	mutex fcs_out_mutex;
+  {
+  	unique_lock<mutex> fcs_out_lock(fcs_out_mutex);	
+		ExtY_fcsModel_T_ = fcsModel_Obj.getExternalOutputs();
+	}
+
+	
+  //##############################################################
+
+  //write the initial state
+	float zero_array[9] = {0};
+	data_writer.UpdateDataBuffer(0, 0, zero_array, sensor_meas, initial_state, gps_meas_indices, ExtY_fcsModel_T_);
 
 	// Loop counter
 	size_t loop_count = 0;
@@ -165,7 +203,7 @@ int main(int argc, char *argv[]){
     	}
 
     	// Make all the measurement flags corresponding to position and velocity false
-		for( size_t idx_meas = 1; idx_meas < 7; idx_meas++ ){
+			for( size_t idx_meas = 1; idx_meas < 7; idx_meas++ ){
     		meas_indices[idx_meas] = false;
     	}
 
@@ -179,6 +217,7 @@ int main(int argc, char *argv[]){
 	    	sensor_meas(imu_idx) =  imu_data[imu_idx + 6];
 	    }
 
+	    gps_reader.GetRawLatLonAlt(raw_lat_lon_alt);
 	    gps_reader.GetGpsNedPosAndVel(ned_pos_and_vel_meas, gps_meas_indices);
 	    // Check if GPS position and velocity has been update and set appropriate flags
 	    for(size_t idx_meas = 0; idx_meas < 6; idx_meas++){
@@ -191,18 +230,74 @@ int main(int argc, char *argv[]){
 	   	// Run one step of EKF
 	    imu_gps_ekf.Run(state_sensor_val, sensor_meas, meas_indices);
 	    // Get the state after EKF run
-        current_state = imu_gps_ekf.GetCurrentState();
+      current_state = imu_gps_ekf.GetCurrentState();
 
-        if(remainder(loop_count, 5) == 0){
-        	data_writer.UpdateDataBuffer(duration.count(), loop_count, imu_data, sensor_meas, current_state, gps_meas_indices);
+      //########################################
+      // Assign the state values to the model input structure
+      for(size_t idx = 0; idx < 3; idx++){
+      	stateEstimate_.attitude_rad[idx] = current_state(idx);
+      	stateEstimate_.bodyAngRates_radps[idx] = ( state_sensor_val(idx) - current_state(idx + 3) );
+      	stateEstimate_.nedVel_mps[idx] = current_state(idx + 9);
+      }
+
+      // Get NED to Body DCM
+      c_ned2b = GetDcm(current_state(0), current_state(1), current_state(2));
+
+      // //GET NED to FEP DCM
+      c_ned2fep = GetDcm(current_state(0), current_state(1), 0);
+
+      for(size_t idx = 0; idx < 3; idx++){
+      	for(size_t jdx = 0; jdx < 3; jdx++){
+      		stateEstimate_.ned2BodyDcm_nd[idx*3 + jdx] = c_ned2b(jdx, idx);
+      		stateEstimate_.ned2FepDcm_nd[idx*3 +  jdx] = c_ned2fep(jdx, idx);
+      	}
+      }
+
+
+      stateEstimate_.geodeticPos.lat_rad = raw_lat_lon_alt[0];
+      stateEstimate_.geodeticPos.lon_rad = raw_lat_lon_alt[1];
+      stateEstimate_.geodeticPos.alt_m = current_state(8);
+
+      ExtU_fcsModel_T_->stateEstimate = stateEstimate_;
+
+      // Get RC Data
+      if (remainder(loop_count, 5) == 0){
+      	rc_periods = rc_reader.GetRcPeriods();
+      	rcCmdsIn_.throttleCmd_nd = rc_periods[2];
+      	rcCmdsIn_.joystickYCmd_nd = rc_periods[1];
+      	rcCmdsIn_.joystickXCmd_nd = rc_periods[0];
+      	rcCmdsIn_.joystickZCmd_nd = rc_periods[3];
+      	rcCmdsIn_.rcSwitch1_nd = rc_periods[4];
+      	rcCmdsIn_.rcSwitch2_nd = rc_periods[5];
+      	rcCmdsIn_.rcSwitch3_nd = rc_periods[6];
+
+
+      }
+
+      ExtU_fcsModel_T_->rcCmdsIn = rcCmdsIn_;
+      fcsModel_Obj.setExternalInputs(ExtU_fcsModel_T_);
+      //########################################
+
+      // Step the FCS model
+      {
+      	unique_lock<mutex> fcs_out_lock(fcs_out_mutex);
+  			fcsModel_Obj.step();
+  			ExtY_fcsModel_T_ = fcsModel_Obj.getExternalOutputs();
+  		}
+
+
+      if(remainder(loop_count, 5) == 0){
+        	data_writer.UpdateDataBuffer(duration.count(), loop_count, imu_data, sensor_meas, current_state, gps_meas_indices, ExtY_fcsModel_T_);
 	    }
 
-	    if (remainder(loop_count, 5) == 0){
-	    	rc_periods = rc_reader.GetRcPeriods();
+	    if (remainder(loop_count, 50) == 0){
 	    	// printf("Roll [deg]: %+7.3f, Pitch[deg]: %+7.3f, Yaw[deg]: %+7.3f\n", current_state(0)*RAD2DEG, current_state(1)*RAD2DEG, current_state(2)*RAD2DEG);
 	    	// printf("Pos N [m]: %+7.3f, Pos E [m]: %+7.3f, Pos D[m]: %+7.3f\n", current_state(6), current_state(7), current_state(8));
 	    	// printf("Vel N [m]: %+7.3f, Vel E [m]: %+7.3f, Vel D[m]: %+7.3f\n", current_state(9), current_state(10), current_state(11));
-	    	printf("%d, %d, %d, %d, %d, %d, %d, %d\n", rc_periods[0], rc_periods[1], rc_periods[2], rc_periods[3], rc_periods[4], rc_periods[5], rc_periods[6], rc_periods[7]);
+	    	printf("Throttle: %d, Roll: %d, Pitch: %d, Yaw: %d, Sw1: %d, Sw2: %d, Sw3: %d, State: %d\n", ExtU_fcsModel_T_->rcCmdsIn.throttleCmd_nd, ExtU_fcsModel_T_->rcCmdsIn.joystickXCmd_nd, 
+	    		ExtU_fcsModel_T_->rcCmdsIn.joystickYCmd_nd, ExtU_fcsModel_T_->rcCmdsIn.joystickZCmd_nd, ExtU_fcsModel_T_->rcCmdsIn.rcSwitch1_nd, ExtU_fcsModel_T_->rcCmdsIn.rcSwitch2_nd, 
+	    		ExtU_fcsModel_T_->rcCmdsIn.rcSwitch3_nd, ExtY_fcsModel_T_.fcsDebug.state);
+	    	//printf("%g, %g, %g, %g, %d\n",ExtY_fcsModel_T_.actuatorsCmds[0], ExtY_fcsModel_T_.actuatorsCmds[1], ExtY_fcsModel_T_.actuatorsCmds[2], ExtY_fcsModel_T_.actuatorsCmds[3], ExtY_fcsModel_T_.fcsDebug.state);
 	    	printf("############################################\n");
 		}
 

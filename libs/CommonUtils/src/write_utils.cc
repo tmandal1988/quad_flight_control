@@ -22,10 +22,10 @@ void WriteHelper::WriteToFileLoop(){
 	file_object_.rdbuf()->pubsetbuf(buf.get(), bufsize);
 	while(1){
 		if(is_data_buff1_full_.load()){
-			file_object_.write((char*)data_to_save1_, 1024*sizeof(data_fields));
+			file_object_.write((char*)data_to_save1_, 1024*sizeof(DataFields));
 			is_data_buff1_full_.store(false);
 		}else if(is_data_buff2_full_.load()){
-			file_object_.write((char*)data_to_save2_, 1024*sizeof(data_fields));
+			file_object_.write((char*)data_to_save2_, 1024*sizeof(DataFields));
 			is_data_buff2_full_.store(false);
 		}else{
 			sleep(1);
@@ -48,7 +48,7 @@ WriteHelper::~WriteHelper(){
 }
 
 void WriteHelper::UpdateDataBuffer(long long dt_ms, size_t count, float imu_data[9], 
-	MatrixInv<float> sensor_meas, MatrixInv<float> ekf_current_state, bool gps_valid_flag[6]){
+	MatrixInv<float> sensor_meas, MatrixInv<float> ekf_current_state, bool gps_valid_flag[6], const FcsOutput &fcs_output){
 	if(data_buff_idx2_ == 0 && data_buff_idx1_ != MAX_BUFF_SIZE){
 		{
 			unique_lock<mutex> save_data_lock(data_mutex_);
@@ -69,6 +69,8 @@ void WriteHelper::UpdateDataBuffer(long long dt_ms, size_t count, float imu_data
 			for(size_t g_idx = 0; g_idx < 6; g_idx++){
 				data_to_save1_[data_buff_idx1_].gps_valid_flag[g_idx] = gps_valid_flag[g_idx];
 			}
+
+			AssignFcsData(fcs_output, data_to_save1_, data_buff_idx1_);
 
 			/* To save ekf debugging messsages
 			// size_t ekfdb_idx = 0;
@@ -122,6 +124,8 @@ void WriteHelper::UpdateDataBuffer(long long dt_ms, size_t count, float imu_data
 			for(size_t g_idx = 0; g_idx < 6; g_idx++){
 				data_to_save2_[data_buff_idx2_].gps_valid_flag[g_idx] = gps_valid_flag[g_idx];
 			}
+
+			AssignFcsData(fcs_output, data_to_save2_, data_buff_idx2_);
 
 			/* To save ekf debugging messsages
 			// size_t ekfdb_idx = 0;

@@ -16,7 +16,7 @@ void RcInputHelper::InitializeRcInput(){
 }
 
 void RcInputHelper::RcInputReadLoop(){
-	// Keep reading the GPS data forever
+	// Keep reading the RC data forever
 	while(1){
 		for(int idx = 0; idx < num_channels_; idx++){
             int temp_period = rc_input_ptr_->read(idx);

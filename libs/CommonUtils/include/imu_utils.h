@@ -7,7 +7,7 @@
 #include<Matrix/matrix_inv_class.h>
 
 #include<cmath>
-#include <memory>
+#include<memory>
 
 using namespace std;
 

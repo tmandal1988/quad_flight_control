@@ -27,3 +27,5 @@ target_include_directories(${LIBRARY_NAME} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/libs>
   $<INSTALL_INTERFACE:${LIBRARY_NAME}>  # <prefix>/include/${LIBRARY_NAME}
 )
+
+target_link_libraries(NavioNavio2 NavioCommon)

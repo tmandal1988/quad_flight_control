@@ -2,6 +2,7 @@
 #define WRITEUTILS_H
 
 #include<Matrix/matrix_inv_class.h>
+#include<fcs_out_data.h>
 
 #include <fstream>
 #include<atomic>
@@ -21,35 +22,9 @@ class WriteHelper{
 		// Thread to loop and data to file
 		void StopWriteLoop();
 		void UpdateDataBuffer(long long dt_ms, size_t count, float imu_data[9], MatrixInv<float> sensor_meas, MatrixInv<float> ekf_current_state, 
-			bool gps_valid_flag[6]);
+			bool gps_valid_flag[6], const FcsOutput &fcs_output);
 		void StartFileWriteThread();
 	private:
-		// Struct defining what data to save
-		struct data_fields{
-			// Time it took for the EKF to run
-			float dt_s;
-			// GPS Time if available
-			float time_of_week_ms;
-			// Raw Sensor Data (Mag is calibrated and normalized)
-			float imu_data[9];
-			// GPS NED position and velocity if available;
-			float ned_pos_m[3];
-			float ned_vel_mps[3];
-			// Current EKF State
-			float ekf_current_state[16];
-			// GPS Valid Flag
-			float gps_valid_flag[6];
-			// Debug Data
-			// float ekf_state_jacobian[16*16];
-			// // computed meas
-			// float computed_meas[9];
-			// // Debug Data
-			// float ekf_meas_jacobian[9*16];
-			// //Debug Data
-			// float ekf_computed_meas[9];
-
-		};
-
 		// Thread to write file
 		thread write_thread_;
 
@@ -68,8 +43,8 @@ class WriteHelper{
 		string file_name_;
 
 		// Create two buffers to store the data to save before writing
-		data_fields data_to_save1_[MAX_BUFF_SIZE];
-		data_fields data_to_save2_[MAX_BUFF_SIZE];
+		DataFields data_to_save1_[MAX_BUFF_SIZE];
+		DataFields data_to_save2_[MAX_BUFF_SIZE];
 
 		// Variable to indicate when the data buffers are full of data
 	    atomic<bool> is_data_buff1_full_;
