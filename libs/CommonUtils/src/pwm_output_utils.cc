@@ -29,7 +29,7 @@ void PwmOutputHelper::InitializePwmOutput(float frequency){
 // Set PWM Duty Cycle
 void PwmOutputHelper::SetPwmDutyCyle(vector<float> duty_cycle_ms){
 	int num_channels_to_write = min((int)duty_cycle_ms.size(), num_channels_);
-	for(size_t idx = 0; idx < num_channels_to_write; idx++){
+	for(int idx = 0; idx < num_channels_to_write; idx++){
 		rc_output_ptr_->set_duty_cycle(idx, duty_cycle_ms[idx]);
 	}
 }
