@@ -3,9 +3,9 @@
 //
 // Code generated for Simulink model 'fcsModel'.
 //
-// Model version                  : 1.48
+// Model version                  : 1.51
 // Simulink Coder version         : 9.7 (R2022a) 13-Nov-2021
-// C/C++ source code generated on : Mon May  1 19:34:21 2023
+// C/C++ source code generated on : Fri Sep 22 15:02:49 2023
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM 7
@@ -19,40 +19,7 @@
 
 // Constant parameters (default storage)
 const fcsModel::ConstP_fcsModel_T fcsModel_ConstP{
-  // Expression: rcParamsStruct
-  //  Referenced by: '<S4>/State Machine'
-
-  {
-    {
-      { { -0.52359877559829882, 0.52359877559829882 } },
-
-      { { -0.52359877559829882, 0.52359877559829882 } },
-
-      { { -0.52359877559829882, 0.52359877559829882 } },
-
-      { { 0.0, 50.0 } }
-    },
-
-    { { 990.0, 2006.0 } },
-
-    { { 900.0, 990.0 } },
-
-    {
-      { { 3.9045645325900015e-9, -1.7538875049548508e-5, 0.027221770655502103,
-          -14.548300722291762 } },
-
-      { { 3.9045645325900015e-9, -1.7538875049548508e-5, 0.027221770655502103,
-          -14.548300722291762 } },
-
-      { { 3.9045645325900015e-9, -1.7538875049548508e-5, 0.027221770655502103,
-          -14.548300722291762 } },
-
-      { { 1.8913975371836569e-9, -8.4651009094729818e-6, 0.013109462896716882,
-          -6.5014878863088388 } }
-    }
-  },
-
-  // Computed Parameter: Constant_Value_h
+  // Computed Parameter: Constant_Value
   //  Referenced by: '<S3>/Constant'
 
   {
@@ -66,16 +33,19 @@ const fcsModel::ConstP_fcsModel_T fcsModel_ConstP{
             0.0,                       // feedForwardCmd
             0.0,                       // cmd
             0.0,                       // meas
+            false,                     // integratorReset
             0.0                        // trackingCtrlCmd
           }, {
             0.0,                       // feedForwardCmd
             0.0,                       // cmd
             0.0,                       // meas
+            false,                     // integratorReset
             0.0                        // trackingCtrlCmd
           }, {
             0.0,                       // feedForwardCmd
             0.0,                       // cmd
             0.0,                       // meas
+            false,                     // integratorReset
             0.0                        // trackingCtrlCmd
           } } }
       // ctrlInputsArray
@@ -85,12 +55,12 @@ const fcsModel::ConstP_fcsModel_T fcsModel_ConstP{
   // Expression: allocationDataStruct.allocationMatrix
   //  Referenced by: '<S1>/Constant'
 
-  { { -933.47739593970618, -933.47739593970618, -933.47739593970618,
-      -933.47739593970618, -5280.5455741165442, -5280.5455741165442,
-      5280.5455741165442, 5280.5455741165442, -5280.5455741165442,
-      5280.5455741165442, 5280.5455741165442, -5280.5455741165442,
-      -30625.898816586381, 30625.898816586381, -30625.898816586381,
-      30625.898816586381 } },
+  { { -9334.7739593088463, -9334.77395930884, -9334.773959308839,
+      -9334.7739593088445, 45535.4827282571, -45535.4827282571,
+      -45535.4827282571, 45535.4827282571, 41122.352243582813,
+      41122.352243582813, -41122.352243582813, -41122.352243582813,
+      -61251.797633172762, 61251.797633172762, -61251.797633172762,
+      61251.797633172762 } },
 
   // Expression: vehicleConstants.inertia_kgm2
   //  Referenced by: '<S2>/Constant'

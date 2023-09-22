@@ -11,6 +11,11 @@
 
 using namespace std;
 
+#define PWM_MIN_THRESHOLD 982.0
+#define PWM_CHECK_MIN_THRESHOLD 984
+#define PWM_CMD_MIN_THRESHOLD 1005.0
+#define PWM_CMD_MAX_THRESHOLD 1995.0
+
 class RcInputHelper{
 	#define READ_FAILED -1
 

@@ -13,6 +13,7 @@
 #include <write_utils.h>
 #include <imu_utils.h>
 #include <rc_input_utils.h>
+#include <pwm_output_utils.h>
 // Standard C++ Libraries file, time and memory
 #include <memory>
 
@@ -48,6 +49,11 @@ int main(int argc, char *argv[]){
 
 	RcInputHelper rc_reader(8);
 	rc_reader.InitializeRcInput();
+
+	PwmOutputHelper pwm_writer(4);
+	pwm_writer.InitializePwmOutput();
+
+	vector<float> pwm_out_val(4, 0);
 
 	float ned_pos_and_vel_meas[6];
 	bool gps_meas_indices[6];
@@ -130,7 +136,7 @@ int main(int argc, char *argv[]){
 	// Initial attitude and NED velocity
 	float* init_att = imu_reader.ComputeInitialRollPitchAndYaw(200);
 
-	gps_reader.InitializeGps();
+	gps_reader.InitializeGps(30);
 	gps_reader.CreateGpsThread();
 	data_writer.StartFileWriteThread();
 	rc_reader.CreateRcInputReadThread();
@@ -183,7 +189,15 @@ int main(int argc, char *argv[]){
 
   //write the initial state
 	float zero_array[9] = {0};
-	data_writer.UpdateDataBuffer(0, 0, zero_array, sensor_meas, initial_state, gps_meas_indices, ExtY_fcsModel_T_);
+	int rc_periods_ph[7];
+	rc_periods_ph[0] = -1;
+	rc_periods_ph[1] = -1;
+	rc_periods_ph[2] = -1;
+	rc_periods_ph[3] = -1;
+	rc_periods_ph[4] = -1;
+	rc_periods_ph[5] = -1;
+	rc_periods_ph[6] = -1;
+	data_writer.UpdateDataBuffer(0, 0, zero_array, sensor_meas, initial_state, gps_meas_indices, rc_periods_ph, ExtY_fcsModel_T_);
 
 	// Loop counter
 	size_t loop_count = 0;
@@ -287,19 +301,47 @@ int main(int argc, char *argv[]){
 
 
       if(remainder(loop_count, 5) == 0){
-        	data_writer.UpdateDataBuffer(duration.count(), loop_count, imu_data, sensor_meas, current_state, gps_meas_indices, ExtY_fcsModel_T_);
+        	data_writer.UpdateDataBuffer(duration.count(), loop_count, imu_data, sensor_meas, current_state, gps_meas_indices, rc_periods, ExtY_fcsModel_T_);
 	    }
 
-	    if (remainder(loop_count, 50) == 0){
-	    	// printf("Roll [deg]: %+7.3f, Pitch[deg]: %+7.3f, Yaw[deg]: %+7.3f\n", current_state(0)*RAD2DEG, current_state(1)*RAD2DEG, current_state(2)*RAD2DEG);
-	    	// printf("Pos N [m]: %+7.3f, Pos E [m]: %+7.3f, Pos D[m]: %+7.3f\n", current_state(6), current_state(7), current_state(8));
-	    	// printf("Vel N [m]: %+7.3f, Vel E [m]: %+7.3f, Vel D[m]: %+7.3f\n", current_state(9), current_state(10), current_state(11));
-	    	printf("Throttle: %d, Roll: %d, Pitch: %d, Yaw: %d, Sw1: %d, Sw2: %d, Sw3: %d, State: %d\n", ExtU_fcsModel_T_->rcCmdsIn.throttleCmd_nd, ExtU_fcsModel_T_->rcCmdsIn.joystickXCmd_nd, 
-	    		ExtU_fcsModel_T_->rcCmdsIn.joystickYCmd_nd, ExtU_fcsModel_T_->rcCmdsIn.joystickZCmd_nd, ExtU_fcsModel_T_->rcCmdsIn.rcSwitch1_nd, ExtU_fcsModel_T_->rcCmdsIn.rcSwitch2_nd, 
-	    		ExtU_fcsModel_T_->rcCmdsIn.rcSwitch3_nd, ExtY_fcsModel_T_.fcsDebug.state);
-	    	//printf("%g, %g, %g, %g, %d\n",ExtY_fcsModel_T_.actuatorsCmds[0], ExtY_fcsModel_T_.actuatorsCmds[1], ExtY_fcsModel_T_.actuatorsCmds[2], ExtY_fcsModel_T_.actuatorsCmds[3], ExtY_fcsModel_T_.fcsDebug.state);
-	    	printf("############################################\n");
+	  //   if (remainder(loop_count, 50) == 0){
+	  //   	printf("Roll [deg]: %+7.3f, Pitch[deg]: %+7.3f, Yaw[deg]: %+7.3f\n", current_state(0)*RAD2DEG, current_state(1)*RAD2DEG, current_state(2)*RAD2DEG);
+	  //   	// printf("Pos N [m]: %+7.3f, Pos E [m]: %+7.3f, Pos D[m]: %+7.3f\n", current_state(6), current_state(7), current_state(8));
+	  //   	// printf("Vel N [m]: %+7.3f, Vel E [m]: %+7.3f, Vel D[m]: %+7.3f\n", current_state(9), current_state(10), current_state(11));
+	  //   	// printf("Throttle: %d, Roll: %d, Pitch: %d, Yaw: %d, Sw1: %d, Sw2: %d, Sw3: %d, State: %d\n", ExtU_fcsModel_T_->rcCmdsIn.throttleCmd_nd, ExtU_fcsModel_T_->rcCmdsIn.joystickXCmd_nd, 
+	  //   	// 	ExtU_fcsModel_T_->rcCmdsIn.joystickYCmd_nd, ExtU_fcsModel_T_->rcCmdsIn.joystickZCmd_nd, ExtU_fcsModel_T_->rcCmdsIn.rcSwitch1_nd, ExtU_fcsModel_T_->rcCmdsIn.rcSwitch2_nd, 
+	  //   	// 	ExtU_fcsModel_T_->rcCmdsIn.rcSwitch3_nd, ExtY_fcsModel_T_.fcsDebug.state);
+	  //   	// // printf("%g, %g, %g, %g, %d\n",ExtY_fcsModel_T_.actuatorsCmds[0], ExtY_fcsModel_T_.actuatorsCmds[1], ExtY_fcsModel_T_.actuatorsCmds[2], ExtY_fcsModel_T_.actuatorsCmds[3], ExtY_fcsModel_T_.fcsDebug.state);
+	  //   	printf("############################################\n");
+		// }
+
+		if(static_cast<uint8_t>(ExtY_fcsModel_T_.fcsDebug.state) != 0){
+			if(rcCmdsIn_.throttleCmd_nd <= PWM_CHECK_MIN_THRESHOLD){
+				pwm_out_val[0] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
+				pwm_out_val[1] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
+				pwm_out_val[2] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
+				pwm_out_val[3] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
+			}else{
+		  	pwm_out_val[0] = max(PWM_CMD_MIN_THRESHOLD, min(PWM_CMD_MAX_THRESHOLD, ExtY_fcsModel_T_.actuatorsCmds[0]*RPM_TO_PWM_SCALE + PWM_MIN_THRESHOLD));
+		  	pwm_out_val[1] = max(PWM_CMD_MIN_THRESHOLD, min(PWM_CMD_MAX_THRESHOLD, ExtY_fcsModel_T_.actuatorsCmds[3]*RPM_TO_PWM_SCALE + PWM_MIN_THRESHOLD));
+		  	pwm_out_val[2] = max(PWM_CMD_MIN_THRESHOLD, min(PWM_CMD_MAX_THRESHOLD, ExtY_fcsModel_T_.actuatorsCmds[1]*RPM_TO_PWM_SCALE + PWM_MIN_THRESHOLD));
+		  	pwm_out_val[3] = max(PWM_CMD_MIN_THRESHOLD, min(PWM_CMD_MAX_THRESHOLD, ExtY_fcsModel_T_.actuatorsCmds[2]*RPM_TO_PWM_SCALE + PWM_MIN_THRESHOLD));
+			}
+		}else{
+				pwm_out_val[0] = ExtY_fcsModel_T_.actuatorsCmds[0]*1.0;
+		  	pwm_out_val[1] = ExtY_fcsModel_T_.actuatorsCmds[3]*1.0;
+		  	pwm_out_val[2] = ExtY_fcsModel_T_.actuatorsCmds[1]*1.0;
+		  	pwm_out_val[3] = ExtY_fcsModel_T_.actuatorsCmds[2]*1.0;
 		}
+	  // if (remainder(loop_count, 50) == 0){
+	  // 	printf("%g, %g, %g, %g\n", ExtY_fcsModel_T_.actuatorsCmds[0], ExtY_fcsModel_T_.actuatorsCmds[1], ExtY_fcsModel_T_.actuatorsCmds[2], ExtY_fcsModel_T_.actuatorsCmds[3]);
+	  // 	// printf("%g, %g, %g, %g\n", pwm_out_val[0], pwm_out_val[1], pwm_out_val[2], pwm_out_val[3]);
+	  // }
+
+	  if( ExtY_fcsModel_T_.actuatorsCmds[0] > 1.0 && ExtY_fcsModel_T_.actuatorsCmds[1] > 1.0 && ExtY_fcsModel_T_.actuatorsCmds[2] > 1.0 &&
+	  	ExtY_fcsModel_T_.actuatorsCmds[3] > 1.0 ){
+	  	pwm_writer.SetPwmDutyCyle(pwm_out_val);
+	}
 
 		loop_count++;
 

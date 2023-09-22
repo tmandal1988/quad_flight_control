@@ -17,7 +17,8 @@ set(PROJECT_SOURCE_DIR
 )
 
 set(PROJECT_SOURCE
-    ${PROJECT_SOURCE_DIR}/motor_tests.cc
+	${PROJECT_SOURCE_DIR}/ekf_example.cc
+    #${PROJECT_SOURCE_DIR}/motor_tests.cc
 )
 
 set(PROJECT_LIBRARIES_DIR

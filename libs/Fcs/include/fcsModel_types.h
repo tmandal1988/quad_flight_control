@@ -3,9 +3,9 @@
 //
 // Code generated for Simulink model 'fcsModel'.
 //
-// Model version                  : 1.48
+// Model version                  : 1.51
 // Simulink Coder version         : 9.7 (R2022a) 13-Nov-2021
-// C/C++ source code generated on : Mon May  1 19:34:21 2023
+// C/C++ source code generated on : Fri Sep 22 15:02:49 2023
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM 7
@@ -252,10 +252,10 @@ struct busInnerLoopCtrlDebug
 #ifndef DEFINED_TYPEDEF_FOR_busFcsDebug_
 #define DEFINED_TYPEDEF_FOR_busFcsDebug_
 
-// Bus containing debug data from flight control system
+// Debug data from FCS
 struct busFcsDebug
 {
-  busInnerLoopCtrlDebug innerLoopCtrldebug;
+  busInnerLoopCtrlDebug innerLoopCtrlDebug;
   enumStateMachine state;
 };
 
@@ -287,6 +287,9 @@ struct busCtrlInputs
 
   // measurement data
   real_T meas;
+
+  // Flag to reset integrators
+  boolean_T integratorReset;
 
   // Command that the controller should track in tracking mode
   real_T trackingCtrlCmd;
@@ -379,14 +382,14 @@ struct struct_RgPxAEXAj72sD2xo4DfKOE
 
 #endif
 
-#ifndef DEFINED_TYPEDEF_FOR_struct_ek64hRkWPGOrPAEJD7wTRH_
-#define DEFINED_TYPEDEF_FOR_struct_ek64hRkWPGOrPAEJD7wTRH_
+#ifndef DEFINED_TYPEDEF_FOR_struct_9LceWAhDRL9ysxsUGETp8_
+#define DEFINED_TYPEDEF_FOR_struct_9LceWAhDRL9ysxsUGETp8_
 
-struct struct_ek64hRkWPGOrPAEJD7wTRH
+struct struct_9LceWAhDRL9ysxsUGETp8
 {
   struct_A1FBxl6bVqC2yteQsTJPYF cmdLimits;
   std::array<real_T, 2> pwmLimits;
-  std::array<real_T, 2> lowPwmThreshold;
+  real_T pwmMtrArm;
   struct_RgPxAEXAj72sD2xo4DfKOE coeffs;
 };
 

@@ -3,7 +3,8 @@
 GpsHelper::GpsHelper(size_t n_valid_gps_count, size_t n_gps_meas_count, uint16_t time_in_ms_bw_samples):
 n_valid_gps_count_(n_valid_gps_count),
 n_gps_meas_count_(n_gps_meas_count),
-time_in_ms_bw_samples_(time_in_ms_bw_samples){
+time_in_ms_bw_samples_(time_in_ms_bw_samples),
+ublox_check_flag(false){
     // Counter to keep track of how many valid llh position data was received from GPS during initialization
 	gps_pos_count_ = 0;
     // Counter to keep track of how many valid ned velocity data was received from GPS during initialization
@@ -27,6 +28,8 @@ time_in_ms_bw_samples_(time_in_ms_bw_samples){
     // Variable to indicate GpsReadLoop() to stop
 	stop_gps_read_loop_.store(false);
 
+	sigint_flag = 0;
+
     /* Variable to indicate which GPS measurement has been updated
 	first 3 indices are for position and last 3 indices are for velocities,
 	this is shared between threads while running GpsReadLoop()
@@ -37,20 +40,30 @@ time_in_ms_bw_samples_(time_in_ms_bw_samples){
 	}
 }
 
-void GpsHelper::InitializeGps(){
+void GpsHelper::InitializeGps(float wait_duration_sec){
 	// Test GPS connection
 	if(gps_.testConnection())
 	{
+		ublox_check_flag = true;
 		printf("Ublox test OK\n");
 		printf("\n");
 		if ( !gps_.configureSolutionRate(time_in_ms_bw_samples_) )
 		{
 			printf("Setting new rate: FAILED\n");
 		}
+	}else{
+		ublox_check_flag = false;
+		printf("Ublox test failed\n");
+		return;
 	}
 
+	// initialize the duration
+	// Recording the timestamp at the start of the code
+    auto start = chrono::high_resolution_clock::now();
+    auto duration = chrono::duration_cast<chrono::seconds>(start - start);
+
     // Run the loop till we have the desired number of llh position and NED velocity data for EKF initialization
-	while( (gps_pos_count_ < n_gps_meas_count_) || (gps_vel_count_ < n_gps_meas_count_) ){
+	while( (gps_pos_count_ < n_gps_meas_count_) || (gps_vel_count_ < n_gps_meas_count_) && duration.count() < wait_duration_sec ){
 		if  ( gps_3d_fix_ && ( gps_fix_count_ > n_valid_gps_count_ ) ){
 			if(GetLlhPos() && gps_pos_count_ < n_gps_meas_count_){
 				lat_ref_ += pos_data_[2];
@@ -92,6 +105,11 @@ void GpsHelper::InitializeGps(){
 		}
 		cout.flush();
 		cout<<"GPS INITIALIZATION PROGRESS: "<< ( (float)(gps_pos_count_ + gps_vel_count_) * 100 )/(2*n_gps_meas_count_)<<" %\r";
+		if(sigint_flag == 1)
+	   		break;
+
+	   	auto end = chrono::high_resolution_clock::now();
+	   	duration = chrono::duration_cast<chrono::seconds>(end - start);
     }// While loop
     printf("\n");
 
@@ -107,66 +125,71 @@ void GpsHelper::InitializeGps(){
 }
 
 void GpsHelper::GpsReadLoop(){
-	// Keep reading the GPS data forever
-	while(1){
-		// Set all the flags to false to show position and velocity data hasn't been received
-		{
-			unique_lock<mutex> gps_data_lock(gps_mutex_);
-			for( size_t idx_meas = 0; idx_meas < 6; idx_meas++ ){
-				gps_meas_indices_[idx_meas] = false;
-			}
-		}
-
-    	// // Check for llh position data if we have valid 3D GPS fix and number of 3D GPS fix is more than the required number of 3D GPS fixes
-    	if ( GetLlhPos() && gps_3d_fix_ && ( gps_fix_count_ > n_valid_gps_count_ ) )
-		{
-        	// Convert the current llh position to NED position
-			ned_pos_meas_ = Geodetic2Ned( pos_data_[2],
-				pos_data_[1],
-				pos_data_[3], 
-				lat_ref_, 
-				lon_ref_,
-				height_ref_);
-        	// Set the flags to indicate llh position data is updated and assign data position data to the variables shared
-        	// between threads
+	if(ublox_check_flag){
+		// Keep reading the GPS data forever
+		while(1){
+			// Set all the flags to false to show position and velocity data hasn't been received
 			{
 				unique_lock<mutex> gps_data_lock(gps_mutex_);
-				for( size_t idx_meas = 0; idx_meas < 3; idx_meas++ ){
-					gps_meas_indices_[idx_meas] = true;
-					ned_pos_and_vel_meas_[idx_meas] = ned_pos_meas_(idx_meas);
+				for( size_t idx_meas = 0; idx_meas < 6; idx_meas++ ){
+					gps_meas_indices_[idx_meas] = false;
 				}
 			}
-		}
 
-    	// Check for NED velocity data if we have valid 3D GPS fix and number of 3D GPS fix is more than the required number of 3D GPS fixes
-		if ( GetNedVel() && gps_3d_fix_ && ( gps_fix_count_ > n_valid_gps_count_ ) )
-		{
-        	// Set the flags to indicate NED velocity data is updated and assign data position data to the variables shared
-        	// between threads
-			unique_lock<mutex> gps_data_lock(gps_mutex_);
-			for( size_t idx_meas = 3; idx_meas < 6; idx_meas++ ){
-				gps_meas_indices_[idx_meas] = true;
-				ned_pos_and_vel_meas_[idx_meas] = (float)(vel_data_[idx_meas - 2]);
+	    	// // Check for llh position data if we have valid 3D GPS fix and number of 3D GPS fix is more than the required number of 3D GPS fixes
+	    	if ( GetLlhPos() && gps_3d_fix_ && ( gps_fix_count_ > n_valid_gps_count_ ) )
+			{
+	        	// Convert the current llh position to NED position
+				ned_pos_meas_ = Geodetic2Ned( pos_data_[2],
+					pos_data_[1],
+					pos_data_[3], 
+					lat_ref_, 
+					lon_ref_,
+					height_ref_);
+	        	// Set the flags to indicate llh position data is updated and assign data position data to the variables shared
+	        	// between threads
+				{
+					unique_lock<mutex> gps_data_lock(gps_mutex_);
+					for( size_t idx_meas = 0; idx_meas < 3; idx_meas++ ){
+						gps_meas_indices_[idx_meas] = true;
+						ned_pos_and_vel_meas_[idx_meas] = ned_pos_meas_(idx_meas);
+					}
+				}
 			}
-		}
 
-    	// Verify that we have valid 3D GPS fix
-		if (GetFixStatus()){
-			if ( (int)fix_data_[0] == GPS3DFIXID ){
-				if (gps_fix_count_ <= n_valid_gps_count_)
-					gps_fix_count_++;
-				gps_3d_fix_ = true;
-			}else{
-				if (gps_fix_count_ != 0)
-					gps_fix_count_--;
-				gps_3d_fix_ = false;
+	    	// Check for NED velocity data if we have valid 3D GPS fix and number of 3D GPS fix is more than the required number of 3D GPS fixes
+			if ( GetNedVel() && gps_3d_fix_ && ( gps_fix_count_ > n_valid_gps_count_ ) )
+			{
+	        	// Set the flags to indicate NED velocity data is updated and assign data position data to the variables shared
+	        	// between threads
+				unique_lock<mutex> gps_data_lock(gps_mutex_);
+				for( size_t idx_meas = 3; idx_meas < 6; idx_meas++ ){
+					gps_meas_indices_[idx_meas] = true;
+					ned_pos_and_vel_meas_[idx_meas] = (float)(vel_data_[idx_meas - 2]);
+				}
 			}
-		}
 
-		if(stop_gps_read_loop_.load()){
-			break;
-		}
-    }// While loop
+	    	// Verify that we have valid 3D GPS fix
+			if (GetFixStatus()){
+				if ( (int)fix_data_[0] == GPS3DFIXID ){
+					if (gps_fix_count_ <= n_valid_gps_count_)
+						gps_fix_count_++;
+					gps_3d_fix_ = true;
+				}else{
+					if (gps_fix_count_ != 0)
+						gps_fix_count_--;
+					gps_3d_fix_ = false;
+				}
+			}
+
+			if(stop_gps_read_loop_.load()){
+				break;
+			}
+
+			if(sigint_flag == 1)
+		   		break;
+	    }// While loop
+	}
 }// GpsReadLoop function
 
 bool GpsHelper::GetFixStatus(){

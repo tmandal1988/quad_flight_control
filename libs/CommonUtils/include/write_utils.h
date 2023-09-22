@@ -22,7 +22,7 @@ class WriteHelper{
 		// Thread to loop and data to file
 		void StopWriteLoop();
 		void UpdateDataBuffer(long long dt_ms, size_t count, float imu_data[9], MatrixInv<float> sensor_meas, MatrixInv<float> ekf_current_state, 
-			bool gps_valid_flag[6], const FcsOutput &fcs_output);
+			bool gps_valid_flag[6], int* const& rc_periods, const FcsOutput &fcs_output);
 		void StartFileWriteThread();
 	private:
 		// Thread to write file

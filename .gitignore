@@ -14,3 +14,7 @@ build
 *.dat
 # Don't include MAC auto files
 ._*
+# Don't include tags
+tag
+# Don't include ctags
+.ctags

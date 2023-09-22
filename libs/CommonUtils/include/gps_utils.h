@@ -6,11 +6,13 @@
 #include<constants.h>
 #include<coordinate_transformation.h>
 
+#include <chrono>
 #include<vector>
 #include<atomic>
 #include<mutex>
 #include<thread>
 #include<pthread.h>
+#include<signal.h>
 
 //https://content.u-blox.com/sites/default/files/products/documents/u-blox8-M8_ReceiverDescrProtSpec_UBX-13003221.pdf
 using namespace std;
@@ -26,7 +28,7 @@ class GpsHelper{
 		~GpsHelper();
 
 		// To initialize the GPS
-		void InitializeGps();
+		void InitializeGps(float wait_duration_sec);
 
 		// Useful function that can be used to read GPS data in a loop at the configured rate
 		// This function can be passed to a thread to update position and velocity data in thread safe way
@@ -118,11 +120,16 @@ class GpsHelper{
 		*/
 	    bool gps_meas_indices_[6];
 
+	    bool ublox_check_flag;
+
 	    // Function to get fix status
 	    bool GetFixStatus();
 	    // Function to get NED Velocity
 	    bool GetNedVel();
 	    // Function to get llh position
 	    bool GetLlhPos();
+
+	    // To catch SIGINT
+		volatile sig_atomic_t sigint_flag;
 };
 #endif
