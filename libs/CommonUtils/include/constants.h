@@ -5,5 +5,6 @@
 #define PIx2 				6.28318530717959
 #define RAD2DEG			    57.2957795130823
 #define DEG2RAD 			0.0174532925199433
+#define G_SI 				9.80665
 
 #endif

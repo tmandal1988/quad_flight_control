@@ -5,6 +5,7 @@
 #include "Navio/Common/MPU9250.h"
 #include "Navio/Navio2/LSM9DS1.h"
 #include<Matrix/matrix_inv_class.h>
+#include<constants.h>
 
 #include<cmath>
 #include<memory>
@@ -17,6 +18,7 @@ class ImuHelper{
 		~ImuHelper();
 		void GetInertialSensor();
 		void InitializeImu();
+		void SetGyroOffset(size_t num_samples);
 		float* ComputeInitialRollPitchAndYaw(size_t num_samples);
 		MatrixInv<float> CorrectMagData(MatrixInv<float> mag_vector);
 		MatrixInv<float> GetMag3DTo2DProj(float roll, float pitch);
@@ -27,6 +29,11 @@ class ImuHelper{
 			MAG_OFFSET_ = mag_offset;
 			MAG_SCALE_ = mag_scale;
 		}
+		void MahonyFilterQuat(const float* imu_data, float twoKi, float twoKp, float sample_time_s, float (&quat)[4]);
+		void MahonyFilter9Dof(const float* imu_data, float twoKi, float twoKp, float sample_time_s, float (&quat)[4]);
+		void MahonyFilter6Dof(const float* imu_data, float twoKi, float twoKp, float sample_time_s, float (&quat)[4]);
+		void GetEuler(float (&quat)[4], float (&mh_euler)[3]);
+		float InvSqrt(float x);
 
 	private:
 		unique_ptr<InertialSensor> imu_sensor_;
@@ -39,6 +46,9 @@ class ImuHelper{
 		float gyro_[3];
     	//Mags
 		float mag_[3];
+
+		// Gyro offsets
+		float gyro_offset_[3];
 
 		// Initial roll, pitch and yaw
 		float init_att_[3];
@@ -53,6 +63,7 @@ class ImuHelper{
 		MatrixInv<float> MAG_OFFSET_;
 
 		void ReadRawImu();
+		
 };
 
 #endif

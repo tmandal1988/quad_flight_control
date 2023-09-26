@@ -27,6 +27,10 @@
 #include <sys/mman.h>
 #include <iterator>
 
+// Flags to use EKF or Mahony
+bool use_mahony_filter = true;
+bool use_ekf = false;
+
 static fcsModel fcsModel_Obj;          // Instance of FCS model class
 
 // To catch SIGINT
@@ -77,19 +81,28 @@ int main(int argc, char *argv[]){
     }
 
 	// Register signals 
-  	signal(SIGINT, sigint_handler); 
+	signal(SIGINT, sigint_handler); 
 
-    // Variables to read data from the IMU
-    // Accels
-    float accel[3];
-    //Gyros
-    float gyro[3];
-    //Mags
-    float mag[3];
+  // Variables to read data from the IMU
+  // Accels
+  float accel[3];
+  //Gyros
+  float gyro[3];
+  //Mags
+  float mag[3];
 
-  // Initial State Variable
-  MatrixInv<float> initial_state(15, 1);
-    // Variable used in the measurement update of the EKF
+	//Quat
+	float quat[4] = {0};
+	quat[0] = 1;
+	float mh_euler[3] = {0};
+
+
+  // Initial State Variable for EKF
+	MatrixInv<float> initial_state(15, 1);
+	// Variable to store current state at the end of each EKF run
+	MatrixInv<float> current_state(15, 1);
+  
+  // Variable used in the measurement update of the EKF
 	MatrixInv<float> sensor_meas(9, 1);
 	// Sensor values used in the time propagation stage of the EKF
 	MatrixInv<float> state_sensor_val(6, 1);
@@ -106,10 +119,8 @@ int main(int argc, char *argv[]){
 	meas_noise_r.Diag({0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01});
 	// P init
 	initial_covariance_p.Diag({30*DEG2RAD, 30*DEG2RAD, 30*DEG2RAD, 0.01, 0.01, 0.01, 100, 100, 100,
-							   10, 10, 10, 0.1, 0.1, 0.1});
+							   10, 10, 10, 0.1, 0.1, 0.1});	
 
-	// Variable to store current state at the end of each EKF run
-	MatrixInv<float> current_state(15, 1);
 
 	// NED to BODY DCM
 	MatrixInv<float> c_ned2b;
@@ -135,6 +146,19 @@ int main(int argc, char *argv[]){
 
 	// Initial attitude and NED velocity
 	float* init_att = imu_reader.ComputeInitialRollPitchAndYaw(200);
+	quat[0] = cos(init_att[2]/2)*cos(init_att[1]/2)*cos(init_att[0]/2) + sin(init_att[2]/2)*sin(init_att[1]/2)*sin(init_att[0]/2);
+  quat[1] = cos(init_att[2]/2)*cos(init_att[1]/2)*sin(init_att[0]/2) - sin(init_att[2]/2)*sin(init_att[1]/2)*cos(init_att[0]/2);
+  quat[2] = cos(init_att[2]/2)*sin(init_att[1]/2)*cos(init_att[0]/2) + sin(init_att[2]/2)*cos(init_att[1]/2)*sin(init_att[0]/2);
+  quat[3] = sin(init_att[2]/2)*cos(init_att[1]/2)*cos(init_att[0]/2) - cos(init_att[2]/2)*sin(init_att[1]/2)*sin(init_att[0]/2);
+
+  float qInvSqrt = imu_reader.InvSqrt(quat[0] * quat[0] + quat[1] * quat[1] + quat[2] * quat[2] + quat[3] * quat[3]);
+  quat[0] *= qInvSqrt;
+  quat[1] *= qInvSqrt;
+  quat[2] *= qInvSqrt;
+  quat[3] *= qInvSqrt;
+
+ 	imu_reader.SetGyroOffset(100);
+
 
 	gps_reader.InitializeGps(30);
 	gps_reader.CreateGpsThread();
@@ -224,27 +248,38 @@ int main(int argc, char *argv[]){
     	// Read IMU data
 	    imu_data = imu_reader.GetImuData();
 
-	    // Assign required sensor value for time propagation of the ekf state and measurement update
-	    for(size_t imu_idx = 0; imu_idx < 3; imu_idx++){
-	    	state_sensor_val(imu_idx) = imu_data[imu_idx];
-	    	state_sensor_val(imu_idx + 3) = imu_data[imu_idx + 3];
-	    	sensor_meas(imu_idx) =  imu_data[imu_idx + 6];
-	    }
-
 	    gps_reader.GetRawLatLonAlt(raw_lat_lon_alt);
-	    gps_reader.GetGpsNedPosAndVel(ned_pos_and_vel_meas, gps_meas_indices);
-	    // Check if GPS position and velocity has been update and set appropriate flags
-	    for(size_t idx_meas = 0; idx_meas < 6; idx_meas++){
-	    	if(gps_meas_indices[idx_meas]){
-	    		sensor_meas(idx_meas + 3) = ned_pos_and_vel_meas[idx_meas];
-	    		meas_indices[idx_meas + 1] = true;
-	    	}
-	    }
+		  gps_reader.GetGpsNedPosAndVel(ned_pos_and_vel_meas, gps_meas_indices);
 
-	   	// Run one step of EKF
-	    imu_gps_ekf.Run(state_sensor_val, sensor_meas, meas_indices);
-	    // Get the state after EKF run
-      current_state = imu_gps_ekf.GetCurrentState();
+	    if (use_ekf){
+		    // Assign required sensor value for time propagation of the ekf state and measurement update
+		    for(size_t imu_idx = 0; imu_idx < 3; imu_idx++){
+		    	state_sensor_val(imu_idx) = imu_data[imu_idx];
+		    	state_sensor_val(imu_idx + 3) = imu_data[imu_idx + 3];
+		    	sensor_meas(imu_idx) =  imu_data[imu_idx + 6];
+		    }
+		    
+		    // Check if GPS position and velocity has been update and set appropriate flags
+		    for(size_t idx_meas = 0; idx_meas < 6; idx_meas++){
+		    	if(gps_meas_indices[idx_meas]){
+		    		sensor_meas(idx_meas + 3) = ned_pos_and_vel_meas[idx_meas];
+		    		meas_indices[idx_meas + 1] = true;
+		    	}
+		    }
+
+		   	// Run one step of EKF
+		    imu_gps_ekf.Run(state_sensor_val, sensor_meas, meas_indices);
+		    // Get the state after EKF run
+	      current_state = imu_gps_ekf.GetCurrentState();
+    	}
+
+    	if (use_mahony_filter){
+    		imu_reader.MahonyFilter6Dof(imu_data, 0.0, 2.0, 0.004, quat);
+    		imu_reader.GetEuler(quat, mh_euler);
+    		if (remainder(loop_count, 50) == 0){
+    			printf("Roll [deg]: %+7.3f, Pitch[deg]: %+7.3f, Yaw[deg]: %+7.3f\n", mh_euler[0], mh_euler[1], mh_euler[2]);
+    		}
+    	}
 
       //########################################
       // Assign the state values to the model input structure
