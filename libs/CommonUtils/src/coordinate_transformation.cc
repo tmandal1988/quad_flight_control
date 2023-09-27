@@ -87,3 +87,16 @@ MatrixInv<float> GetDcm(float roll, float pitch, float yaw){
 
 	return c_ned2b;
 }
+
+void GetEulerFromQuat(const float (&quat)[4], float (&euler)[3]){
+	euler[0] = -atan2( 2*( quat[0]*quat[1] + quat[2]*quat[3] ), -1 + 2*( quat[1]*quat[1] + quat[2]*quat[2] ) );
+   	euler[1] = -asin( 2*( quat[0]*quat[2] - quat[3]*quat[1] ) );
+   	euler[2] = atan2( 2*( quat[0]*quat[3] + quat[1]*quat[2] ), 1-2*( quat[2]*quat[2] + quat[3]*quat[3] ) );
+}
+
+void GetQuatFromEuler(const float (&euler)[3], float (&quat)[4]){
+	quat[0] = cos(euler[2]/2)*cos(euler[1]/2)*cos(euler[0]/2) + sin(euler[2]/2)*sin(euler[1]/2)*sin(euler[0]/2);
+  	quat[1] = cos(euler[2]/2)*cos(euler[1]/2)*sin(euler[0]/2) - sin(euler[2]/2)*sin(euler[1]/2)*cos(euler[0]/2);
+  	quat[2] = cos(euler[2]/2)*sin(euler[1]/2)*cos(euler[0]/2) + sin(euler[2]/2)*cos(euler[1]/2)*sin(euler[0]/2);
+  	quat[3] = sin(euler[2]/2)*cos(euler[1]/2)*cos(euler[0]/2) - cos(euler[2]/2)*sin(euler[1]/2)*sin(euler[0]/2);
+}

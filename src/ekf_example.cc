@@ -12,6 +12,7 @@
 #include <gps_utils.h>
 #include <write_utils.h>
 #include <imu_utils.h>
+#include <mahony_filter.h>
 #include <rc_input_utils.h>
 #include <pwm_output_utils.h>
 // Standard C++ Libraries file, time and memory
@@ -88,6 +89,7 @@ int main(int argc, char *argv[]){
   float accel[3];
   //Gyros
   float gyro[3];
+  float gyro_offset[3];
   //Mags
   float mag[3];
 
@@ -145,19 +147,17 @@ int main(int argc, char *argv[]){
 	imu_reader.SetMagParams(magnetic_declination , mag_a, mag_offset, mag_scale);
 
 	// Initial attitude and NED velocity
+	imu_reader.ComputeGyroOffset(100);
+	imu_reader.GetGyroOffset(gyro_offset);
 	float* init_att = imu_reader.ComputeInitialRollPitchAndYaw(200);
-	quat[0] = cos(init_att[2]/2)*cos(init_att[1]/2)*cos(init_att[0]/2) + sin(init_att[2]/2)*sin(init_att[1]/2)*sin(init_att[0]/2);
-  quat[1] = cos(init_att[2]/2)*cos(init_att[1]/2)*sin(init_att[0]/2) - sin(init_att[2]/2)*sin(init_att[1]/2)*cos(init_att[0]/2);
-  quat[2] = cos(init_att[2]/2)*sin(init_att[1]/2)*cos(init_att[0]/2) + sin(init_att[2]/2)*cos(init_att[1]/2)*sin(init_att[0]/2);
-  quat[3] = sin(init_att[2]/2)*cos(init_att[1]/2)*cos(init_att[0]/2) - cos(init_att[2]/2)*sin(init_att[1]/2)*sin(init_att[0]/2);
+	float init_att_array[3];
+	init_att_array[0] = init_att[0];
+	init_att_array[1] = init_att[1];
+	init_att_array[2] = init_att[2];
 
-  float qInvSqrt = imu_reader.InvSqrt(quat[0] * quat[0] + quat[1] * quat[1] + quat[2] * quat[2] + quat[3] * quat[3]);
-  quat[0] *= qInvSqrt;
-  quat[1] *= qInvSqrt;
-  quat[2] *= qInvSqrt;
-  quat[3] *= qInvSqrt;
+  GetQuatFromEuler(init_att_array, quat);
 
- 	imu_reader.SetGyroOffset(100);
+  MahonyFilter m_filt(0.0, 2.0, 0.004, quat);	
 
 
 	gps_reader.InitializeGps(30);
@@ -274,11 +274,15 @@ int main(int argc, char *argv[]){
     	}
 
     	if (use_mahony_filter){
-    		imu_reader.MahonyFilter6Dof(imu_data, 0.0, 2.0, 0.004, quat);
-    		imu_reader.GetEuler(quat, mh_euler);
-    		if (remainder(loop_count, 50) == 0){
-    			printf("Roll [deg]: %+7.3f, Pitch[deg]: %+7.3f, Yaw[deg]: %+7.3f\n", mh_euler[0], mh_euler[1], mh_euler[2]);
-    		}
+    		m_filt.MahonyFilter9Dof(imu_data, gyro_offset);
+    		m_filt.GetCurrentQuat(quat);
+    		GetEulerFromQuat(quat, mh_euler);
+    		current_state(0) = mh_euler[0];
+    		current_state(1) = mh_euler[1];
+    		current_state(2) = mh_euler[2];
+    		// if (remainder(loop_count, 50) == 0){
+    		// 	printf("Roll [deg]: %+7.3f, Pitch[deg]: %+7.3f, Yaw[deg]: %+7.3f\n", mh_euler[0]*180/3.14, mh_euler[1]*180/3.14, mh_euler[2]*180/3.14);
+    		// }
     	}
 
       //########################################

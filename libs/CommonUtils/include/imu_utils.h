@@ -18,7 +18,8 @@ class ImuHelper{
 		~ImuHelper();
 		void GetInertialSensor();
 		void InitializeImu();
-		void SetGyroOffset(size_t num_samples);
+		void ComputeGyroOffset(size_t num_samples);
+		void GetGyroOffset(float (&gyro_offset)[3]);
 		float* ComputeInitialRollPitchAndYaw(size_t num_samples);
 		MatrixInv<float> CorrectMagData(MatrixInv<float> mag_vector);
 		MatrixInv<float> GetMag3DTo2DProj(float roll, float pitch);
@@ -29,11 +30,6 @@ class ImuHelper{
 			MAG_OFFSET_ = mag_offset;
 			MAG_SCALE_ = mag_scale;
 		}
-		void MahonyFilterQuat(const float* imu_data, float twoKi, float twoKp, float sample_time_s, float (&quat)[4]);
-		void MahonyFilter9Dof(const float* imu_data, float twoKi, float twoKp, float sample_time_s, float (&quat)[4]);
-		void MahonyFilter6Dof(const float* imu_data, float twoKi, float twoKp, float sample_time_s, float (&quat)[4]);
-		void GetEuler(float (&quat)[4], float (&mh_euler)[3]);
-		float InvSqrt(float x);
 
 	private:
 		unique_ptr<InertialSensor> imu_sensor_;
