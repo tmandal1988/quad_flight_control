@@ -225,20 +225,37 @@ int main(int argc, char *argv[]){
 
 	// Loop counter
 	size_t loop_count = 0;
+	// 50 Hz flag
+	bool fifty_hz_flag = false;
 	// initialize the duration
 	chrono::microseconds delta (4000); 
 	auto duration = chrono::duration_cast<chrono::microseconds> (delta);
+	auto duration_count = duration.count();
 	// start time
 	auto time_point_start = chrono::high_resolution_clock::now();
 	chrono::microseconds time_start_us = chrono::duration_cast<chrono::microseconds>(time_point_start.time_since_epoch());
 	auto time_start_us_count = time_start_us.count();
+
+	// Loop timers
+	chrono::high_resolution_clock::time_point loop_start;
+	chrono::high_resolution_clock::time_point loop_end;
+	// long long time_since_loop_start_us;
+	// long long loop_start_us;
+
 	// loop
     while(1) {
-    	auto loop_start = chrono::high_resolution_clock::now();
-    	auto time_since_loop_start_us = chrono::duration_cast<chrono::microseconds>(loop_start.time_since_epoch()).count();
-    	while (  time_since_loop_start_us < (time_start_us_count + 4000) ){
-    		time_since_loop_start_us = chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now().time_since_epoch()).count();
+    	/* Check if the current loop count is a multiple of 5 which will give a 50hz loop as main loop
+    	runs at 250Hz
+    	*/
+    	if(remainder(loop_count, 5) == 0){
+    		fifty_hz_flag = true;
+    	}else{
+    		fifty_hz_flag = false;
     	}
+
+    	/* With till 4000us has passed
+    	*/
+    	loop_start = chrono::high_resolution_clock::now();
 
     	// Make all the measurement flags corresponding to position and velocity false
 			for( size_t idx_meas = 1; idx_meas < 7; idx_meas++ ){
@@ -280,7 +297,7 @@ int main(int argc, char *argv[]){
     		current_state(0) = mh_euler[0];
     		current_state(1) = mh_euler[1];
     		current_state(2) = mh_euler[2];
-    		// if (remainder(loop_count, 50) == 0){
+    		// if (fifty_hz_flag){
     		// 	printf("Roll [deg]: %+7.3f, Pitch[deg]: %+7.3f, Yaw[deg]: %+7.3f\n", mh_euler[0]*180/3.14, mh_euler[1]*180/3.14, mh_euler[2]*180/3.14);
     		// }
     	}
@@ -289,7 +306,8 @@ int main(int argc, char *argv[]){
       // Assign the state values to the model input structure
       for(size_t idx = 0; idx < 3; idx++){
       	stateEstimate_.attitude_rad[idx] = current_state(idx);
-      	stateEstimate_.bodyAngRates_radps[idx] = ( state_sensor_val(idx) - current_state(idx + 3) );
+      	// stateEstimate_.bodyAngRates_radps[idx] = ( state_sensor_val(idx) - current_state(idx + 3) );
+      	stateEstimate_.bodyAngRates_radps[idx] = state_sensor_val(idx) - gyro_offset[idx];
       	stateEstimate_.nedVel_mps[idx] = current_state(idx + 9);
       }
 
@@ -314,7 +332,7 @@ int main(int argc, char *argv[]){
       ExtU_fcsModel_T_->stateEstimate = stateEstimate_;
 
       // Get RC Data
-      if (remainder(loop_count, 5) == 0){
+      if (fifty_hz_flag){
       	rc_periods = rc_reader.GetRcPeriods();
       	rcCmdsIn_.throttleCmd_nd = rc_periods[2];
       	rcCmdsIn_.joystickYCmd_nd = rc_periods[1];
@@ -339,8 +357,8 @@ int main(int argc, char *argv[]){
   		}
 
 
-      if(remainder(loop_count, 5) == 0){
-        	data_writer.UpdateDataBuffer(duration.count(), loop_count, imu_data, sensor_meas, current_state, gps_meas_indices, rc_periods, ExtY_fcsModel_T_);
+      if(fifty_hz_flag){
+        	data_writer.UpdateDataBuffer(duration_count, loop_count, imu_data, sensor_meas, current_state, gps_meas_indices, rc_periods, ExtY_fcsModel_T_);
 	    }
 
 	  //   if (remainder(loop_count, 50) == 0){
@@ -380,18 +398,22 @@ int main(int argc, char *argv[]){
 	  if( ExtY_fcsModel_T_.actuatorsCmds[0] > 1.0 && ExtY_fcsModel_T_.actuatorsCmds[1] > 1.0 && ExtY_fcsModel_T_.actuatorsCmds[2] > 1.0 &&
 	  	ExtY_fcsModel_T_.actuatorsCmds[3] > 1.0 ){
 	  	pwm_writer.SetPwmDutyCyle(pwm_out_val);
-	}
+		}
 
 		loop_count++;
 
-	    // Get the stop time and compute the duration
-	    auto loop_end = std::chrono::high_resolution_clock::now();
+    // Get the stop time and compute the duration
+    loop_end = std::chrono::high_resolution_clock::now();
 
-	    duration = chrono::duration_cast<chrono::microseconds>(loop_end - loop_start);
-	    time_start_us_count = time_start_us_count + 4000;
-	   	//cout<<loop_count<<"\n";
-	   	if(sigint_flag == 1)
-	   		break;
+    duration_count = chrono::duration_cast<chrono::microseconds>(loop_end - loop_start).count();
+    while(duration_count < 4000){
+    	duration_count = chrono::duration_cast<chrono::microseconds>(std::chrono::high_resolution_clock::now() - loop_start).count();
+    }
+    // duration_count = duration.count();
+    // time_start_us_count = time_start_us_count + 4000;
+   	//cout<<loop_count<<"\n";
+   	if(sigint_flag == 1)
+   		break;
 	}
 	return 0;
 }

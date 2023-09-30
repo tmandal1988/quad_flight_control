@@ -3,9 +3,9 @@
 //
 // Code generated for Simulink model 'fcsModel'.
 //
-// Model version                  : 1.51
+// Model version                  : 1.59
 // Simulink Coder version         : 9.7 (R2022a) 13-Nov-2021
-// C/C++ source code generated on : Fri Sep 22 15:02:49 2023
+// C/C++ source code generated on : Thu Sep 28 16:38:18 2023
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM 7
@@ -356,14 +356,16 @@ struct busRcOutCmds
 
 #endif
 
-#ifndef DEFINED_TYPEDEF_FOR_struct_A1FBxl6bVqC2yteQsTJPYF_
-#define DEFINED_TYPEDEF_FOR_struct_A1FBxl6bVqC2yteQsTJPYF_
+#ifndef DEFINED_TYPEDEF_FOR_struct_5FgSWMQlmJmj4xXmurngRB_
+#define DEFINED_TYPEDEF_FOR_struct_5FgSWMQlmJmj4xXmurngRB_
 
-struct struct_A1FBxl6bVqC2yteQsTJPYF
+struct struct_5FgSWMQlmJmj4xXmurngRB
 {
   std::array<real_T, 2> pitchRate_radps;
   std::array<real_T, 2> rollRate_radps;
   std::array<real_T, 2> yawRate_radps;
+  std::array<real_T, 2> pitch_rad;
+  std::array<real_T, 2> roll_rad;
   std::array<real_T, 2> zForce_N;
 };
 
@@ -382,12 +384,12 @@ struct struct_RgPxAEXAj72sD2xo4DfKOE
 
 #endif
 
-#ifndef DEFINED_TYPEDEF_FOR_struct_9LceWAhDRL9ysxsUGETp8_
-#define DEFINED_TYPEDEF_FOR_struct_9LceWAhDRL9ysxsUGETp8_
+#ifndef DEFINED_TYPEDEF_FOR_struct_IRXRNwOPQ4vCQfNg7QNIgD_
+#define DEFINED_TYPEDEF_FOR_struct_IRXRNwOPQ4vCQfNg7QNIgD_
 
-struct struct_9LceWAhDRL9ysxsUGETp8
+struct struct_IRXRNwOPQ4vCQfNg7QNIgD
 {
-  struct_A1FBxl6bVqC2yteQsTJPYF cmdLimits;
+  struct_5FgSWMQlmJmj4xXmurngRB cmdLimits;
   std::array<real_T, 2> pwmLimits;
   real_T pwmMtrArm;
   struct_RgPxAEXAj72sD2xo4DfKOE coeffs;

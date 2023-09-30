@@ -3,9 +3,9 @@
 //
 // Code generated for Simulink model 'fcsModel'.
 //
-// Model version                  : 1.51
+// Model version                  : 1.59
 // Simulink Coder version         : 9.7 (R2022a) 13-Nov-2021
-// C/C++ source code generated on : Fri Sep 22 15:02:49 2023
+// C/C++ source code generated on : Thu Sep 28 16:38:18 2023
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM 7
@@ -608,16 +608,16 @@ boolean_T fcsModel::fcsModel_checkRcCmds(const busRcInCmds
 // Model step function
 void fcsModel::step()
 {
+  std::array<real_T, 9> conversionMatrix;
   std::array<real_T, 3> rtb_ImpAsg_InsertedFor_angAccel;
+  std::array<real_T, 3> rtb_ImpAsg_InsertedFor_angRateC;
   std::array<busCtrlInputs, 3> rtb_ctrlInputsArray;
-  std::array<real_T, 3> rtb_momCmd_Nm;
   busPidDebug rtb_BusCreator_o;
   real_T pCmd;
+  real_T pCmd_tmp_tmp;
   real_T rCmd;
   real_T tCmd;
-  real_T tmp;
-  real_T tmp_0;
-  int32_T yCmd;
+  real_T yCmd;
   boolean_T resetIntegrator;
   enumStateMachine state;
 
@@ -844,7 +844,7 @@ void fcsModel::step()
     (fcsModel_U.rcCmdsIn.joystickXCmd_nd)));
 
   // 'interpretRcInputs_function:12' rcOutCmds.rollStick = (rCoeffs(1)*rCmd^3 + rCoeffs(2)*rCmd^2 + ... 
-  // 'interpretRcInputs_function:13'                           rCoeffs(3)*rCmd + rCoeffs(4))*rcParamsStruct.cmdLimits.rollRate_radps(2); 
+  // 'interpretRcInputs_function:13'                           rCoeffs(3)*rCmd + rCoeffs(4))*rcParamsStruct.cmdLimits.roll_rad(2); 
   // 'interpretRcInputs_function:15' pCoeffs = rcParamsStruct.coeffs.pitch_nd;
   //  Reverse the pitch cmd
   // 'interpretRcInputs_function:17' pCmd = double(rcInCmds.joystickYCmd_nd);
@@ -854,15 +854,17 @@ void fcsModel::step()
     (fcsModel_U.rcCmdsIn.joystickYCmd_nd)));
 
   // 'interpretRcInputs_function:20' rcOutCmds.pitchStick = -(pCoeffs(1)*pCmd^3 + pCoeffs(2)*pCmd^2 + ... 
-  // 'interpretRcInputs_function:21'                           pCoeffs(3)*pCmd + pCoeffs(4))*rcParamsStruct.cmdLimits.pitchRate_radps(2); 
+  // 'interpretRcInputs_function:21'                           pCoeffs(3)*pCmd + pCoeffs(4))*rcParamsStruct.cmdLimits.pitch_rad(2); 
   // 'interpretRcInputs_function:23' yCoeffs = rcParamsStruct.coeffs.yaw_nd;
   // 'interpretRcInputs_function:24' yCmd = min( rcParamsStruct.pwmLimits(2), ... 
   // 'interpretRcInputs_function:25'        max( rcParamsStruct.pwmLimits(1), double(rcInCmds.joystickZCmd_nd) ) ); 
-  yCmd = static_cast<int32_T>(std::fmin(2006.0, std::fmax(987.0, static_cast<
-    real_T>(fcsModel_U.rcCmdsIn.joystickZCmd_nd))));
+  yCmd = std::fmin(2006.0, std::fmax(987.0, static_cast<real_T>
+    (fcsModel_U.rcCmdsIn.joystickZCmd_nd)));
 
   // MATLAB Function: '<S3>/assembleOuterLoopToInnerLoopBus' incorporates:
+  //   BusCreator generated from: '<S3>/assembleOuterLoopToInnerLoopBus'
   //   Constant: '<S3>/Constant'
+  //   Inport: '<Root>/stateEstimate'
   //   MATLAB Function: '<S4>/Interpret RC In Cmds'
 
   // 'interpretRcInputs_function:26' rcOutCmds.yawStick = (yCoeffs(1)*yCmd^3 + yCoeffs(2)*yCmd^2 + ... 
@@ -882,26 +884,34 @@ void fcsModel::step()
   // '<S90>:1:6' outBus.attCtrlInputs.ctrlInputsArray(1).cmd = rcOutCmds.rollStick; 
   rtb_ctrlInputsArray[0].cmd = (((rCmd * rCmd * 1.0043823416568364E-5 +
     -2.2216571985540022E-9 * std::pow(rCmd, 3.0)) + -0.012613046004899127 * rCmd)
-    + 3.8187541282968023) * 3.1415926535897931;
+    + 3.8187541282968023) * 0.78539816339744828;
 
-  // '<S90>:1:7' outBus.attCtrlInputs.ctrlInputsArray(2).cmd = rcOutCmds.pitchStick; 
+  // '<S90>:1:7' outBus.attCtrlInputs.ctrlInputsArray(1).meas = stateEstimate.attitude_rad(1); 
+  rtb_ctrlInputsArray[0].meas = fcsModel_U.stateEstimate.attitude_rad[0];
+
+  // '<S90>:1:8' outBus.attCtrlInputs.ctrlInputsArray(2).cmd = rcOutCmds.pitchStick; 
   rtb_ctrlInputsArray[1].cmd = -(((pCmd * pCmd * 1.0043823416568364E-5 +
     -2.2216571985540022E-9 * std::pow(pCmd, 3.0)) + -0.012613046004899127 * pCmd)
+    + 3.8187541282968023) * 0.78539816339744828;
+
+  // '<S90>:1:9' outBus.attCtrlInputs.ctrlInputsArray(2).meas = stateEstimate.attitude_rad(2); 
+  rtb_ctrlInputsArray[1].meas = fcsModel_U.stateEstimate.attitude_rad[1];
+
+  // '<S90>:1:10' outBus.attCtrlInputs.ctrlInputsArray(3).cmd = rcOutCmds.yawStick; 
+  rtb_ctrlInputsArray[2].cmd = (((yCmd * yCmd * 1.0043823416568364E-5 +
+    -2.2216571985540022E-9 * std::pow(yCmd, 3.0)) + -0.012613046004899127 * yCmd)
     + 3.8187541282968023) * 3.1415926535897931;
 
-  // '<S90>:1:8' outBus.attCtrlInputs.ctrlInputsArray(3).cmd = rcOutCmds.yawStick; 
-  rtb_ctrlInputsArray[2].cmd = (((static_cast<real_T>(yCmd * yCmd) *
-    1.0043823416568364E-5 + -2.2216571985540022E-9 * std::pow(static_cast<real_T>
-    (yCmd), 3.0)) + -0.012613046004899127 * static_cast<real_T>(yCmd)) +
-    3.8187541282968023) * 3.1415926535897931;
+  // '<S90>:1:11' outBus.attCtrlInputs.ctrlInputsArray(3).meas = stateEstimate.attitude_rad(3); 
+  rtb_ctrlInputsArray[2].meas = fcsModel_U.stateEstimate.attitude_rad[2];
 
-  // '<S90>:1:10' outBus.attCtrlInputs.ctrlInputsArray(1).integratorReset = resetIntegrator; 
+  // '<S90>:1:13' outBus.attCtrlInputs.ctrlInputsArray(1).integratorReset = resetIntegrator; 
   rtb_ctrlInputsArray[0].integratorReset = resetIntegrator;
 
-  // '<S90>:1:11' outBus.attCtrlInputs.ctrlInputsArray(2).integratorReset = resetIntegrator; 
+  // '<S90>:1:14' outBus.attCtrlInputs.ctrlInputsArray(2).integratorReset = resetIntegrator; 
   rtb_ctrlInputsArray[1].integratorReset = resetIntegrator;
 
-  // '<S90>:1:12' outBus.attCtrlInputs.ctrlInputsArray(3).integratorReset = resetIntegrator; 
+  // '<S90>:1:15' outBus.attCtrlInputs.ctrlInputsArray(3).integratorReset = resetIntegrator; 
   rtb_ctrlInputsArray[2].integratorReset = resetIntegrator;
 
   // Outputs for Iterator SubSystem: '<S9>/For Each Subsystem' incorporates:
@@ -940,6 +950,9 @@ void fcsModel::step()
   // ForEachSliceAssignment generated from: '<S51>/pidDebug'
   fcsModel_Y.fcsDebug.innerLoopCtrlDebug.attCtrlDebug[0] = rtb_BusCreator_o;
 
+  // ForEachSliceAssignment generated from: '<S51>/angRateCmds_radps'
+  rtb_ImpAsg_InsertedFor_angRateC[0] = rCmd;
+
   // Outputs for Atomic SubSystem: '<S51>/Signal Conditioning Block'
   // ForEachSliceSelector generated from: '<S51>/ctrlInputs' incorporates:
   //   Inport: '<Root>/ctrlParams'
@@ -972,6 +985,9 @@ void fcsModel::step()
 
   // ForEachSliceAssignment generated from: '<S51>/pidDebug'
   fcsModel_Y.fcsDebug.innerLoopCtrlDebug.attCtrlDebug[1] = rtb_BusCreator_o;
+
+  // ForEachSliceAssignment generated from: '<S51>/angRateCmds_radps'
+  rtb_ImpAsg_InsertedFor_angRateC[1] = rCmd;
 
   // Outputs for Atomic SubSystem: '<S51>/Signal Conditioning Block'
   // ForEachSliceSelector generated from: '<S51>/ctrlInputs' incorporates:
@@ -1006,13 +1022,18 @@ void fcsModel::step()
   // ForEachSliceAssignment generated from: '<S51>/pidDebug'
   fcsModel_Y.fcsDebug.innerLoopCtrlDebug.attCtrlDebug[2] = rtb_BusCreator_o;
 
+  // ForEachSliceAssignment generated from: '<S51>/angRateCmds_radps'
+  rtb_ImpAsg_InsertedFor_angRateC[2] = rCmd;
+
   // End of Outputs for SubSystem: '<S9>/For Each Subsystem'
 
   // MATLAB Function: '<S8>/EulerRates2BodyRates' incorporates:
   //   Inport: '<Root>/stateEstimate'
+  //   SignalConversion generated from: '<S49>/ SFunction '
+  //   Switch: '<S9>/Switch'
 
-  // MATLAB Function 'EulerRates2BodyRates': '<S50>:1'
-  // '<S50>:1:3' bodyRates_radps = eulerRates2bodyRates_function(taitBryanRates_radps,shipOrientation_rad); 
+  // MATLAB Function 'EulerRates2BodyRates': '<S49>:1'
+  // '<S49>:1:3' bodyRates_radps = eulerRates2bodyRates_function(taitBryanRates_radps,shipOrientation_rad); 
   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   // Converts  rate of change of TaitBryan angles in the globle frame to
   // rotational rate of change in the body frame
@@ -1028,44 +1049,46 @@ void fcsModel::step()
   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   // 'eulerRates2bodyRates_function:18' roll = shipOrientation_rad(1);
   // 'eulerRates2bodyRates_function:19' pitch = shipOrientation_rad(2);
+  rCmd = fcsModel_U.stateEstimate.attitude_rad[1];
+
   // 'eulerRates2bodyRates_function:20' eps = 10^(-12);
   // 'eulerRates2bodyRates_function:21' limit = pi/740;
   // Check for pm pi/2 rotation to avoid NaNs
   // 'eulerRates2bodyRates_function:24' if( abs( abs(pitch)- pi/2 ) <= limit || abs( abs(pitch) - 3*pi/2 ) <= limit) 
-  rCmd = std::abs(fcsModel_U.stateEstimate.attitude_rad[1]);
-  if ((std::abs(rCmd - 1.5707963267948966) <= 0.004245395477824045) || (std::abs
-       (rCmd - 4.71238898038469) <= 0.004245395477824045)) {
+  pCmd_tmp_tmp = std::abs(fcsModel_U.stateEstimate.attitude_rad[1]);
+  if ((std::abs(pCmd_tmp_tmp - 1.5707963267948966) <= 0.004245395477824045) ||
+      (std::abs(pCmd_tmp_tmp - 4.71238898038469) <= 0.004245395477824045)) {
     // 'eulerRates2bodyRates_function:25' if((abs(pitch)- pi/2) <= 0 || (abs(pitch) - 3*pi/2) <= 0) 
     if (std::abs(fcsModel_U.stateEstimate.attitude_rad[1]) - 1.5707963267948966 <=
         0.0) {
       // 'eulerRates2bodyRates_function:26' pitch = sign(pitch)*( abs(pitch) - limit); 
       if (fcsModel_U.stateEstimate.attitude_rad[1] < 0.0) {
-        pCmd = -1.0;
+        rCmd = -1.0;
       } else {
-        pCmd = (fcsModel_U.stateEstimate.attitude_rad[1] > 0.0);
+        rCmd = (fcsModel_U.stateEstimate.attitude_rad[1] > 0.0);
       }
 
-      rCmd = (rCmd - 0.004245395477824045) * pCmd;
+      rCmd *= pCmd_tmp_tmp - 0.004245395477824045;
     } else if (std::abs(fcsModel_U.stateEstimate.attitude_rad[1]) -
                4.71238898038469 <= 0.0) {
       // 'eulerRates2bodyRates_function:26' pitch = sign(pitch)*( abs(pitch) - limit); 
       if (fcsModel_U.stateEstimate.attitude_rad[1] < 0.0) {
-        pCmd = -1.0;
+        rCmd = -1.0;
       } else {
-        pCmd = (fcsModel_U.stateEstimate.attitude_rad[1] > 0.0);
+        rCmd = (fcsModel_U.stateEstimate.attitude_rad[1] > 0.0);
       }
 
-      rCmd = (rCmd - 0.004245395477824045) * pCmd;
+      rCmd *= pCmd_tmp_tmp - 0.004245395477824045;
     } else {
       // 'eulerRates2bodyRates_function:27' else
       // 'eulerRates2bodyRates_function:28' pitch = sign(pitch)*( abs(pitch) + limit); 
       if (fcsModel_U.stateEstimate.attitude_rad[1] < 0.0) {
-        pCmd = -1.0;
+        rCmd = -1.0;
       } else {
-        pCmd = (fcsModel_U.stateEstimate.attitude_rad[1] > 0.0);
+        rCmd = (fcsModel_U.stateEstimate.attitude_rad[1] > 0.0);
       }
 
-      rCmd = (rCmd + 0.004245395477824045) * pCmd;
+      rCmd *= pCmd_tmp_tmp + 0.004245395477824045;
     }
   }
 
@@ -1074,10 +1097,18 @@ void fcsModel::step()
   // 'eulerRates2bodyRates_function:34'     0, cos(roll), sin(roll)*cos(pitch);
   // 'eulerRates2bodyRates_function:35'     0, -sin(roll), cos(roll)*cos(pitch)]; 
   pCmd = std::sin(fcsModel_U.stateEstimate.attitude_rad[0]);
+  yCmd = std::cos(fcsModel_U.stateEstimate.attitude_rad[0]);
+  pCmd_tmp_tmp = std::cos(rCmd);
+  conversionMatrix[0] = 1.0;
+  conversionMatrix[3] = 0.0;
+  conversionMatrix[6] = -std::sin(rCmd);
+  conversionMatrix[1] = 0.0;
+  conversionMatrix[4] = yCmd;
+  conversionMatrix[7] = pCmd * pCmd_tmp_tmp;
+  conversionMatrix[2] = 0.0;
+  conversionMatrix[5] = -pCmd;
+  conversionMatrix[8] = yCmd * pCmd_tmp_tmp;
 
-  // End of MATLAB Function: '<S8>/EulerRates2BodyRates'
-
-  // Switch: '<S8>/Switch'
   // 'eulerRates2bodyRates_function:37' conversionMatrix = zeroSmallValues(conversionMatrix,eps); 
   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   // sets values in the M = zero if abs(values) is below this_eps
@@ -1089,18 +1120,43 @@ void fcsModel::step()
   // 'zeroSmallValues:10' for ii=1:size(M,1)
   // Convert rotation rate to change in TaitBryan angles
   // 'eulerRates2bodyRates_function:40' bodyRates_radps =  conversionMatrix * taitBryanRates_radps; 
-  rtb_ImpAsg_InsertedFor_angAccel[0] = rtb_ctrlInputsArray[0].cmd;
-  rtb_ImpAsg_InsertedFor_angAccel[1] = rtb_ctrlInputsArray[1].cmd;
-  rtb_ImpAsg_InsertedFor_angAccel[2] = rtb_ctrlInputsArray[2].cmd;
-  for (yCmd = 0; yCmd < 3; yCmd++) {
-    // Switch: '<S8>/Switch' incorporates:
-    //   DiscreteTransferFcn: '<S1>/Discrete Transfer Fcn'
-    //   Product: '<S2>/Matrix Multiply'
-    //
+  rCmd = rtb_ImpAsg_InsertedFor_angRateC[0];
+  pCmd = rtb_ImpAsg_InsertedFor_angRateC[1];
+  yCmd = rtb_ctrlInputsArray[2].cmd;
+  for (int32_T ii{0}; ii < 3; ii++) {
     // 'zeroSmallValues:11' for jj = 1:size(M,2)
+    pCmd_tmp_tmp = conversionMatrix[ii];
+
     // 'zeroSmallValues:12' if(abs(M(ii,jj))<= abs(eps))
-    rtb_momCmd_Nm[yCmd] = rtb_ImpAsg_InsertedFor_angAccel[yCmd];
+    if (pCmd_tmp_tmp <= 1.0E-12) {
+      // 'zeroSmallValues:13' M(ii,jj) = 0;
+      pCmd_tmp_tmp = 0.0;
+    }
+
+    conversionMatrix[ii] = pCmd_tmp_tmp;
+    pCmd_tmp_tmp = conversionMatrix[ii + 3];
+
+    // 'zeroSmallValues:12' if(abs(M(ii,jj))<= abs(eps))
+    if (std::abs(pCmd_tmp_tmp) <= 1.0E-12) {
+      // 'zeroSmallValues:13' M(ii,jj) = 0;
+      pCmd_tmp_tmp = 0.0;
+    }
+
+    conversionMatrix[ii + 3] = pCmd_tmp_tmp;
+    pCmd_tmp_tmp = conversionMatrix[ii + 6];
+
+    // 'zeroSmallValues:12' if(abs(M(ii,jj))<= abs(eps))
+    if (std::abs(pCmd_tmp_tmp) <= 1.0E-12) {
+      // 'zeroSmallValues:13' M(ii,jj) = 0;
+      pCmd_tmp_tmp = 0.0;
+    }
+
+    conversionMatrix[ii + 6] = pCmd_tmp_tmp;
+    rtb_ImpAsg_InsertedFor_angRateC[ii] = (conversionMatrix[ii + 3] * pCmd +
+      conversionMatrix[ii] * rCmd) + conversionMatrix[ii + 6] * yCmd;
   }
+
+  // End of MATLAB Function: '<S8>/EulerRates2BodyRates'
 
   // BusCreator: '<S8>/Bus Creator' incorporates:
   //   Concatenate: '<S8>/Vector Concatenate'
@@ -1108,7 +1164,7 @@ void fcsModel::step()
   //   MATLAB Function: '<S3>/assembleOuterLoopToInnerLoopBus'
 
   rtb_ctrlInputsArray[0].feedForwardCmd = 0.0;
-  rtb_ctrlInputsArray[0].cmd = rtb_momCmd_Nm[0];
+  rtb_ctrlInputsArray[0].cmd = rtb_ImpAsg_InsertedFor_angRateC[0];
   rtb_ctrlInputsArray[0].meas = fcsModel_U.stateEstimate.bodyAngRates_radps[0];
   rtb_ctrlInputsArray[0].integratorReset = resetIntegrator;
   rtb_ctrlInputsArray[0].trackingCtrlCmd = 0.0;
@@ -1119,7 +1175,7 @@ void fcsModel::step()
   //   MATLAB Function: '<S3>/assembleOuterLoopToInnerLoopBus'
 
   rtb_ctrlInputsArray[1].feedForwardCmd = 0.0;
-  rtb_ctrlInputsArray[1].cmd = rtb_momCmd_Nm[1];
+  rtb_ctrlInputsArray[1].cmd = rtb_ImpAsg_InsertedFor_angRateC[1];
   rtb_ctrlInputsArray[1].meas = fcsModel_U.stateEstimate.bodyAngRates_radps[1];
   rtb_ctrlInputsArray[1].integratorReset = resetIntegrator;
   rtb_ctrlInputsArray[1].trackingCtrlCmd = 0.0;
@@ -1130,7 +1186,7 @@ void fcsModel::step()
   //   MATLAB Function: '<S3>/assembleOuterLoopToInnerLoopBus'
 
   rtb_ctrlInputsArray[2].feedForwardCmd = 0.0;
-  rtb_ctrlInputsArray[2].cmd = rtb_momCmd_Nm[2];
+  rtb_ctrlInputsArray[2].cmd = rtb_ImpAsg_InsertedFor_angRateC[2];
   rtb_ctrlInputsArray[2].meas = fcsModel_U.stateEstimate.bodyAngRates_radps[2];
   rtb_ctrlInputsArray[2].integratorReset = resetIntegrator;
   rtb_ctrlInputsArray[2].trackingCtrlCmd = 0.0;
@@ -1260,14 +1316,14 @@ void fcsModel::step()
   //   Constant: '<S2>/Constant'
   //   ForEachSliceAssignment generated from: '<S10>/angAccelCmd_radps2'
 
-  for (yCmd = 0; yCmd < 3; yCmd++) {
-    rtb_momCmd_Nm[yCmd] = 0.0;
-    rtb_momCmd_Nm[yCmd] += fcsModel_ConstP.Constant_Value_n[yCmd] *
+  for (int32_T ii{0}; ii < 3; ii++) {
+    rtb_ImpAsg_InsertedFor_angRateC[ii] = 0.0;
+    rtb_ImpAsg_InsertedFor_angRateC[ii] += fcsModel_ConstP.Constant_Value_n[ii] *
       rtb_ImpAsg_InsertedFor_angAccel[0];
-    rtb_momCmd_Nm[yCmd] += fcsModel_ConstP.Constant_Value_n[yCmd + 3] *
-      rtb_ImpAsg_InsertedFor_angAccel[1];
-    rtb_momCmd_Nm[yCmd] += fcsModel_ConstP.Constant_Value_n[yCmd + 6] *
-      rtb_ImpAsg_InsertedFor_angAccel[2];
+    rtb_ImpAsg_InsertedFor_angRateC[ii] += fcsModel_ConstP.Constant_Value_n[ii +
+      3] * rtb_ImpAsg_InsertedFor_angAccel[1];
+    rtb_ImpAsg_InsertedFor_angRateC[ii] += fcsModel_ConstP.Constant_Value_n[ii +
+      6] * rtb_ImpAsg_InsertedFor_angAccel[2];
   }
 
   // End of Product: '<S2>/Matrix Multiply'
@@ -1276,12 +1332,12 @@ void fcsModel::step()
   //   BusCreator: '<S2>/Bus Creator1'
   //   MATLAB Function: '<S4>/Interpret RC In Cmds'
 
-  rCmd = -(((tCmd * tCmd * 8.5458804152826638E-6 + -1.9060550862738522E-9 * std::
-             pow(tCmd, 3.0)) + -0.011298232595401985 * tCmd) +
-           4.6650659714392448) * 46.0;
-  pCmd = rtb_momCmd_Nm[0];
-  tmp_0 = rtb_momCmd_Nm[1];
-  tmp = rtb_momCmd_Nm[2];
+  pCmd_tmp_tmp = -(((tCmd * tCmd * 8.5458804152826638E-6 +
+                     -1.9060550862738522E-9 * std::pow(tCmd, 3.0)) +
+                    -0.011298232595401985 * tCmd) + 4.6650659714392448) * 46.0;
+  rCmd = rtb_ImpAsg_InsertedFor_angRateC[0];
+  pCmd = rtb_ImpAsg_InsertedFor_angRateC[1];
+  yCmd = rtb_ImpAsg_InsertedFor_angRateC[2];
 
   // RelationalOperator: '<S6>/Compare' incorporates:
   //   Constant: '<S6>/Constant'
@@ -1294,14 +1350,14 @@ void fcsModel::step()
   //   Outport: '<Root>/fcsDebug'
 
   fcsModel_Y.fcsDebug.state = state;
-  for (yCmd = 0; yCmd < 4; yCmd++) {
+  for (int32_T ii{0}; ii < 4; ii++) {
     // Product: '<S1>/Matrix Multiply' incorporates:
     //   Constant: '<S1>/Constant'
 
-    tCmd = ((fcsModel_ConstP.Constant_Value_c[yCmd + 4] * pCmd +
-             fcsModel_ConstP.Constant_Value_c[yCmd] * rCmd) +
-            fcsModel_ConstP.Constant_Value_c[yCmd + 8] * tmp_0) +
-      fcsModel_ConstP.Constant_Value_c[yCmd + 12] * tmp;
+    tCmd = ((fcsModel_ConstP.Constant_Value_c[ii + 4] * rCmd +
+             fcsModel_ConstP.Constant_Value_c[ii] * pCmd_tmp_tmp) +
+            fcsModel_ConstP.Constant_Value_c[ii + 8] * pCmd) +
+      fcsModel_ConstP.Constant_Value_c[ii + 12] * yCmd;
 
     // Saturate: '<S1>/Saturation'
     if (tCmd > 616850.27506808483) {
@@ -1317,24 +1373,24 @@ void fcsModel::step()
     //   UnitConversion: '<S5>/Unit Conversion'
 
     tCmd = 9.5492965855137211 * std::sqrt(tCmd) - -0.92734095767679814 *
-      fcsModel_DW.DiscreteTransferFcn_states[yCmd];
+      fcsModel_DW.DiscreteTransferFcn_states[ii];
 
     // Switch: '<S1>/Switch'
     if (resetIntegrator) {
       // Outport: '<Root>/actuatorsCmds'
-      fcsModel_Y.actuatorsCmds[yCmd] = -1.0;
+      fcsModel_Y.actuatorsCmds[ii] = -1.0;
     } else {
       // Outport: '<Root>/actuatorsCmds' incorporates:
       //   DiscreteTransferFcn: '<S1>/Discrete Transfer Fcn'
 
-      fcsModel_Y.actuatorsCmds[yCmd] = 0.036329521161600868 * tCmd +
-        0.036329521161600868 * fcsModel_DW.DiscreteTransferFcn_states[yCmd];
+      fcsModel_Y.actuatorsCmds[ii] = 0.036329521161600868 * tCmd +
+        0.036329521161600868 * fcsModel_DW.DiscreteTransferFcn_states[ii];
     }
 
     // End of Switch: '<S1>/Switch'
 
     // Update for DiscreteTransferFcn: '<S1>/Discrete Transfer Fcn'
-    fcsModel_DW.DiscreteTransferFcn_states[yCmd] = tCmd;
+    fcsModel_DW.DiscreteTransferFcn_states[ii] = tCmd;
   }
 }
 
