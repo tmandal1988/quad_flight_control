@@ -5,7 +5,7 @@
 //
 // Model version                  : 1.59
 // Simulink Coder version         : 9.7 (R2022a) 13-Nov-2021
-// C/C++ source code generated on : Tue Oct 10 19:37:13 2023
+// C/C++ source code generated on : Sun Oct 22 13:19:40 2023
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM 7
@@ -623,7 +623,7 @@ void fcsModel::step()
   // Chart: '<S4>/Chart' incorporates:
   //   Inport: '<Root>/rcCmdsIn'
 
-  if (fcsModel_DW.temporalCounter_i1 < 8191U) {
+  if (fcsModel_DW.temporalCounter_i1 < 16383U) {
     fcsModel_DW.temporalCounter_i1 = static_cast<uint16_T>
       (fcsModel_DW.temporalCounter_i1 + 1U);
   }
@@ -647,7 +647,6 @@ void fcsModel::step()
     fcsModel_DW.rcCheckFlag = fcsModel_checkRcCmds(&fcsModel_U.rcCmdsIn);
     if (!fcsModel_DW.rcCheckFlag) {
       fcsModel_DW.durationCounter_1_j = 0;
-      fcsModel_DW.durationCounter_1_d = 0;
     }
 
     // '<S91>:1:4' resetIntegrator = true;
@@ -656,8 +655,8 @@ void fcsModel::step()
     switch (fcsModel_DW.is_c1_rcInterpreter) {
      case fcsModel_IN_ARM_MTRS:
       // During 'ARM_MTRS': '<S91>:3'
-      // '<S91>:10:1' sf_internal_predicateOutput = after(20, sec) || duration(rcCheckFlag == true, sec) >= 5; 
-      if (fcsModel_DW.temporalCounter_i1 >= 5000U) {
+      // '<S91>:10:1' sf_internal_predicateOutput = after(60, sec) || duration(rcCheckFlag == true, sec) >= 5; 
+      if (fcsModel_DW.temporalCounter_i1 >= 15000U) {
         resetIntegrator = true;
       } else {
         if (!fcsModel_DW.rcCheckFlag) {
@@ -680,7 +679,6 @@ void fcsModel::step()
         fcsModel_DW.rcCheckFlag = fcsModel_checkRcCmds(&fcsModel_U.rcCmdsIn);
         if (!fcsModel_DW.rcCheckFlag) {
           fcsModel_DW.durationCounter_1_j = 0;
-          fcsModel_DW.durationCounter_1_d = 0;
         }
 
         // '<S91>:1:4' resetIntegrator = true;
@@ -688,7 +686,6 @@ void fcsModel::step()
         // '<S91>:12:1' sf_internal_predicateOutput = rcCmds.throttleCmd_nd > paramsStruct.pwmLimits(1); 
       } else if (fcsModel_U.rcCmdsIn.throttleCmd_nd > 987) {
         // Transition: '<S91>:12'
-        fcsModel_DW.durationCounter_1_d = 0;
         fcsModel_DW.is_c1_rcInterpreter = fcsModel_IN_INFLIGHT;
 
         // Entry 'INFLIGHT': '<S91>:11'
@@ -712,7 +709,6 @@ void fcsModel::step()
         if (!fcsModel_DW.rcCheckFlag) {
           fcsModel_DW.durationCounter_1 = 0;
           fcsModel_DW.durationCounter_1_j = 0;
-          fcsModel_DW.durationCounter_1_d = 0;
         }
 
         // '<S91>:3:4' resetIntegrator = true;
@@ -742,7 +738,6 @@ void fcsModel::step()
         fcsModel_DW.rcCheckFlag = fcsModel_checkRcCmds(&fcsModel_U.rcCmdsIn);
         if (!fcsModel_DW.rcCheckFlag) {
           fcsModel_DW.durationCounter_1 = 0;
-          fcsModel_DW.durationCounter_1_d = 0;
         }
 
         // '<S91>:3:4' resetIntegrator = true;
@@ -756,7 +751,6 @@ void fcsModel::step()
         if (!fcsModel_DW.rcCheckFlag) {
           fcsModel_DW.durationCounter_1 = 0;
           fcsModel_DW.durationCounter_1_j = 0;
-          fcsModel_DW.durationCounter_1_d = 0;
         }
 
         // '<S91>:1:4' resetIntegrator = true;
@@ -766,28 +760,24 @@ void fcsModel::step()
 
      default:
       // During 'INFLIGHT': '<S91>:11'
-      // '<S91>:17:1' sf_internal_predicateOutput = duration(rcCheckFlag == true, sec) >= 5; 
-      if (!fcsModel_DW.rcCheckFlag) {
-        fcsModel_DW.durationCounter_1_d = 0;
-      }
+      // '<S91>:20:1' sf_internal_predicateOutput = rcCmds.throttleCmd_nd <= paramsStruct.pwmLimits(1); 
+      if (fcsModel_U.rcCmdsIn.throttleCmd_nd <= 987) {
+        // Transition: '<S91>:20'
+        fcsModel_DW.durationCounter_1_j = 0;
+        fcsModel_DW.is_c1_rcInterpreter = fcsModel_IN_ARM_MTRS;
+        fcsModel_DW.temporalCounter_i1 = 0U;
 
-      if (fcsModel_DW.durationCounter_1_d >= 1250) {
-        // Transition: '<S91>:17'
-        fcsModel_DW.durationCounter_1 = 0;
-        fcsModel_DW.is_c1_rcInterpreter = fcsModel_IN_INACTIVE;
+        // Entry 'ARM_MTRS': '<S91>:3'
+        // '<S91>:3:2' state = enumStateMachine.MTR_ARMED;
+        state = enumStateMachine::MTR_ARMED;
 
-        // Entry 'INACTIVE': '<S91>:1'
-        // '<S91>:1:2' state = enumStateMachine.INACTIVE;
-        state = enumStateMachine::INACTIVE;
-
-        // '<S91>:1:3' rcCheckFlag = checkRcCmds(rcCmds, paramsStruct);
+        // '<S91>:3:3' rcCheckFlag = checkRcCmds(rcCmds, paramsStruct);
         fcsModel_DW.rcCheckFlag = fcsModel_checkRcCmds(&fcsModel_U.rcCmdsIn);
         if (!fcsModel_DW.rcCheckFlag) {
-          fcsModel_DW.durationCounter_1_j = 0;
-          fcsModel_DW.durationCounter_1_d = 0;
+          fcsModel_DW.durationCounter_1 = 0;
         }
 
-        // '<S91>:1:4' resetIntegrator = true;
+        // '<S91>:3:4' resetIntegrator = true;
         resetIntegrator = true;
       } else {
         // '<S91>:11:2' state = enumStateMachine.INFLIGHT;
@@ -798,7 +788,6 @@ void fcsModel::step()
         if (!fcsModel_DW.rcCheckFlag) {
           fcsModel_DW.durationCounter_1 = 0;
           fcsModel_DW.durationCounter_1_j = 0;
-          fcsModel_DW.durationCounter_1_d = 0;
         }
 
         // '<S91>:11:4' resetIntegrator = false;
@@ -811,11 +800,9 @@ void fcsModel::step()
   if (fcsModel_DW.rcCheckFlag) {
     fcsModel_DW.durationCounter_1++;
     fcsModel_DW.durationCounter_1_j++;
-    fcsModel_DW.durationCounter_1_d++;
   } else {
     fcsModel_DW.durationCounter_1 = 0;
     fcsModel_DW.durationCounter_1_j = 0;
-    fcsModel_DW.durationCounter_1_d = 0;
   }
 
   // End of Chart: '<S4>/Chart'

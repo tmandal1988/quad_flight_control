@@ -5,7 +5,7 @@
 //
 // Model version                  : 1.59
 // Simulink Coder version         : 9.7 (R2022a) 13-Nov-2021
-// C/C++ source code generated on : Tue Oct 10 19:37:13 2023
+// C/C++ source code generated on : Sun Oct 22 13:19:40 2023
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM 7
@@ -74,7 +74,6 @@ class fcsModel final
     std::array<real_T, 4> DiscreteTransferFcn_states;// '<S1>/Discrete Transfer Fcn' 
     int32_T durationCounter_1;         // '<S4>/Chart'
     int32_T durationCounter_1_j;       // '<S4>/Chart'
-    int32_T durationCounter_1_d;       // '<S4>/Chart'
     uint16_T temporalCounter_i1;       // '<S4>/Chart'
     uint8_T is_active_c1_rcInterpreter;// '<S4>/Chart'
     uint8_T is_c1_rcInterpreter;       // '<S4>/Chart'
