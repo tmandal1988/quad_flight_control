@@ -74,17 +74,21 @@ int main(int argc, char *argv[]){
 	  	int throttleCmd_nd = rc_periods[2];
 	  	
 	  	vector<float> pwm_out_val(4, 0);
-	  	if(throttleCmd_nd >= 1500){
-	  		pwm_out_val[0] = 2006.0;
-	  		pwm_out_val[1] = 2006.0;
-	  		pwm_out_val[2] = 2006.0;
-	  		pwm_out_val[3] = 2006.0;
-	  	}else{
-	  		pwm_out_val[0] = 982.0;
-	  		pwm_out_val[1] = 982.0;
-	  		pwm_out_val[2] = 982.0;
-	  		pwm_out_val[3] = 982.0;
-	  	}
+	  	// if(throttleCmd_nd >= 1500){
+	  	// 	pwm_out_val[0] = 2006.0;
+	  	// 	pwm_out_val[1] = 2006.0;
+	  	// 	pwm_out_val[2] = 2006.0;
+	  	// 	pwm_out_val[3] = 2006.0;
+	  	// }else{
+	  	// 	pwm_out_val[0] = 982.0;
+	  	// 	pwm_out_val[1] = 982.0;
+	  	// 	pwm_out_val[2] = 982.0;
+	  	// 	pwm_out_val[3] = 982.0;
+	  	// }
+	  	pwm_out_val[0] = static_cast<float>(throttleCmd_nd);
+  		pwm_out_val[1] = static_cast<float>(throttleCmd_nd);
+  		pwm_out_val[2] = static_cast<float>(throttleCmd_nd);
+  		pwm_out_val[3] = static_cast<float>(throttleCmd_nd);
 	  	printf("Throttle: %g\n", pwm_out_val[0]);
 
 	  	pwm_writer.SetPwmDutyCyle(pwm_out_val);

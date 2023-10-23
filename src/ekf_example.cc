@@ -225,6 +225,7 @@ int main(int argc, char *argv[]){
 
 	// Loop counter
 	size_t loop_count = 0;
+	size_t arm_loop_count = 0;
 	// 50 Hz flag
 	bool fifty_hz_flag = false;
 	// initialize the duration
@@ -241,6 +242,7 @@ int main(int argc, char *argv[]){
 	chrono::high_resolution_clock::time_point loop_end;
 	// long long time_since_loop_start_us;
 	// long long loop_start_us;
+	bool is_mtr_armed = false;
 
 	// loop
     while(1) {
@@ -301,15 +303,16 @@ int main(int argc, char *argv[]){
     		// 	printf("Roll [deg]: %+7.3f, Pitch[deg]: %+7.3f, Yaw[deg]: %+7.3f\n", mh_euler[0]*180/3.14, mh_euler[1]*180/3.14, mh_euler[2]*180/3.14);
     		// }
     	}
-
+    	
       //########################################
       // Assign the state values to the model input structure
       for(size_t idx = 0; idx < 3; idx++){
       	stateEstimate_.attitude_rad[idx] = current_state(idx);
       	// stateEstimate_.bodyAngRates_radps[idx] = ( state_sensor_val(idx) - current_state(idx + 3) );
-      	stateEstimate_.bodyAngRates_radps[idx] = state_sensor_val(idx) - gyro_offset[idx];
+      	stateEstimate_.bodyAngRates_radps[idx] = imu_data[idx] - gyro_offset[idx];
       	stateEstimate_.nedVel_mps[idx] = current_state(idx + 9);
       }
+      
 
       // Get NED to Body DCM
       c_ned2b = GetDcm(current_state(0), current_state(1), current_state(2));
@@ -373,32 +376,65 @@ int main(int argc, char *argv[]){
 		// }
 
 		if(static_cast<uint8_t>(ExtY_fcsModel_T_.fcsDebug.state) != 0){
-			if(rcCmdsIn_.throttleCmd_nd <= PWM_CHECK_MIN_THRESHOLD){
-				pwm_out_val[0] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
-				pwm_out_val[1] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
-				pwm_out_val[2] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
-				pwm_out_val[3] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
-			}else{
-		  	pwm_out_val[0] = max(PWM_CMD_MIN_THRESHOLD, min(PWM_CMD_MAX_THRESHOLD, ExtY_fcsModel_T_.actuatorsCmds[0]*RPM_TO_PWM_SCALE + PWM_MIN_THRESHOLD));
-		  	pwm_out_val[1] = max(PWM_CMD_MIN_THRESHOLD, min(PWM_CMD_MAX_THRESHOLD, ExtY_fcsModel_T_.actuatorsCmds[3]*RPM_TO_PWM_SCALE + PWM_MIN_THRESHOLD));
-		  	pwm_out_val[2] = max(PWM_CMD_MIN_THRESHOLD, min(PWM_CMD_MAX_THRESHOLD, ExtY_fcsModel_T_.actuatorsCmds[1]*RPM_TO_PWM_SCALE + PWM_MIN_THRESHOLD));
-		  	pwm_out_val[3] = max(PWM_CMD_MIN_THRESHOLD, min(PWM_CMD_MAX_THRESHOLD, ExtY_fcsModel_T_.actuatorsCmds[2]*RPM_TO_PWM_SCALE + PWM_MIN_THRESHOLD));
-			}
+			// if(!is_mtr_armed){
+			// 	//Bump up the throttle pwm and then bump down the throttle
+			// 	pwm_out_val[0] = static_cast<float>(PWM_CHECK_MIN_THRESHOLD*1.0);
+			// 	pwm_out_val[1] = static_cast<float>(PWM_CHECK_MIN_THRESHOLD*1.0);
+			// 	pwm_out_val[2] = static_cast<float>(PWM_CHECK_MIN_THRESHOLD*1.0);
+			// 	pwm_out_val[3] = static_cast<float>(PWM_CHECK_MIN_THRESHOLD*1.0);
+			// 	arm_loop_count += 1;
+			// 	//Check for a second
+			// 	if(remainder(arm_loop_count, 250) == 0){
+			// 		pwm_out_val[0] = static_cast<float>(PWM_CMD_MIN_THRESHOLD*1.0);
+			// 		pwm_out_val[1] = static_cast<float>(PWM_CMD_MIN_THRESHOLD*1.0);
+			// 		pwm_out_val[2] = static_cast<float>(PWM_CMD_MIN_THRESHOLD*1.0);
+			// 		pwm_out_val[3] = static_cast<float>(PWM_CMD_MIN_THRESHOLD*1.0);
+			// 		is_mtr_armed = true;
+			// 	}
+			// }else{
+			// 	arm_loop_count = 0;
+				if(rcCmdsIn_.throttleCmd_nd <= PWM_CHECK_MIN_THRESHOLD){
+					pwm_out_val[0] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
+					pwm_out_val[1] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
+					pwm_out_val[2] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
+					pwm_out_val[3] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
+					// printf("%d\n",rcCmdsIn_.throttleCmd_nd);
+				}else{
+					// pwm_out_val[0] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
+					// pwm_out_val[1] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
+					// pwm_out_val[2] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
+					// pwm_out_val[3] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
+					// printf("###############################\n");
+					// printf("%g, %g, %g, %g\n",pwm_out_val[0], pwm_out_val[1], pwm_out_val[2], pwm_out_val[3]);
+					// printf("###############################\n");
+			  	pwm_out_val[0] = max(PWM_CMD_MIN_THRESHOLD, min(PWM_CMD_MAX_THRESHOLD, ExtY_fcsModel_T_.actuatorsCmds[0]*RPM_TO_PWM_SCALE + PWM_MIN_THRESHOLD));
+			  	pwm_out_val[1] = max(PWM_CMD_MIN_THRESHOLD, min(PWM_CMD_MAX_THRESHOLD, ExtY_fcsModel_T_.actuatorsCmds[3]*RPM_TO_PWM_SCALE + PWM_MIN_THRESHOLD));
+			  	pwm_out_val[2] = max(PWM_CMD_MIN_THRESHOLD, min(PWM_CMD_MAX_THRESHOLD, ExtY_fcsModel_T_.actuatorsCmds[1]*RPM_TO_PWM_SCALE + PWM_MIN_THRESHOLD));
+			  	pwm_out_val[3] = max(PWM_CMD_MIN_THRESHOLD, min(PWM_CMD_MAX_THRESHOLD, ExtY_fcsModel_T_.actuatorsCmds[2]*RPM_TO_PWM_SCALE + PWM_MIN_THRESHOLD));
+				}
+			// }
 		}else{
-				pwm_out_val[0] = ExtY_fcsModel_T_.actuatorsCmds[0]*1.0;
-		  	pwm_out_val[1] = ExtY_fcsModel_T_.actuatorsCmds[3]*1.0;
-		  	pwm_out_val[2] = ExtY_fcsModel_T_.actuatorsCmds[1]*1.0;
-		  	pwm_out_val[3] = ExtY_fcsModel_T_.actuatorsCmds[2]*1.0;
+				// is_mtr_armed = false;
+				// arm_loop_count = 0;
+				// pwm_out_val[0] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
+				// pwm_out_val[1] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
+				// pwm_out_val[2] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
+				// pwm_out_val[3] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
+				pwm_out_val[0] = static_cast<float>(PWM_MIN_THRESHOLD*1.0);
+		  	pwm_out_val[1] = static_cast<float>(PWM_MIN_THRESHOLD*1.0);
+		  	pwm_out_val[2] = static_cast<float>(PWM_MIN_THRESHOLD*1.0);
+		  	pwm_out_val[3] = static_cast<float>(PWM_MIN_THRESHOLD*1.0);
 		}
 	  // if (remainder(loop_count, 50) == 0){
 	  // 	printf("%g, %g, %g, %g\n", ExtY_fcsModel_T_.actuatorsCmds[0], ExtY_fcsModel_T_.actuatorsCmds[1], ExtY_fcsModel_T_.actuatorsCmds[2], ExtY_fcsModel_T_.actuatorsCmds[3]);
 	  // 	// printf("%g, %g, %g, %g\n", pwm_out_val[0], pwm_out_val[1], pwm_out_val[2], pwm_out_val[3]);
 	  // }
 
-	  if( ExtY_fcsModel_T_.actuatorsCmds[0] > 1.0 && ExtY_fcsModel_T_.actuatorsCmds[1] > 1.0 && ExtY_fcsModel_T_.actuatorsCmds[2] > 1.0 &&
-	  	ExtY_fcsModel_T_.actuatorsCmds[3] > 1.0 ){
+	  // if(ExtY_fcsModel_T_.actuatorsCmds[0] > 1.0 && ExtY_fcsModel_T_.actuatorsCmds[1] > 1.0 && ExtY_fcsModel_T_.actuatorsCmds[2] > 1.0 &&
+	  // 	ExtY_fcsModel_T_.actuatorsCmds[3] > 1.0 ){
+		// if(pwm_out_val[0] >= 800.0){
 	  	pwm_writer.SetPwmDutyCyle(pwm_out_val);
-		}
+		// }
 
 		loop_count++;
 

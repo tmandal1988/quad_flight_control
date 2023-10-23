@@ -79,6 +79,30 @@ struct DataFields{
 
 	float fcsOut24;
 
+	float fcsOut25;
+
+	float fcsOut26;
+
+	float fcsOut27;
+
+	float fcsOut28;
+
+	float fcsOut29;
+
+	float fcsOut30;
+
+	float fcsOut31;
+
+	float fcsOut32;
+
+	float fcsOut33;
+
+	float fcsOut34;
+
+	float fcsOut35;
+
+	float fcsOut36;
+
 };
 
 

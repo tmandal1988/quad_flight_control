@@ -30,7 +30,7 @@ void ImuHelper::ComputeGyroOffset(size_t num_samples){
     //-------------------------------------------------------------------------
     for(size_t idx = 0; idx < num_samples; idx++)
     {
-        imu_sensor_->read_gyroscope(gyro_);
+        ReadRawImu();
 
         offset[0] += gyro_[0];
         offset[1] += gyro_[1];

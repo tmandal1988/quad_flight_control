@@ -5,7 +5,7 @@
 //
 // Model version                  : 1.59
 // Simulink Coder version         : 9.7 (R2022a) 13-Nov-2021
-// C/C++ source code generated on : Thu Sep 28 16:38:18 2023
+// C/C++ source code generated on : Tue Oct 10 19:37:13 2023
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM 7
@@ -237,14 +237,40 @@ struct busPidDebug
 
 #endif
 
+#ifndef DEFINED_TYPEDEF_FOR_busAngRateCtrlDebug_
+#define DEFINED_TYPEDEF_FOR_busAngRateCtrlDebug_
+
+// Bus containing angular rate controller debug data
+struct busAngRateCtrlDebug
+{
+  std::array<real_T, 3> cmd;
+  std::array<real_T, 3> meas;
+  std::array<busPidDebug, 3> pidDebug;
+};
+
+#endif
+
+#ifndef DEFINED_TYPEDEF_FOR_busAttCtrlDebug_
+#define DEFINED_TYPEDEF_FOR_busAttCtrlDebug_
+
+// Contains debug information from attitude control system
+struct busAttCtrlDebug
+{
+  std::array<real_T, 3> cmd;
+  std::array<real_T, 3> meas;
+  std::array<busPidDebug, 3> pidDebug;
+};
+
+#endif
+
 #ifndef DEFINED_TYPEDEF_FOR_busInnerLoopCtrlDebug_
 #define DEFINED_TYPEDEF_FOR_busInnerLoopCtrlDebug_
 
 // Bus containing inner loop controller debug data
 struct busInnerLoopCtrlDebug
 {
-  std::array<busPidDebug, 3> angRateCtrlDebug;
-  std::array<busPidDebug, 3> attCtrlDebug;
+  busAngRateCtrlDebug angRateCtrlDebug;
+  busAttCtrlDebug attCtrlDebug;
 };
 
 #endif
