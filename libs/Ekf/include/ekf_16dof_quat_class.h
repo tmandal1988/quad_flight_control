@@ -37,7 +37,7 @@ class Ekf16DofQuat:public EkfBase<T>{
 		Ekf16DofQuat(T sample_time_s, MatrixInv<T> initial_state, MatrixInv<T> process_noise_q, MatrixInv<T> meas_noise_r, MatrixInv<T> initial_covariance_p);
 
 		// Run method specific to this EKF formulation
-		void Run(MatrixInv<T> state_sensor_val, MatrixInv<T> meas_sensor_val, bool meas_indices[]);
+		void Run(const MatrixInv<T> &state_sensor_val, const MatrixInv<T> &meas_sensor_val, const bool meas_indices []);
 
 		// Method to get Eulr angle from quaternion
 		MatrixInv<T> GetEulerAngle();
@@ -47,12 +47,12 @@ class Ekf16DofQuat:public EkfBase<T>{
 
 	protected:
 		// member functions
-		void PropagateState(MatrixInv<T> state_sensor_val);
-		void ComputeStateJacobian(MatrixInv<T> state_sensor_val);
-		void ComputeStateNoiseJacobian(MatrixInv<T> previous_state);
-		void GetMeas(MatrixInv<T> meas_sensor_val);
-		void ComputeMeasJacobian(MatrixInv<T> meas_sensor_val);
-		void ComputeMeasNoiseJacobian(MatrixInv<T> meas_sensor_val);
+		void PropagateState(const MatrixInv<T> &state_sensor_val);
+		void ComputeStateJacobian(const MatrixInv<T> &state_sensor_val);
+		void ComputeStateNoiseJacobian(const MatrixInv<T> &previous_state);
+		void GetMeas(const MatrixInv<T> &meas_sensor_val);
+		void ComputeMeasJacobian(const MatrixInv<T> &meas_sensor_val);
+		void ComputeMeasNoiseJacobian(const MatrixInv<T> &meas_sensor_val);
 		void ComputeMeasFromState();
 
 		MatrixInv<T> g_;			

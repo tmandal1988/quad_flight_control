@@ -22,7 +22,7 @@ class PwmOutputHelper{
 		PwmOutputHelper(int num_channels);
 
 		// Initializer
-		void InitializePwmOutput(float frequency = 50.0);
+		void InitializePwmOutput(float frequency = 400.0);
 
 		// Set PWM duty cycle
 		void SetPwmDutyCyle(vector<float> duty_cycle_ms);

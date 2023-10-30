@@ -3,9 +3,9 @@
 //
 // Code generated for Simulink model 'fcsModel'.
 //
-// Model version                  : 1.59
+// Model version                  : 1.67
 // Simulink Coder version         : 9.7 (R2022a) 13-Nov-2021
-// C/C++ source code generated on : Sun Oct 22 13:19:40 2023
+// C/C++ source code generated on : Fri Oct 27 23:29:18 2023
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM 7

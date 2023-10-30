@@ -14,7 +14,7 @@ Ekf16DofQuat<T>::~Ekf16DofQuat(){
 }
 
 template <typename T>
-void Ekf16DofQuat<T>::PropagateState(MatrixInv<T> state_sensor_val){
+void Ekf16DofQuat<T>::PropagateState(const MatrixInv<T> &state_sensor_val){
 	// wrap the yaw angle	
 	//this->current_state_(2) = remainder(this->current_state_(2) + PI, PIx2) - PI;
 
@@ -85,7 +85,7 @@ void Ekf16DofQuat<T>::PropagateState(MatrixInv<T> state_sensor_val){
 }
 
 template <typename T>
-void Ekf16DofQuat<T>::ComputeStateJacobian(MatrixInv<T> state_sensor_val){
+void Ekf16DofQuat<T>::ComputeStateJacobian(const MatrixInv<T> &state_sensor_val){
 	T dt = this->sample_time_s_;
 
 	// Easy to use names
@@ -217,12 +217,12 @@ void Ekf16DofQuat<T>::ComputeStateJacobian(MatrixInv<T> state_sensor_val){
 }
 
 template <typename T>
-void Ekf16DofQuat<T>::ComputeStateNoiseJacobian(MatrixInv<T> previous_state){
+void Ekf16DofQuat<T>::ComputeStateNoiseJacobian(const MatrixInv<T> &previous_state){
 	// Do Nothing
 }
 
 template <typename T>
-void Ekf16DofQuat<T>::GetMeas(MatrixInv<T> meas_sensor_val){
+void Ekf16DofQuat<T>::GetMeas(const MatrixInv<T> &meas_sensor_val){
 	/* First 3 indices should be normalized magnetometer x, y, z readings in body frame,
 	next 3 indices should be GPS measured position translated into NED frame and last
 	3 indices should be GPS measured NED velocity*/
@@ -233,7 +233,7 @@ void Ekf16DofQuat<T>::GetMeas(MatrixInv<T> meas_sensor_val){
 }
 
 template <typename T>
-void Ekf16DofQuat<T>::ComputeMeasJacobian(MatrixInv<T> meas_sensor_val){
+void Ekf16DofQuat<T>::ComputeMeasJacobian(const MatrixInv<T> &meas_sensor_val){
 	// Easy to use names
 	T q0 	= this->time_propagated_state_(0);
 	T q1 	= this->time_propagated_state_(1);
@@ -279,7 +279,7 @@ void Ekf16DofQuat<T>::ComputeMeasJacobian(MatrixInv<T> meas_sensor_val){
 }
 
 template <typename T>
-void Ekf16DofQuat<T>::ComputeMeasNoiseJacobian(MatrixInv<T> meas_sensor_val){
+void Ekf16DofQuat<T>::ComputeMeasNoiseJacobian(const MatrixInv<T> &meas_sensor_val){
 	// Do Nothing
 }
 
@@ -314,7 +314,7 @@ void Ekf16DofQuat<T>::ComputeMeasFromState(){
 }
 
 template <typename T>
-void Ekf16DofQuat<T>::Run(MatrixInv<T> state_sensor_val, MatrixInv<T> meas_sensor_val, bool meas_indices[]){
+void Ekf16DofQuat<T>::Run(const MatrixInv<T> &state_sensor_val, const MatrixInv<T> &meas_sensor_val, const bool meas_indices []){
 	// Call the base class run method
 	EkfBase<T>::Run(state_sensor_val, meas_sensor_val, meas_indices);
 	//Normalize the quaternion

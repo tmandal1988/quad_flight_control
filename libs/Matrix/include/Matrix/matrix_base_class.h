@@ -58,8 +58,8 @@ class MatrixBase{
 		// divide by a scalar
 		MatrixBase operator/ (T x);
 		// getter and setters
-		size_t get_ncols();
-		size_t get_nrows();
+		size_t get_ncols () const;
+		size_t get_nrows () const;
 		T get_element(size_t idx_r, size_t idx_c);
 		void set_element(size_t idx_r, size_t idx_c, T val);
 		bool is_empty();

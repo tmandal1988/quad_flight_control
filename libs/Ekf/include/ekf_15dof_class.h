@@ -28,12 +28,12 @@ class Ekf15Dof:public EkfBase<T>{
 
 	protected:
 		// member functions
-		void PropagateState(MatrixInv<T> state_sensor_val);
-		void ComputeStateJacobian(MatrixInv<T> state_sensor_val);
-		void ComputeStateNoiseJacobian(MatrixInv<T> previous_state);
-		void GetMeas(MatrixInv<T> meas_sensor_val);
-		void ComputeMeasJacobian(MatrixInv<T> meas_sensor_val);
-		void ComputeMeasNoiseJacobian(MatrixInv<T> meas_sensor_val);
+		void PropagateState(const MatrixInv<T> &state_sensor_val);
+		void ComputeStateJacobian(const MatrixInv<T> &state_sensor_val);
+		void ComputeStateNoiseJacobian(const MatrixInv<T> &previous_state);
+		void GetMeas(const MatrixInv<T> &meas_sensor_val);
+		void ComputeMeasJacobian(const MatrixInv<T> &meas_sensor_val);
+		void ComputeMeasNoiseJacobian(const MatrixInv<T> &meas_sensor_val);
 		void ComputeMeasFromState();
 
 		void ComputeTrignometricValues();

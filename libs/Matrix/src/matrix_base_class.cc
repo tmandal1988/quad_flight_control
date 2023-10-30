@@ -407,12 +407,12 @@ MatrixBase<T> MatrixBase<T>::operator/ (T x){
 
 // getters and setters
 template<typename T>
-size_t MatrixBase<T>::get_ncols(){
+size_t MatrixBase<T>::get_ncols() const{
 	return ncols_;
 }
 
 template<typename T>
-size_t MatrixBase<T>::get_nrows(){
+size_t MatrixBase<T>::get_nrows() const{
 	return nrows_;
 }
 

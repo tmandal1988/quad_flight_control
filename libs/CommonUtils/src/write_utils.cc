@@ -47,8 +47,8 @@ WriteHelper::~WriteHelper(){
 		write_thread_.join();
 }
 
-void WriteHelper::UpdateDataBuffer(long long dt_ms, size_t count, float imu_data[9], 
-	MatrixInv<float> sensor_meas, MatrixInv<float> ekf_current_state, bool gps_valid_flag[6], int* const& rc_periods, const FcsOutput &fcs_output){
+void WriteHelper::UpdateDataBuffer(long long dt_ms, size_t count, float* const& imu_data, 
+	const MatrixInv<float> &sensor_meas, const MatrixInv<float> &ekf_current_state, const MatrixInv<float> &secondary_filter_debug, const bool (&gps_valid_flag)[6], int* const& rc_periods, const FcsOutput &fcs_output){
 	if(data_buff_idx2_ == 0 && data_buff_idx1_ != MAX_BUFF_SIZE){
 		{
 			unique_lock<mutex> save_data_lock(data_mutex_);
@@ -64,6 +64,10 @@ void WriteHelper::UpdateDataBuffer(long long dt_ms, size_t count, float imu_data
 
 			for(size_t d_idx = 0; d_idx < ekf_current_state.get_nrows(); d_idx++){
 				data_to_save1_[data_buff_idx1_].ekf_current_state[d_idx] = ekf_current_state(d_idx);
+			}
+
+			for(size_t sc_idx = 0; sc_idx < secondary_filter_debug.get_nrows(); sc_idx++){
+				data_to_save1_[data_buff_idx1_].secondary_filter_debug[sc_idx] = secondary_filter_debug(sc_idx);
 			}
 
 			for(size_t g_idx = 0; g_idx < 6; g_idx++){
@@ -123,6 +127,10 @@ void WriteHelper::UpdateDataBuffer(long long dt_ms, size_t count, float imu_data
 
 			for(size_t d_idx = 0; d_idx < ekf_current_state.get_nrows(); d_idx++){
 				data_to_save2_[data_buff_idx2_].ekf_current_state[d_idx] = ekf_current_state(d_idx);
+			}
+
+			for(size_t sc_idx = 0; sc_idx < secondary_filter_debug.get_nrows(); sc_idx++){
+				data_to_save2_[data_buff_idx2_].secondary_filter_debug[sc_idx] = secondary_filter_debug(sc_idx);
 			}
 
 			for(size_t g_idx = 0; g_idx < 6; g_idx++){

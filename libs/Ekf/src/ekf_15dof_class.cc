@@ -50,7 +50,7 @@ inline void Ekf15Dof<T>::ComputeTrignometricValues(){
 }
 
 template <typename T>
-void Ekf15Dof<T>::PropagateState(MatrixInv<T> state_sensor_val){
+void Ekf15Dof<T>::PropagateState(const MatrixInv<T> &state_sensor_val){
 	// wrap the yaw angle	
 	this->current_state_(2) = remainder(this->current_state_(2) + PI, PIx2) - PI;
 
@@ -112,7 +112,7 @@ void Ekf15Dof<T>::PropagateState(MatrixInv<T> state_sensor_val){
 }
 
 template <typename T>
-void Ekf15Dof<T>::ComputeStateJacobian(MatrixInv<T> state_sensor_val){
+void Ekf15Dof<T>::ComputeStateJacobian(const MatrixInv<T> &state_sensor_val){
 	T dt = this->sample_time_s_;
 
 	// 1st row
@@ -205,7 +205,7 @@ void Ekf15Dof<T>::ComputeStateJacobian(MatrixInv<T> state_sensor_val){
 }
 
 template <typename T>
-void Ekf15Dof<T>::ComputeStateNoiseJacobian(MatrixInv<T> previous_state){
+void Ekf15Dof<T>::ComputeStateNoiseJacobian(const MatrixInv<T> &previous_state){
 	// Not used right now
 	//1st row
 	this->state_noise_jacobian_(0, 15) = this->sample_time_s_;
@@ -266,7 +266,7 @@ void Ekf15Dof<T>::ComputeStateNoiseJacobian(MatrixInv<T> previous_state){
 }
 
 template <typename T>
-void Ekf15Dof<T>::GetMeas(MatrixInv<T> meas_sensor_val){
+void Ekf15Dof<T>::GetMeas(const MatrixInv<T> &meas_sensor_val){
 	/* First 3 indices should be magnetometer x, y, z readings in body frame,
 	next 3 indices should be GPS measured position translated into NED frame and last
 	3 indices should be GPS measured NED velocity*/
@@ -304,12 +304,12 @@ void Ekf15Dof<T>::GetMeas(MatrixInv<T> meas_sensor_val){
 }
 
 template <typename T>
-void Ekf15Dof<T>::ComputeMeasJacobian(MatrixInv<T> meas_sensor_val){
+void Ekf15Dof<T>::ComputeMeasJacobian(const MatrixInv<T> &meas_sensor_val){
 	// Do nothing
 }
 
 template <typename T>
-void Ekf15Dof<T>::ComputeMeasNoiseJacobian(MatrixInv<T> meas_sensor_val){
+void Ekf15Dof<T>::ComputeMeasNoiseJacobian(const MatrixInv<T> &meas_sensor_val){
 	// Do Nothing
 }
 

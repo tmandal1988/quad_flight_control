@@ -3,9 +3,9 @@
 //
 // Code generated for Simulink model 'fcsModel'.
 //
-// Model version                  : 1.59
+// Model version                  : 1.67
 // Simulink Coder version         : 9.7 (R2022a) 13-Nov-2021
-// C/C++ source code generated on : Sun Oct 22 13:19:40 2023
+// C/C++ source code generated on : Fri Oct 27 23:29:18 2023
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM 7
@@ -32,7 +32,7 @@ const uint8_T fcsModel_IN_INFLIGHT{ 3U };
 //
 // Output and update for atomic system:
 //    '<S10>/pidWithDebug'
-//    '<S51>/pidWithDebug'
+//    '<S53>/pidWithDebug'
 //
 void fcsModel::fcsModel_pidWithDebug(real_T rtu_feedForward, real_T rtu_cmd,
   real_T rtu_meas, boolean_T rtu_integratorReset, const busPidParams
@@ -258,10 +258,10 @@ void fcsModel::fcsModel_pidWithDebug(real_T rtu_feedForward, real_T rtu_cmd,
 //    '<S30>/Compute Natural Frequency'
 //    '<S14>/Compute Natural Frequency'
 //    '<S15>/Compute Natural Frequency'
-//    '<S70>/Compute Natural Frequency'
-//    '<S71>/Compute Natural Frequency'
-//    '<S55>/Compute Natural Frequency'
-//    '<S56>/Compute Natural Frequency'
+//    '<S72>/Compute Natural Frequency'
+//    '<S73>/Compute Natural Frequency'
+//    '<S57>/Compute Natural Frequency'
+//    '<S58>/Compute Natural Frequency'
 //
 void fcsModel::fcsMode_ComputeNaturalFrequency(real_T rtu_bandwidth_radps,
   real_T rtu_dampingRatio_nd, real_T *rty_naturalFrequency_radps)
@@ -288,8 +288,8 @@ void fcsModel::fcsMode_ComputeNaturalFrequency(real_T rtu_bandwidth_radps,
 // Output and update for atomic system:
 //    '<S10>/Signal Conditioning Block1'
 //    '<S10>/Signal Conditioning Block'
-//    '<S51>/Signal Conditioning Block1'
-//    '<S51>/Signal Conditioning Block'
+//    '<S53>/Signal Conditioning Block1'
+//    '<S53>/Signal Conditioning Block'
 //
 void fcsModel::fcsMod_SignalConditioningBlock1(real_T rtu_input, const
   busSignalConditioningParams *rtu_params, real_T *rty_filteredInput, real_T
@@ -568,36 +568,36 @@ boolean_T fcsModel::fcsModel_checkRcCmds(const busRcInCmds
 {
   boolean_T isTrue;
 
-  // MATLAB Function 'checkRcCmds': '<S91>:7'
-  // '<S91>:7:2' pwmLowVal = paramsStruct.pwmLimits(1);
-  // '<S91>:7:3' if(rcCmds.throttleCmd_nd <= pwmLowVal && ...
-  // '<S91>:7:4'        rcCmds.joystickYCmd_nd <= pwmLowVal && ...
-  // '<S91>:7:5'        rcCmds.joystickXCmd_nd <= pwmLowVal && ...
-  // '<S91>:7:6'        rcCmds.joystickZCmd_nd <= pwmLowVal)
-  if (BusConversion_InsertedFor_Chart->throttleCmd_nd <= 987) {
-    if (BusConversion_InsertedFor_Chart->joystickYCmd_nd <= 987) {
-      if (BusConversion_InsertedFor_Chart->joystickXCmd_nd <= 987) {
-        if (BusConversion_InsertedFor_Chart->joystickZCmd_nd <= 987) {
-          // '<S91>:7:7' isTrue = true;
+  // MATLAB Function 'checkRcCmds': '<S93>:7'
+  // '<S93>:7:2' pwmLowVal = paramsStruct.pwmLimits(1);
+  // '<S93>:7:3' if(rcCmds.throttleCmd_nd <= pwmLowVal && ...
+  // '<S93>:7:4'        rcCmds.joystickYCmd_nd <= pwmLowVal && ...
+  // '<S93>:7:5'        rcCmds.joystickXCmd_nd <= pwmLowVal && ...
+  // '<S93>:7:6'        rcCmds.joystickZCmd_nd <= pwmLowVal)
+  if (BusConversion_InsertedFor_Chart->throttleCmd_nd <= 1000) {
+    if (BusConversion_InsertedFor_Chart->joystickYCmd_nd <= 1000) {
+      if (BusConversion_InsertedFor_Chart->joystickXCmd_nd <= 1000) {
+        if (BusConversion_InsertedFor_Chart->joystickZCmd_nd <= 1000) {
+          // '<S93>:7:7' isTrue = true;
           isTrue = true;
         } else {
-          // '<S91>:7:8' else
-          // '<S91>:7:9' isTrue = false;
+          // '<S93>:7:8' else
+          // '<S93>:7:9' isTrue = false;
           isTrue = false;
         }
       } else {
-        // '<S91>:7:8' else
-        // '<S91>:7:9' isTrue = false;
+        // '<S93>:7:8' else
+        // '<S93>:7:9' isTrue = false;
         isTrue = false;
       }
     } else {
-      // '<S91>:7:8' else
-      // '<S91>:7:9' isTrue = false;
+      // '<S93>:7:8' else
+      // '<S93>:7:9' isTrue = false;
       isTrue = false;
     }
   } else {
-    // '<S91>:7:8' else
-    // '<S91>:7:9' isTrue = false;
+    // '<S93>:7:8' else
+    // '<S93>:7:9' isTrue = false;
     isTrue = false;
   }
 
@@ -608,16 +608,17 @@ boolean_T fcsModel::fcsModel_checkRcCmds(const busRcInCmds
 void fcsModel::step()
 {
   std::array<real_T, 9> conversionMatrix;
-  std::array<real_T, 3> rtb_ImpAsg_InsertedFor_angAccel;
   std::array<real_T, 3> rtb_ImpAsg_InsertedFor_angRateC;
+  std::array<real_T, 3> rtb_Switch;
   std::array<busCtrlInputs, 3> rtb_ctrlInputsArray;
   busPidDebug rtb_BusCreator_o;
-  real_T pCmd;
-  real_T pCmd_tmp_tmp;
-  real_T rCmd;
-  real_T tCmd;
-  real_T yCmd;
+  real_T plim;
+  real_T rlim;
+  real_T tCmd_unitRange;
+  real_T tlim;
+  real_T ylim;
   boolean_T resetIntegrator;
+  enumFlightMode rtb_flightMode;
   enumStateMachine state;
 
   // Chart: '<S4>/Chart' incorporates:
@@ -635,27 +636,27 @@ void fcsModel::step()
     fcsModel_DW.is_active_c1_rcInterpreter = 1U;
 
     // Entry Internal: rcInterpreter/Chart
-    // Transition: '<S91>:2'
+    // Transition: '<S93>:2'
     fcsModel_DW.durationCounter_1 = 0;
     fcsModel_DW.is_c1_rcInterpreter = fcsModel_IN_INACTIVE;
 
-    // Entry 'INACTIVE': '<S91>:1'
-    // '<S91>:1:2' state = enumStateMachine.INACTIVE;
+    // Entry 'INACTIVE': '<S93>:1'
+    // '<S93>:1:2' state = enumStateMachine.INACTIVE;
     state = enumStateMachine::INACTIVE;
 
-    // '<S91>:1:3' rcCheckFlag = checkRcCmds(rcCmds, paramsStruct);
+    // '<S93>:1:3' rcCheckFlag = checkRcCmds(rcCmds, paramsStruct);
     fcsModel_DW.rcCheckFlag = fcsModel_checkRcCmds(&fcsModel_U.rcCmdsIn);
     if (!fcsModel_DW.rcCheckFlag) {
       fcsModel_DW.durationCounter_1_j = 0;
     }
 
-    // '<S91>:1:4' resetIntegrator = true;
+    // '<S93>:1:4' resetIntegrator = true;
     resetIntegrator = true;
   } else {
     switch (fcsModel_DW.is_c1_rcInterpreter) {
      case fcsModel_IN_ARM_MTRS:
-      // During 'ARM_MTRS': '<S91>:3'
-      // '<S91>:10:1' sf_internal_predicateOutput = after(60, sec) || duration(rcCheckFlag == true, sec) >= 5; 
+      // During 'ARM_MTRS': '<S93>:3'
+      // '<S93>:10:1' sf_internal_predicateOutput = after(60, sec) || duration(rcCheckFlag == true, sec) >= 5; 
       if (fcsModel_DW.temporalCounter_i1 >= 15000U) {
         resetIntegrator = true;
       } else {
@@ -667,130 +668,130 @@ void fcsModel::step()
       }
 
       if (resetIntegrator) {
-        // Transition: '<S91>:10'
+        // Transition: '<S93>:10'
         fcsModel_DW.durationCounter_1 = 0;
         fcsModel_DW.is_c1_rcInterpreter = fcsModel_IN_INACTIVE;
 
-        // Entry 'INACTIVE': '<S91>:1'
-        // '<S91>:1:2' state = enumStateMachine.INACTIVE;
+        // Entry 'INACTIVE': '<S93>:1'
+        // '<S93>:1:2' state = enumStateMachine.INACTIVE;
         state = enumStateMachine::INACTIVE;
 
-        // '<S91>:1:3' rcCheckFlag = checkRcCmds(rcCmds, paramsStruct);
+        // '<S93>:1:3' rcCheckFlag = checkRcCmds(rcCmds, paramsStruct);
         fcsModel_DW.rcCheckFlag = fcsModel_checkRcCmds(&fcsModel_U.rcCmdsIn);
         if (!fcsModel_DW.rcCheckFlag) {
           fcsModel_DW.durationCounter_1_j = 0;
         }
 
-        // '<S91>:1:4' resetIntegrator = true;
+        // '<S93>:1:4' resetIntegrator = true;
 
-        // '<S91>:12:1' sf_internal_predicateOutput = rcCmds.throttleCmd_nd > paramsStruct.pwmLimits(1); 
-      } else if (fcsModel_U.rcCmdsIn.throttleCmd_nd > 987) {
-        // Transition: '<S91>:12'
+        // '<S93>:12:1' sf_internal_predicateOutput = rcCmds.throttleCmd_nd > paramsStruct.pwmLimits(1); 
+      } else if (fcsModel_U.rcCmdsIn.throttleCmd_nd > 1000) {
+        // Transition: '<S93>:12'
         fcsModel_DW.is_c1_rcInterpreter = fcsModel_IN_INFLIGHT;
 
-        // Entry 'INFLIGHT': '<S91>:11'
-        // '<S91>:11:2' state = enumStateMachine.INFLIGHT;
+        // Entry 'INFLIGHT': '<S93>:11'
+        // '<S93>:11:2' state = enumStateMachine.INFLIGHT;
         state = enumStateMachine::INFLIGHT;
 
-        // '<S91>:11:3' rcCheckFlag = checkRcCmds(rcCmds, paramsStruct);
+        // '<S93>:11:3' rcCheckFlag = checkRcCmds(rcCmds, paramsStruct);
         fcsModel_DW.rcCheckFlag = fcsModel_checkRcCmds(&fcsModel_U.rcCmdsIn);
         if (!fcsModel_DW.rcCheckFlag) {
           fcsModel_DW.durationCounter_1 = 0;
           fcsModel_DW.durationCounter_1_j = 0;
         }
 
-        // '<S91>:11:4' resetIntegrator = false;
+        // '<S93>:11:4' resetIntegrator = false;
       } else {
-        // '<S91>:3:2' state = enumStateMachine.MTR_ARMED;
+        // '<S93>:3:2' state = enumStateMachine.MTR_ARMED;
         state = enumStateMachine::MTR_ARMED;
 
-        // '<S91>:3:3' rcCheckFlag = checkRcCmds(rcCmds, paramsStruct);
+        // '<S93>:3:3' rcCheckFlag = checkRcCmds(rcCmds, paramsStruct);
         fcsModel_DW.rcCheckFlag = fcsModel_checkRcCmds(&fcsModel_U.rcCmdsIn);
         if (!fcsModel_DW.rcCheckFlag) {
           fcsModel_DW.durationCounter_1 = 0;
           fcsModel_DW.durationCounter_1_j = 0;
         }
 
-        // '<S91>:3:4' resetIntegrator = true;
+        // '<S93>:3:4' resetIntegrator = true;
         resetIntegrator = true;
       }
       break;
 
      case fcsModel_IN_INACTIVE:
-      // During 'INACTIVE': '<S91>:1'
-      // '<S91>:5:1' sf_internal_predicateOutput = duration(rcCheckFlag, sec) >= 5 && rcCmds.throttleCmd_nd >= 900; 
+      // During 'INACTIVE': '<S93>:1'
+      // '<S93>:5:1' sf_internal_predicateOutput = duration(rcCheckFlag, sec) >= 5 && rcCmds.throttleCmd_nd >= 900; 
       if (!fcsModel_DW.rcCheckFlag) {
         fcsModel_DW.durationCounter_1 = 0;
       }
 
       if ((fcsModel_DW.durationCounter_1 >= 1250) &&
           (fcsModel_U.rcCmdsIn.throttleCmd_nd >= 900)) {
-        // Transition: '<S91>:5'
+        // Transition: '<S93>:5'
         fcsModel_DW.durationCounter_1_j = 0;
         fcsModel_DW.is_c1_rcInterpreter = fcsModel_IN_ARM_MTRS;
         fcsModel_DW.temporalCounter_i1 = 0U;
 
-        // Entry 'ARM_MTRS': '<S91>:3'
-        // '<S91>:3:2' state = enumStateMachine.MTR_ARMED;
+        // Entry 'ARM_MTRS': '<S93>:3'
+        // '<S93>:3:2' state = enumStateMachine.MTR_ARMED;
         state = enumStateMachine::MTR_ARMED;
 
-        // '<S91>:3:3' rcCheckFlag = checkRcCmds(rcCmds, paramsStruct);
+        // '<S93>:3:3' rcCheckFlag = checkRcCmds(rcCmds, paramsStruct);
         fcsModel_DW.rcCheckFlag = fcsModel_checkRcCmds(&fcsModel_U.rcCmdsIn);
         if (!fcsModel_DW.rcCheckFlag) {
           fcsModel_DW.durationCounter_1 = 0;
         }
 
-        // '<S91>:3:4' resetIntegrator = true;
+        // '<S93>:3:4' resetIntegrator = true;
         resetIntegrator = true;
       } else {
-        // '<S91>:1:2' state = enumStateMachine.INACTIVE;
+        // '<S93>:1:2' state = enumStateMachine.INACTIVE;
         state = enumStateMachine::INACTIVE;
 
-        // '<S91>:1:3' rcCheckFlag = checkRcCmds(rcCmds, paramsStruct);
+        // '<S93>:1:3' rcCheckFlag = checkRcCmds(rcCmds, paramsStruct);
         fcsModel_DW.rcCheckFlag = fcsModel_checkRcCmds(&fcsModel_U.rcCmdsIn);
         if (!fcsModel_DW.rcCheckFlag) {
           fcsModel_DW.durationCounter_1 = 0;
           fcsModel_DW.durationCounter_1_j = 0;
         }
 
-        // '<S91>:1:4' resetIntegrator = true;
+        // '<S93>:1:4' resetIntegrator = true;
         resetIntegrator = true;
       }
       break;
 
      default:
-      // During 'INFLIGHT': '<S91>:11'
-      // '<S91>:20:1' sf_internal_predicateOutput = rcCmds.throttleCmd_nd <= paramsStruct.pwmLimits(1); 
-      if (fcsModel_U.rcCmdsIn.throttleCmd_nd <= 987) {
-        // Transition: '<S91>:20'
+      // During 'INFLIGHT': '<S93>:11'
+      // '<S93>:20:1' sf_internal_predicateOutput = rcCmds.throttleCmd_nd <= paramsStruct.pwmLimits(1); 
+      if (fcsModel_U.rcCmdsIn.throttleCmd_nd <= 1000) {
+        // Transition: '<S93>:20'
         fcsModel_DW.durationCounter_1_j = 0;
         fcsModel_DW.is_c1_rcInterpreter = fcsModel_IN_ARM_MTRS;
         fcsModel_DW.temporalCounter_i1 = 0U;
 
-        // Entry 'ARM_MTRS': '<S91>:3'
-        // '<S91>:3:2' state = enumStateMachine.MTR_ARMED;
+        // Entry 'ARM_MTRS': '<S93>:3'
+        // '<S93>:3:2' state = enumStateMachine.MTR_ARMED;
         state = enumStateMachine::MTR_ARMED;
 
-        // '<S91>:3:3' rcCheckFlag = checkRcCmds(rcCmds, paramsStruct);
+        // '<S93>:3:3' rcCheckFlag = checkRcCmds(rcCmds, paramsStruct);
         fcsModel_DW.rcCheckFlag = fcsModel_checkRcCmds(&fcsModel_U.rcCmdsIn);
         if (!fcsModel_DW.rcCheckFlag) {
           fcsModel_DW.durationCounter_1 = 0;
         }
 
-        // '<S91>:3:4' resetIntegrator = true;
+        // '<S93>:3:4' resetIntegrator = true;
         resetIntegrator = true;
       } else {
-        // '<S91>:11:2' state = enumStateMachine.INFLIGHT;
+        // '<S93>:11:2' state = enumStateMachine.INFLIGHT;
         state = enumStateMachine::INFLIGHT;
 
-        // '<S91>:11:3' rcCheckFlag = checkRcCmds(rcCmds, paramsStruct);
+        // '<S93>:11:3' rcCheckFlag = checkRcCmds(rcCmds, paramsStruct);
         fcsModel_DW.rcCheckFlag = fcsModel_checkRcCmds(&fcsModel_U.rcCmdsIn);
         if (!fcsModel_DW.rcCheckFlag) {
           fcsModel_DW.durationCounter_1 = 0;
           fcsModel_DW.durationCounter_1_j = 0;
         }
 
-        // '<S91>:11:4' resetIntegrator = false;
+        // '<S93>:11:4' resetIntegrator = false;
         resetIntegrator = false;
       }
       break;
@@ -812,235 +813,290 @@ void fcsModel::step()
   //   Inport: '<Root>/rcCmdsIn'
 
   // Computes command and flight mode from the rc inputs
-  // MATLAB Function 'rcInterpreter/Interpret RC In Cmds': '<S92>:1'
-  // '<S92>:1:3' [flightMode, rcOutCmds] = interpretRcInputs_function(rcCmds, rcParamsStruct); 
-  // INTERPRETRCINPUTS_FUNCTION %Computes command and flight mode from the rc inputs 
-  // 'interpretRcInputs_function:3' tCoeffs = rcParamsStruct.coeffs.throttle_nd; 
-  // 'interpretRcInputs_function:4' tCmd = min( rcParamsStruct.pwmLimits(2), ... 
-  // 'interpretRcInputs_function:5'         max( rcParamsStruct.pwmLimits(1), double(rcInCmds.throttleCmd_nd) ) ); 
-  tCmd = std::fmin(2006.0, std::fmax(987.0, static_cast<real_T>
-    (fcsModel_U.rcCmdsIn.throttleCmd_nd)));
+  // MATLAB Function 'rcInterpreter/Interpret RC In Cmds': '<S94>:1'
+  // '<S94>:1:3' [flightMode, rcOutCmds] = interpretRcInputs_function(rcCmds, expo, rcParamsStruct); 
+  // INTERPRETRCINPUTS_FUNCTION
+  // Computes command and flight mode from the rc inputs
+  // Select mode
+  // 'interpretRcInputs_function:6' if(rcInCmds.rcSwitch1_nd < 1100)
+  if (fcsModel_U.rcCmdsIn.rcSwitch1_nd < 1100) {
+    // 'interpretRcInputs_function:7' flightMode = enumFlightMode.ACRO;
+    rtb_flightMode = enumFlightMode::ACRO;
 
-  // 'interpretRcInputs_function:6' rcOutCmds.throttleStick = -(tCoeffs(1)*tCmd^3 + tCoeffs(2)*tCmd^2 + ... 
-  // 'interpretRcInputs_function:7'                           tCoeffs(3)*tCmd + tCoeffs(4))*rcParamsStruct.cmdLimits.zForce_N(2); 
-  // 'interpretRcInputs_function:9' rCoeffs = rcParamsStruct.coeffs.roll_nd;
-  // 'interpretRcInputs_function:10' rCmd = min( rcParamsStruct.pwmLimits(2), ... 
-  // 'interpretRcInputs_function:11'        max( rcParamsStruct.pwmLimits(1), double(rcInCmds.joystickXCmd_nd) ) ); 
-  rCmd = std::fmin(2006.0, std::fmax(987.0, static_cast<real_T>
-    (fcsModel_U.rcCmdsIn.joystickXCmd_nd)));
+    // 'interpretRcInputs_function:8' tlim = -rcParamsStruct.cmdLimits.zForce_N(2); 
+    // 'interpretRcInputs_function:9' rlim = rcParamsStruct.cmdLimits.rollRate_radps(2); 
+    rlim = 1.0471975511965976;
 
-  // 'interpretRcInputs_function:12' rcOutCmds.rollStick = (rCoeffs(1)*rCmd^3 + rCoeffs(2)*rCmd^2 + ... 
-  // 'interpretRcInputs_function:13'                           rCoeffs(3)*rCmd + rCoeffs(4))*rcParamsStruct.cmdLimits.roll_rad(2); 
-  // 'interpretRcInputs_function:15' pCoeffs = rcParamsStruct.coeffs.pitch_nd;
-  //  Reverse the pitch cmd
-  // 'interpretRcInputs_function:17' pCmd = double(rcInCmds.joystickYCmd_nd);
-  // 'interpretRcInputs_function:18' pCmd = min( rcParamsStruct.pwmLimits(2), ... 
-  // 'interpretRcInputs_function:19'        max( rcParamsStruct.pwmLimits(1),  pCmd) ); 
-  pCmd = std::fmin(2006.0, std::fmax(987.0, static_cast<real_T>
-    (fcsModel_U.rcCmdsIn.joystickYCmd_nd)));
+    // 'interpretRcInputs_function:10' plim = rcParamsStruct.cmdLimits.pitchRate_radps(2); 
+    plim = 1.0471975511965976;
 
-  // 'interpretRcInputs_function:20' rcOutCmds.pitchStick = -(pCoeffs(1)*pCmd^3 + pCoeffs(2)*pCmd^2 + ... 
-  // 'interpretRcInputs_function:21'                           pCoeffs(3)*pCmd + pCoeffs(4))*rcParamsStruct.cmdLimits.pitch_rad(2); 
-  // 'interpretRcInputs_function:23' yCoeffs = rcParamsStruct.coeffs.yaw_nd;
-  // 'interpretRcInputs_function:24' yCmd = min( rcParamsStruct.pwmLimits(2), ... 
-  // 'interpretRcInputs_function:25'        max( rcParamsStruct.pwmLimits(1), double(rcInCmds.joystickZCmd_nd) ) ); 
-  yCmd = std::fmin(2006.0, std::fmax(987.0, static_cast<real_T>
-    (fcsModel_U.rcCmdsIn.joystickZCmd_nd)));
+    // 'interpretRcInputs_function:11' ylim = rcParamsStruct.cmdLimits.yawRate_radps(2); 
+  } else if ((fcsModel_U.rcCmdsIn.rcSwitch1_nd >= 1100) &&
+             (fcsModel_U.rcCmdsIn.rcSwitch1_nd < 1800)) {
+    // 'interpretRcInputs_function:13' elseif (rcInCmds.rcSwitch1_nd >= 1100 && rcInCmds.rcSwitch1_nd < 1800) 
+    // 'interpretRcInputs_function:14' flightMode = enumFlightMode.STABILIZE;
+    rtb_flightMode = enumFlightMode::STABILIZE;
+
+    // 'interpretRcInputs_function:15' tlim = -rcParamsStruct.cmdLimits.zForce_N(2); 
+    // 'interpretRcInputs_function:16' rlim = rcParamsStruct.cmdLimits.roll_rad(2); 
+    rlim = 0.52359877559829882;
+
+    // 'interpretRcInputs_function:17' plim = rcParamsStruct.cmdLimits.pitch_rad(2); 
+    plim = 0.52359877559829882;
+
+    // 'interpretRcInputs_function:18' ylim = rcParamsStruct.cmdLimits.yawRate_radps(2); 
+  } else {
+    // 'interpretRcInputs_function:19' else
+    // 'interpretRcInputs_function:20' flightMode = enumFlightMode.ACRO;
+    rtb_flightMode = enumFlightMode::ACRO;
+
+    // 'interpretRcInputs_function:21' tlim = -rcParamsStruct.cmdLimits.zForce_N(2); 
+    // 'interpretRcInputs_function:22' rlim = rcParamsStruct.cmdLimits.rollRate_radps(2); 
+    rlim = 1.0471975511965976;
+
+    // 'interpretRcInputs_function:23' plim = rcParamsStruct.cmdLimits.pitchRate_radps(2); 
+    plim = 1.0471975511965976;
+
+    // 'interpretRcInputs_function:24' ylim = rcParamsStruct.cmdLimits.yawRate_radps(2); 
+  }
+
+  // 'interpretRcInputs_function:27' if expo
+  // 'interpretRcInputs_function:54' else
+  // 'interpretRcInputs_function:55' tCmd = min( rcParamsStruct.pwmLimits(2), ... 
+  // 'interpretRcInputs_function:56'         max( rcParamsStruct.pwmLimits(1), double(rcInCmds.throttleCmd_nd) ) ); 
+  // 'interpretRcInputs_function:57' tCmd_unitRange = -1 + tCmd/1000;
+  // 'interpretRcInputs_function:59' rCmd = min( rcParamsStruct.pwmLimits(2), ... 
+  // 'interpretRcInputs_function:60'         max( rcParamsStruct.pwmLimits(1), double(rcInCmds.joystickXCmd_nd) ) ); 
+  // 'interpretRcInputs_function:61' rCmd_unitRange = -3 + rCmd/500;
+  // 'interpretRcInputs_function:63' pCmd = min( rcParamsStruct.pwmLimits(2), ... 
+  // 'interpretRcInputs_function:64'         max( rcParamsStruct.pwmLimits(1),  double(rcInCmds.joystickYCmd_nd) ) ); 
+  // 'interpretRcInputs_function:65' pCmd_unitRange = -(-3 + pCmd/500);
+  // 'interpretRcInputs_function:67' yCmd = min( rcParamsStruct.pwmLimits(2), ... 
+  // 'interpretRcInputs_function:68'         max( rcParamsStruct.pwmLimits(1), double(rcInCmds.joystickZCmd_nd) ) ); 
+  // 'interpretRcInputs_function:69' yCmd_unitRange = -3 + yCmd/500;
+  // 'interpretRcInputs_function:71' rcOutCmds.throttleStick = tCmd_unitRange*tlim; 
+  tlim = (std::fmin(2000.0, std::fmax(1000.0, static_cast<real_T>
+            (fcsModel_U.rcCmdsIn.throttleCmd_nd))) / 1000.0 + -1.0) * -60.0;
+
+  // 'interpretRcInputs_function:72' rcOutCmds.rollStick = rCmd_unitRange*rlim;
+  rlim *= std::fmin(2000.0, std::fmax(1000.0, static_cast<real_T>
+    (fcsModel_U.rcCmdsIn.joystickXCmd_nd))) / 500.0 + -3.0;
+
+  // 'interpretRcInputs_function:73' rcOutCmds.pitchStick = pCmd_unitRange*plim; 
+  plim *= -(std::fmin(2000.0, std::fmax(1000.0, static_cast<real_T>
+              (fcsModel_U.rcCmdsIn.joystickYCmd_nd))) / 500.0 + -3.0);
+
+  // 'interpretRcInputs_function:74' rcOutCmds.yawStick = yCmd_unitRange*ylim;
+  ylim = (std::fmin(2000.0, std::fmax(1000.0, static_cast<real_T>
+            (fcsModel_U.rcCmdsIn.joystickZCmd_nd))) / 500.0 + -3.0) *
+    1.0471975511965976;
+
+  // End of MATLAB Function: '<S4>/Interpret RC In Cmds'
 
   // MATLAB Function: '<S3>/assembleOuterLoopToInnerLoopBus' incorporates:
   //   BusCreator generated from: '<S3>/assembleOuterLoopToInnerLoopBus'
   //   Constant: '<S3>/Constant'
   //   Inport: '<Root>/stateEstimate'
-  //   MATLAB Function: '<S4>/Interpret RC In Cmds'
 
-  // 'interpretRcInputs_function:26' rcOutCmds.yawStick = (yCoeffs(1)*yCmd^3 + yCoeffs(2)*yCmd^2 + ... 
-  // 'interpretRcInputs_function:27'                           yCoeffs(3)*yCmd + yCoeffs(4))*rcParamsStruct.cmdLimits.yawRate_radps(2); 
-  // if(rcInCmds.rcSwitch1_nd < 1500)
-  // 'interpretRcInputs_function:30' flightMode = enumFlightMode.STABILIZE;
-  // end
   std::memcpy(&rtb_ctrlInputsArray[0],
               &fcsModel_ConstP.Constant_Value.attCtrlInputs.ctrlInputsArray[0],
               3U * sizeof(busCtrlInputs));
 
-  // MATLAB Function 'Outer Loop Controller/assembleOuterLoopToInnerLoopBus': '<S90>:1' 
-  // '<S90>:1:2' outBus.outerLoopCmds.thrustCmd_N = throttleCmd_N;
+  // MATLAB Function 'Outer Loop Controller/assembleOuterLoopToInnerLoopBus': '<S92>:1' 
+  // '<S92>:1:2' outBus.outerLoopCmds.thrustCmd_N = throttleCmd_N;
+  // '<S92>:1:3' outDebug = throttleCmd_N;
+  fcsModel_Y.fcsDebug.outerLoopCtrlDebug.frcCmd_N = tlim;
+
   //  This is a stop gap setup where we are only assuming that rate control
   //  is active and therefore not setting up attCtrlInputs for Euler angle
   //  control
-  // '<S90>:1:6' outBus.attCtrlInputs.ctrlInputsArray(1).cmd = rcOutCmds.rollStick; 
-  rtb_ctrlInputsArray[0].cmd = (((rCmd * rCmd * 1.0043823416568364E-5 +
-    -2.2216571985540022E-9 * std::pow(rCmd, 3.0)) + -0.012613046004899127 * rCmd)
-    + 3.8187541282968023) * 0.3490658503988659;
+  // '<S92>:1:7' outBus.attCtrlInputs.ctrlInputsArray(1).cmd = rcOutCmds.rollStick; 
+  rtb_ctrlInputsArray[0].cmd = rlim;
 
-  // '<S90>:1:7' outBus.attCtrlInputs.ctrlInputsArray(1).meas = stateEstimate.attitude_rad(1); 
+  // '<S92>:1:8' outBus.attCtrlInputs.ctrlInputsArray(1).meas = stateEstimate.attitude_rad(1); 
   rtb_ctrlInputsArray[0].meas = fcsModel_U.stateEstimate.attitude_rad[0];
 
-  // '<S90>:1:8' outBus.attCtrlInputs.ctrlInputsArray(2).cmd = rcOutCmds.pitchStick; 
-  rtb_ctrlInputsArray[1].cmd = -(((pCmd * pCmd * 1.0043823416568364E-5 +
-    -2.2216571985540022E-9 * std::pow(pCmd, 3.0)) + -0.012613046004899127 * pCmd)
-    + 3.8187541282968023) * 0.3490658503988659;
+  // '<S92>:1:9' outBus.attCtrlInputs.ctrlInputsArray(2).cmd = rcOutCmds.pitchStick; 
+  rtb_ctrlInputsArray[1].cmd = plim;
 
-  // '<S90>:1:9' outBus.attCtrlInputs.ctrlInputsArray(2).meas = stateEstimate.attitude_rad(2); 
+  // '<S92>:1:10' outBus.attCtrlInputs.ctrlInputsArray(2).meas = stateEstimate.attitude_rad(2); 
   rtb_ctrlInputsArray[1].meas = fcsModel_U.stateEstimate.attitude_rad[1];
 
-  // '<S90>:1:10' outBus.attCtrlInputs.ctrlInputsArray(3).cmd = rcOutCmds.yawStick; 
-  rtb_ctrlInputsArray[2].cmd = (((yCmd * yCmd * 1.0043823416568364E-5 +
-    -2.2216571985540022E-9 * std::pow(yCmd, 3.0)) + -0.012613046004899127 * yCmd)
-    + 3.8187541282968023) * 1.5707963267948966;
+  // '<S92>:1:11' outBus.attCtrlInputs.ctrlInputsArray(3).cmd = rcOutCmds.yawStick; 
+  rtb_ctrlInputsArray[2].cmd = ylim;
 
-  // '<S90>:1:11' outBus.attCtrlInputs.ctrlInputsArray(3).meas = stateEstimate.attitude_rad(3); 
+  // '<S92>:1:12' outBus.attCtrlInputs.ctrlInputsArray(3).meas = stateEstimate.attitude_rad(3); 
   rtb_ctrlInputsArray[2].meas = fcsModel_U.stateEstimate.attitude_rad[2];
 
-  // '<S90>:1:13' outBus.attCtrlInputs.ctrlInputsArray(1).integratorReset = resetIntegrator; 
+  // '<S92>:1:14' outBus.attCtrlInputs.ctrlInputsArray(1).integratorReset = resetIntegrator; 
   rtb_ctrlInputsArray[0].integratorReset = resetIntegrator;
 
-  // '<S90>:1:14' outBus.attCtrlInputs.ctrlInputsArray(2).integratorReset = resetIntegrator; 
+  // '<S92>:1:15' outBus.attCtrlInputs.ctrlInputsArray(2).integratorReset = resetIntegrator; 
   rtb_ctrlInputsArray[1].integratorReset = resetIntegrator;
 
-  // '<S90>:1:15' outBus.attCtrlInputs.ctrlInputsArray(3).integratorReset = resetIntegrator; 
+  // '<S92>:1:16' outBus.attCtrlInputs.ctrlInputsArray(3).integratorReset = resetIntegrator; 
   rtb_ctrlInputsArray[2].integratorReset = resetIntegrator;
 
   // Outputs for Iterator SubSystem: '<S9>/For Each Subsystem' incorporates:
-  //   ForEach: '<S51>/For Each'
+  //   ForEach: '<S53>/For Each'
 
-  // Outputs for Atomic SubSystem: '<S51>/Signal Conditioning Block'
-  // ForEachSliceSelector generated from: '<S51>/ctrlInputs' incorporates:
+  // Outputs for Atomic SubSystem: '<S53>/Signal Conditioning Block'
+  // ForEachSliceSelector generated from: '<S53>/ctrlInputs' incorporates:
   //   Inport: '<Root>/ctrlParams'
-  //   UnitDelay: '<S51>/Unit Delay'
+  //   UnitDelay: '<S53>/Unit Delay'
 
   fcsMod_SignalConditioningBlock1(rtb_ctrlInputsArray[0].cmd,
     &fcsModel_U.ctrlParams.attCtrlParams.cmdSignalConditioningParamsArray[0],
-    &yCmd, 0.004, &fcsModel_DW.CoreSubsys_p[0].SignalConditioningBlock);
+    &rlim, 0.004, &fcsModel_DW.CoreSubsys_p[0].SignalConditioningBlock);
 
-  // End of Outputs for SubSystem: '<S51>/Signal Conditioning Block'
+  // End of Outputs for SubSystem: '<S53>/Signal Conditioning Block'
 
-  // Outputs for Atomic SubSystem: '<S51>/Signal Conditioning Block1'
+  // Outputs for Atomic SubSystem: '<S53>/Signal Conditioning Block1'
   fcsMod_SignalConditioningBlock1(rtb_ctrlInputsArray[0].meas,
     &fcsModel_U.ctrlParams.attCtrlParams.measSignalConditioningParamsArray[0],
-    &pCmd, 0.004, &fcsModel_DW.CoreSubsys_p[0].SignalConditioningBlock1);
+    &plim, 0.004, &fcsModel_DW.CoreSubsys_p[0].SignalConditioningBlock1);
 
-  // End of Outputs for SubSystem: '<S51>/Signal Conditioning Block1'
+  // End of Outputs for SubSystem: '<S53>/Signal Conditioning Block1'
 
-  // Outputs for Atomic SubSystem: '<S51>/pidWithDebug'
-  fcsModel_pidWithDebug(0.0, yCmd, pCmd, rtb_ctrlInputsArray[0].integratorReset,
+  // Outputs for Atomic SubSystem: '<S53>/pidWithDebug'
+  fcsModel_pidWithDebug(0.0, rlim, plim, rtb_ctrlInputsArray[0].integratorReset,
                         &fcsModel_U.ctrlParams.attCtrlParams.ctrlParamsArray[0],
-                        fcsModel_DW.CoreSubsys_p[0].UnitDelay_DSTATE, &rCmd,
+                        fcsModel_DW.CoreSubsys_p[0].UnitDelay_DSTATE, &ylim,
                         &rtb_BusCreator_o, 0.004, &fcsModel_DW.CoreSubsys_p[0].
                         pidWithDebug);
 
-  // End of Outputs for SubSystem: '<S51>/pidWithDebug'
+  // End of Outputs for SubSystem: '<S53>/pidWithDebug'
 
-  // Update for UnitDelay: '<S51>/Unit Delay'
-  fcsModel_DW.CoreSubsys_p[0].UnitDelay_DSTATE = rCmd;
+  // Update for UnitDelay: '<S53>/Unit Delay'
+  fcsModel_DW.CoreSubsys_p[0].UnitDelay_DSTATE = ylim;
 
-  // ForEachSliceAssignment generated from: '<S51>/pidDebug'
+  // ForEachSliceAssignment generated from: '<S53>/pidDebug'
   fcsModel_Y.fcsDebug.innerLoopCtrlDebug.attCtrlDebug.pidDebug[0] =
     rtb_BusCreator_o;
 
-  // ForEachSliceAssignment generated from: '<S51>/angRateCmds_radps'
-  rtb_ImpAsg_InsertedFor_angRateC[0] = rCmd;
+  // ForEachSliceAssignment generated from: '<S53>/angRateCmds_radps'
+  rtb_ImpAsg_InsertedFor_angRateC[0] = ylim;
 
-  // ForEachSliceAssignment generated from: '<S51>/filtMeas'
-  fcsModel_Y.fcsDebug.innerLoopCtrlDebug.attCtrlDebug.meas[0] = pCmd;
+  // ForEachSliceAssignment generated from: '<S53>/filtMeas'
+  fcsModel_Y.fcsDebug.innerLoopCtrlDebug.attCtrlDebug.meas[0] = plim;
 
-  // ForEachSliceAssignment generated from: '<S51>/filtCmd'
-  fcsModel_Y.fcsDebug.innerLoopCtrlDebug.attCtrlDebug.cmd[0] = yCmd;
+  // ForEachSliceAssignment generated from: '<S53>/filtCmd'
+  fcsModel_Y.fcsDebug.innerLoopCtrlDebug.attCtrlDebug.cmd[0] = rlim;
 
-  // Outputs for Atomic SubSystem: '<S51>/Signal Conditioning Block'
-  // ForEachSliceSelector generated from: '<S51>/ctrlInputs' incorporates:
+  // Outputs for Atomic SubSystem: '<S53>/Signal Conditioning Block'
+  // ForEachSliceSelector generated from: '<S53>/ctrlInputs' incorporates:
   //   Inport: '<Root>/ctrlParams'
-  //   UnitDelay: '<S51>/Unit Delay'
+  //   UnitDelay: '<S53>/Unit Delay'
 
   fcsMod_SignalConditioningBlock1(rtb_ctrlInputsArray[1].cmd,
     &fcsModel_U.ctrlParams.attCtrlParams.cmdSignalConditioningParamsArray[1],
-    &yCmd, 0.004, &fcsModel_DW.CoreSubsys_p[1].SignalConditioningBlock);
+    &rlim, 0.004, &fcsModel_DW.CoreSubsys_p[1].SignalConditioningBlock);
 
-  // End of Outputs for SubSystem: '<S51>/Signal Conditioning Block'
+  // End of Outputs for SubSystem: '<S53>/Signal Conditioning Block'
 
-  // Outputs for Atomic SubSystem: '<S51>/Signal Conditioning Block1'
+  // Outputs for Atomic SubSystem: '<S53>/Signal Conditioning Block1'
   fcsMod_SignalConditioningBlock1(rtb_ctrlInputsArray[1].meas,
     &fcsModel_U.ctrlParams.attCtrlParams.measSignalConditioningParamsArray[1],
-    &pCmd, 0.004, &fcsModel_DW.CoreSubsys_p[1].SignalConditioningBlock1);
+    &plim, 0.004, &fcsModel_DW.CoreSubsys_p[1].SignalConditioningBlock1);
 
-  // End of Outputs for SubSystem: '<S51>/Signal Conditioning Block1'
+  // End of Outputs for SubSystem: '<S53>/Signal Conditioning Block1'
 
-  // Outputs for Atomic SubSystem: '<S51>/pidWithDebug'
-  fcsModel_pidWithDebug(0.0, yCmd, pCmd, rtb_ctrlInputsArray[1].integratorReset,
+  // Outputs for Atomic SubSystem: '<S53>/pidWithDebug'
+  fcsModel_pidWithDebug(0.0, rlim, plim, rtb_ctrlInputsArray[1].integratorReset,
                         &fcsModel_U.ctrlParams.attCtrlParams.ctrlParamsArray[1],
-                        fcsModel_DW.CoreSubsys_p[1].UnitDelay_DSTATE, &rCmd,
+                        fcsModel_DW.CoreSubsys_p[1].UnitDelay_DSTATE, &ylim,
                         &rtb_BusCreator_o, 0.004, &fcsModel_DW.CoreSubsys_p[1].
                         pidWithDebug);
 
-  // End of Outputs for SubSystem: '<S51>/pidWithDebug'
+  // End of Outputs for SubSystem: '<S53>/pidWithDebug'
 
-  // Update for UnitDelay: '<S51>/Unit Delay'
-  fcsModel_DW.CoreSubsys_p[1].UnitDelay_DSTATE = rCmd;
+  // Update for UnitDelay: '<S53>/Unit Delay'
+  fcsModel_DW.CoreSubsys_p[1].UnitDelay_DSTATE = ylim;
 
-  // ForEachSliceAssignment generated from: '<S51>/pidDebug'
+  // ForEachSliceAssignment generated from: '<S53>/pidDebug'
   fcsModel_Y.fcsDebug.innerLoopCtrlDebug.attCtrlDebug.pidDebug[1] =
     rtb_BusCreator_o;
 
-  // ForEachSliceAssignment generated from: '<S51>/angRateCmds_radps'
-  rtb_ImpAsg_InsertedFor_angRateC[1] = rCmd;
+  // ForEachSliceAssignment generated from: '<S53>/angRateCmds_radps'
+  rtb_ImpAsg_InsertedFor_angRateC[1] = ylim;
 
-  // ForEachSliceAssignment generated from: '<S51>/filtMeas'
-  fcsModel_Y.fcsDebug.innerLoopCtrlDebug.attCtrlDebug.meas[1] = pCmd;
+  // ForEachSliceAssignment generated from: '<S53>/filtMeas'
+  fcsModel_Y.fcsDebug.innerLoopCtrlDebug.attCtrlDebug.meas[1] = plim;
 
-  // ForEachSliceAssignment generated from: '<S51>/filtCmd'
-  fcsModel_Y.fcsDebug.innerLoopCtrlDebug.attCtrlDebug.cmd[1] = yCmd;
+  // ForEachSliceAssignment generated from: '<S53>/filtCmd'
+  fcsModel_Y.fcsDebug.innerLoopCtrlDebug.attCtrlDebug.cmd[1] = rlim;
 
-  // Outputs for Atomic SubSystem: '<S51>/Signal Conditioning Block'
-  // ForEachSliceSelector generated from: '<S51>/ctrlInputs' incorporates:
+  // Outputs for Atomic SubSystem: '<S53>/Signal Conditioning Block'
+  // ForEachSliceSelector generated from: '<S53>/ctrlInputs' incorporates:
   //   Inport: '<Root>/ctrlParams'
-  //   UnitDelay: '<S51>/Unit Delay'
+  //   UnitDelay: '<S53>/Unit Delay'
 
   fcsMod_SignalConditioningBlock1(rtb_ctrlInputsArray[2].cmd,
     &fcsModel_U.ctrlParams.attCtrlParams.cmdSignalConditioningParamsArray[2],
-    &yCmd, 0.004, &fcsModel_DW.CoreSubsys_p[2].SignalConditioningBlock);
+    &rlim, 0.004, &fcsModel_DW.CoreSubsys_p[2].SignalConditioningBlock);
 
-  // End of Outputs for SubSystem: '<S51>/Signal Conditioning Block'
+  // End of Outputs for SubSystem: '<S53>/Signal Conditioning Block'
 
-  // Outputs for Atomic SubSystem: '<S51>/Signal Conditioning Block1'
+  // Outputs for Atomic SubSystem: '<S53>/Signal Conditioning Block1'
   fcsMod_SignalConditioningBlock1(rtb_ctrlInputsArray[2].meas,
     &fcsModel_U.ctrlParams.attCtrlParams.measSignalConditioningParamsArray[2],
-    &pCmd, 0.004, &fcsModel_DW.CoreSubsys_p[2].SignalConditioningBlock1);
+    &plim, 0.004, &fcsModel_DW.CoreSubsys_p[2].SignalConditioningBlock1);
 
-  // End of Outputs for SubSystem: '<S51>/Signal Conditioning Block1'
+  // End of Outputs for SubSystem: '<S53>/Signal Conditioning Block1'
 
-  // Outputs for Atomic SubSystem: '<S51>/pidWithDebug'
-  fcsModel_pidWithDebug(0.0, yCmd, pCmd, rtb_ctrlInputsArray[2].integratorReset,
+  // Outputs for Atomic SubSystem: '<S53>/pidWithDebug'
+  fcsModel_pidWithDebug(0.0, rlim, plim, rtb_ctrlInputsArray[2].integratorReset,
                         &fcsModel_U.ctrlParams.attCtrlParams.ctrlParamsArray[2],
-                        fcsModel_DW.CoreSubsys_p[2].UnitDelay_DSTATE, &rCmd,
+                        fcsModel_DW.CoreSubsys_p[2].UnitDelay_DSTATE, &ylim,
                         &rtb_BusCreator_o, 0.004, &fcsModel_DW.CoreSubsys_p[2].
                         pidWithDebug);
 
-  // End of Outputs for SubSystem: '<S51>/pidWithDebug'
+  // End of Outputs for SubSystem: '<S53>/pidWithDebug'
 
-  // Update for UnitDelay: '<S51>/Unit Delay'
-  fcsModel_DW.CoreSubsys_p[2].UnitDelay_DSTATE = rCmd;
+  // Update for UnitDelay: '<S53>/Unit Delay'
+  fcsModel_DW.CoreSubsys_p[2].UnitDelay_DSTATE = ylim;
 
-  // ForEachSliceAssignment generated from: '<S51>/pidDebug'
+  // ForEachSliceAssignment generated from: '<S53>/pidDebug'
   fcsModel_Y.fcsDebug.innerLoopCtrlDebug.attCtrlDebug.pidDebug[2] =
     rtb_BusCreator_o;
 
-  // ForEachSliceAssignment generated from: '<S51>/angRateCmds_radps'
-  rtb_ImpAsg_InsertedFor_angRateC[2] = rCmd;
+  // ForEachSliceAssignment generated from: '<S53>/angRateCmds_radps'
+  rtb_ImpAsg_InsertedFor_angRateC[2] = ylim;
 
-  // ForEachSliceAssignment generated from: '<S51>/filtMeas'
-  fcsModel_Y.fcsDebug.innerLoopCtrlDebug.attCtrlDebug.meas[2] = pCmd;
+  // ForEachSliceAssignment generated from: '<S53>/filtMeas'
+  fcsModel_Y.fcsDebug.innerLoopCtrlDebug.attCtrlDebug.meas[2] = plim;
 
-  // ForEachSliceAssignment generated from: '<S51>/filtCmd'
-  fcsModel_Y.fcsDebug.innerLoopCtrlDebug.attCtrlDebug.cmd[2] = yCmd;
+  // ForEachSliceAssignment generated from: '<S53>/filtCmd'
+  fcsModel_Y.fcsDebug.innerLoopCtrlDebug.attCtrlDebug.cmd[2] = rlim;
 
   // End of Outputs for SubSystem: '<S9>/For Each Subsystem'
 
+  // Switch: '<S8>/Switch' incorporates:
+  //   Constant: '<S49>/Constant'
+  //   RelationalOperator: '<S49>/Compare'
+
+  if (rtb_flightMode == enumFlightMode::ACRO) {
+    rtb_Switch[0] = rtb_ctrlInputsArray[0].cmd;
+    rtb_Switch[1] = rtb_ctrlInputsArray[1].cmd;
+    rtb_Switch[2] = rtb_ctrlInputsArray[2].cmd;
+  } else {
+    rtb_Switch[0] = rtb_ImpAsg_InsertedFor_angRateC[0];
+    rtb_Switch[1] = rtb_ImpAsg_InsertedFor_angRateC[1];
+
+    // Switch: '<S9>/Switch' incorporates:
+    //   Switch: '<S8>/Switch'
+
+    rtb_Switch[2] = rtb_ctrlInputsArray[2].cmd;
+  }
+
+  // End of Switch: '<S8>/Switch'
+
   // MATLAB Function: '<S8>/EulerRates2BodyRates' incorporates:
   //   Inport: '<Root>/stateEstimate'
-  //   SignalConversion generated from: '<S49>/ SFunction '
-  //   Switch: '<S9>/Switch'
+  //   Switch: '<S8>/Switch'
 
-  // MATLAB Function 'EulerRates2BodyRates': '<S49>:1'
-  // '<S49>:1:3' bodyRates_radps = eulerRates2bodyRates_function(taitBryanRates_radps,shipOrientation_rad); 
+  // MATLAB Function 'EulerRates2BodyRates': '<S50>:1'
+  // '<S50>:1:3' bodyRates_radps = eulerRates2bodyRates_function(taitBryanRates_radps,shipOrientation_rad); 
   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   // Converts  rate of change of TaitBryan angles in the globle frame to
   // rotational rate of change in the body frame
@@ -1056,46 +1112,46 @@ void fcsModel::step()
   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   // 'eulerRates2bodyRates_function:18' roll = shipOrientation_rad(1);
   // 'eulerRates2bodyRates_function:19' pitch = shipOrientation_rad(2);
-  rCmd = fcsModel_U.stateEstimate.attitude_rad[1];
+  ylim = fcsModel_U.stateEstimate.attitude_rad[1];
 
   // 'eulerRates2bodyRates_function:20' eps = 10^(-12);
   // 'eulerRates2bodyRates_function:21' limit = pi/740;
   // Check for pm pi/2 rotation to avoid NaNs
   // 'eulerRates2bodyRates_function:24' if( abs( abs(pitch)- pi/2 ) <= limit || abs( abs(pitch) - 3*pi/2 ) <= limit) 
-  pCmd_tmp_tmp = std::abs(fcsModel_U.stateEstimate.attitude_rad[1]);
-  if ((std::abs(pCmd_tmp_tmp - 1.5707963267948966) <= 0.004245395477824045) ||
-      (std::abs(pCmd_tmp_tmp - 4.71238898038469) <= 0.004245395477824045)) {
+  rlim = std::abs(fcsModel_U.stateEstimate.attitude_rad[1]);
+  if ((std::abs(rlim - 1.5707963267948966) <= 0.004245395477824045) || (std::abs
+       (rlim - 4.71238898038469) <= 0.004245395477824045)) {
     // 'eulerRates2bodyRates_function:25' if((abs(pitch)- pi/2) <= 0 || (abs(pitch) - 3*pi/2) <= 0) 
     if (std::abs(fcsModel_U.stateEstimate.attitude_rad[1]) - 1.5707963267948966 <=
         0.0) {
       // 'eulerRates2bodyRates_function:26' pitch = sign(pitch)*( abs(pitch) - limit); 
       if (fcsModel_U.stateEstimate.attitude_rad[1] < 0.0) {
-        rCmd = -1.0;
+        ylim = -1.0;
       } else {
-        rCmd = (fcsModel_U.stateEstimate.attitude_rad[1] > 0.0);
+        ylim = (fcsModel_U.stateEstimate.attitude_rad[1] > 0.0);
       }
 
-      rCmd *= pCmd_tmp_tmp - 0.004245395477824045;
+      ylim *= rlim - 0.004245395477824045;
     } else if (std::abs(fcsModel_U.stateEstimate.attitude_rad[1]) -
                4.71238898038469 <= 0.0) {
       // 'eulerRates2bodyRates_function:26' pitch = sign(pitch)*( abs(pitch) - limit); 
       if (fcsModel_U.stateEstimate.attitude_rad[1] < 0.0) {
-        rCmd = -1.0;
+        ylim = -1.0;
       } else {
-        rCmd = (fcsModel_U.stateEstimate.attitude_rad[1] > 0.0);
+        ylim = (fcsModel_U.stateEstimate.attitude_rad[1] > 0.0);
       }
 
-      rCmd *= pCmd_tmp_tmp - 0.004245395477824045;
+      ylim *= rlim - 0.004245395477824045;
     } else {
       // 'eulerRates2bodyRates_function:27' else
       // 'eulerRates2bodyRates_function:28' pitch = sign(pitch)*( abs(pitch) + limit); 
       if (fcsModel_U.stateEstimate.attitude_rad[1] < 0.0) {
-        rCmd = -1.0;
+        ylim = -1.0;
       } else {
-        rCmd = (fcsModel_U.stateEstimate.attitude_rad[1] > 0.0);
+        ylim = (fcsModel_U.stateEstimate.attitude_rad[1] > 0.0);
       }
 
-      rCmd *= pCmd_tmp_tmp + 0.004245395477824045;
+      ylim *= rlim + 0.004245395477824045;
     }
   }
 
@@ -1103,18 +1159,18 @@ void fcsModel::step()
   // 'eulerRates2bodyRates_function:33' conversionMatrix = [1, 0, -sin(pitch);
   // 'eulerRates2bodyRates_function:34'     0, cos(roll), sin(roll)*cos(pitch);
   // 'eulerRates2bodyRates_function:35'     0, -sin(roll), cos(roll)*cos(pitch)]; 
-  pCmd = std::sin(fcsModel_U.stateEstimate.attitude_rad[0]);
-  yCmd = std::cos(fcsModel_U.stateEstimate.attitude_rad[0]);
-  pCmd_tmp_tmp = std::cos(rCmd);
+  plim = std::sin(fcsModel_U.stateEstimate.attitude_rad[0]);
+  rlim = std::cos(fcsModel_U.stateEstimate.attitude_rad[0]);
+  tCmd_unitRange = std::cos(ylim);
   conversionMatrix[0] = 1.0;
   conversionMatrix[3] = 0.0;
-  conversionMatrix[6] = -std::sin(rCmd);
+  conversionMatrix[6] = -std::sin(ylim);
   conversionMatrix[1] = 0.0;
-  conversionMatrix[4] = yCmd;
-  conversionMatrix[7] = pCmd * pCmd_tmp_tmp;
+  conversionMatrix[4] = rlim;
+  conversionMatrix[7] = plim * tCmd_unitRange;
   conversionMatrix[2] = 0.0;
-  conversionMatrix[5] = -pCmd;
-  conversionMatrix[8] = yCmd * pCmd_tmp_tmp;
+  conversionMatrix[5] = -plim;
+  conversionMatrix[8] = rlim * tCmd_unitRange;
 
   // 'eulerRates2bodyRates_function:37' conversionMatrix = zeroSmallValues(conversionMatrix,eps); 
   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1127,40 +1183,38 @@ void fcsModel::step()
   // 'zeroSmallValues:10' for ii=1:size(M,1)
   // Convert rotation rate to change in TaitBryan angles
   // 'eulerRates2bodyRates_function:40' bodyRates_radps =  conversionMatrix * taitBryanRates_radps; 
-  rCmd = rtb_ImpAsg_InsertedFor_angRateC[0];
-  pCmd = rtb_ImpAsg_InsertedFor_angRateC[1];
-  yCmd = rtb_ctrlInputsArray[2].cmd;
   for (int32_T ii{0}; ii < 3; ii++) {
     // 'zeroSmallValues:11' for jj = 1:size(M,2)
-    pCmd_tmp_tmp = conversionMatrix[ii];
+    ylim = conversionMatrix[ii];
 
     // 'zeroSmallValues:12' if(abs(M(ii,jj))<= abs(eps))
-    if (pCmd_tmp_tmp <= 1.0E-12) {
+    if (ylim <= 1.0E-12) {
       // 'zeroSmallValues:13' M(ii,jj) = 0;
-      pCmd_tmp_tmp = 0.0;
+      ylim = 0.0;
     }
 
-    conversionMatrix[ii] = pCmd_tmp_tmp;
-    pCmd_tmp_tmp = conversionMatrix[ii + 3];
+    conversionMatrix[ii] = ylim;
+    rlim = ylim * rtb_Switch[0];
+    ylim = conversionMatrix[ii + 3];
 
     // 'zeroSmallValues:12' if(abs(M(ii,jj))<= abs(eps))
-    if (std::abs(pCmd_tmp_tmp) <= 1.0E-12) {
+    if (std::abs(ylim) <= 1.0E-12) {
       // 'zeroSmallValues:13' M(ii,jj) = 0;
-      pCmd_tmp_tmp = 0.0;
+      ylim = 0.0;
     }
 
-    conversionMatrix[ii + 3] = pCmd_tmp_tmp;
-    pCmd_tmp_tmp = conversionMatrix[ii + 6];
+    conversionMatrix[ii + 3] = ylim;
+    rlim += ylim * rtb_Switch[1];
+    ylim = conversionMatrix[ii + 6];
 
     // 'zeroSmallValues:12' if(abs(M(ii,jj))<= abs(eps))
-    if (std::abs(pCmd_tmp_tmp) <= 1.0E-12) {
+    if (std::abs(ylim) <= 1.0E-12) {
       // 'zeroSmallValues:13' M(ii,jj) = 0;
-      pCmd_tmp_tmp = 0.0;
+      ylim = 0.0;
     }
 
-    conversionMatrix[ii + 6] = pCmd_tmp_tmp;
-    rtb_ImpAsg_InsertedFor_angRateC[ii] = (conversionMatrix[ii + 3] * pCmd +
-      conversionMatrix[ii] * rCmd) + conversionMatrix[ii + 6] * yCmd;
+    conversionMatrix[ii + 6] = ylim;
+    rtb_ImpAsg_InsertedFor_angRateC[ii] = ylim * rtb_Switch[2] + rlim;
   }
 
   // End of MATLAB Function: '<S8>/EulerRates2BodyRates'
@@ -1211,41 +1265,41 @@ void fcsModel::step()
 
   fcsMod_SignalConditioningBlock1(rtb_ctrlInputsArray[0].cmd,
     &fcsModel_U.ctrlParams.angRateCtrlParams.cmdSignalConditioningParamsArray[0],
-    &rCmd, 0.004, &fcsModel_DW.CoreSubsys[0].SignalConditioningBlock);
+    &ylim, 0.004, &fcsModel_DW.CoreSubsys[0].SignalConditioningBlock);
 
   // End of Outputs for SubSystem: '<S10>/Signal Conditioning Block'
 
   // Outputs for Atomic SubSystem: '<S10>/Signal Conditioning Block1'
   fcsMod_SignalConditioningBlock1(rtb_ctrlInputsArray[0].meas,
     &fcsModel_U.ctrlParams.angRateCtrlParams.measSignalConditioningParamsArray[0],
-    &pCmd, 0.004, &fcsModel_DW.CoreSubsys[0].SignalConditioningBlock1);
+    &plim, 0.004, &fcsModel_DW.CoreSubsys[0].SignalConditioningBlock1);
 
   // End of Outputs for SubSystem: '<S10>/Signal Conditioning Block1'
 
   // Outputs for Atomic SubSystem: '<S10>/pidWithDebug'
-  fcsModel_pidWithDebug(0.0, rCmd, pCmd, rtb_ctrlInputsArray[0].integratorReset,
+  fcsModel_pidWithDebug(0.0, ylim, plim, rtb_ctrlInputsArray[0].integratorReset,
                         &fcsModel_U.ctrlParams.angRateCtrlParams.ctrlParamsArray[
-                        0], fcsModel_DW.CoreSubsys[0].UnitDelay_DSTATE, &yCmd,
+                        0], fcsModel_DW.CoreSubsys[0].UnitDelay_DSTATE, &rlim,
                         &rtb_BusCreator_o, 0.004, &fcsModel_DW.CoreSubsys[0].
                         pidWithDebug);
 
   // End of Outputs for SubSystem: '<S10>/pidWithDebug'
 
   // Update for UnitDelay: '<S10>/Unit Delay'
-  fcsModel_DW.CoreSubsys[0].UnitDelay_DSTATE = yCmd;
+  fcsModel_DW.CoreSubsys[0].UnitDelay_DSTATE = rlim;
 
   // ForEachSliceAssignment generated from: '<S10>/pidDebug'
   fcsModel_Y.fcsDebug.innerLoopCtrlDebug.angRateCtrlDebug.pidDebug[0] =
     rtb_BusCreator_o;
 
   // ForEachSliceAssignment generated from: '<S10>/angAccelCmd_radps2'
-  rtb_ImpAsg_InsertedFor_angAccel[0] = yCmd;
+  rtb_ImpAsg_InsertedFor_angRateC[0] = rlim;
 
   // ForEachSliceAssignment generated from: '<S10>/filtMeas'
-  fcsModel_Y.fcsDebug.innerLoopCtrlDebug.angRateCtrlDebug.meas[0] = pCmd;
+  fcsModel_Y.fcsDebug.innerLoopCtrlDebug.angRateCtrlDebug.meas[0] = plim;
 
   // ForEachSliceAssignment generated from: '<S10>/filtCmd'
-  fcsModel_Y.fcsDebug.innerLoopCtrlDebug.angRateCtrlDebug.cmd[0] = rCmd;
+  fcsModel_Y.fcsDebug.innerLoopCtrlDebug.angRateCtrlDebug.cmd[0] = ylim;
 
   // Outputs for Atomic SubSystem: '<S10>/Signal Conditioning Block'
   // ForEachSliceSelector generated from: '<S10>/ctrlInputs' incorporates:
@@ -1256,41 +1310,41 @@ void fcsModel::step()
 
   fcsMod_SignalConditioningBlock1(rtb_ctrlInputsArray[1].cmd,
     &fcsModel_U.ctrlParams.angRateCtrlParams.cmdSignalConditioningParamsArray[1],
-    &rCmd, 0.004, &fcsModel_DW.CoreSubsys[1].SignalConditioningBlock);
+    &ylim, 0.004, &fcsModel_DW.CoreSubsys[1].SignalConditioningBlock);
 
   // End of Outputs for SubSystem: '<S10>/Signal Conditioning Block'
 
   // Outputs for Atomic SubSystem: '<S10>/Signal Conditioning Block1'
   fcsMod_SignalConditioningBlock1(rtb_ctrlInputsArray[1].meas,
     &fcsModel_U.ctrlParams.angRateCtrlParams.measSignalConditioningParamsArray[1],
-    &pCmd, 0.004, &fcsModel_DW.CoreSubsys[1].SignalConditioningBlock1);
+    &plim, 0.004, &fcsModel_DW.CoreSubsys[1].SignalConditioningBlock1);
 
   // End of Outputs for SubSystem: '<S10>/Signal Conditioning Block1'
 
   // Outputs for Atomic SubSystem: '<S10>/pidWithDebug'
-  fcsModel_pidWithDebug(0.0, rCmd, pCmd, rtb_ctrlInputsArray[1].integratorReset,
+  fcsModel_pidWithDebug(0.0, ylim, plim, rtb_ctrlInputsArray[1].integratorReset,
                         &fcsModel_U.ctrlParams.angRateCtrlParams.ctrlParamsArray[
-                        1], fcsModel_DW.CoreSubsys[1].UnitDelay_DSTATE, &yCmd,
+                        1], fcsModel_DW.CoreSubsys[1].UnitDelay_DSTATE, &rlim,
                         &rtb_BusCreator_o, 0.004, &fcsModel_DW.CoreSubsys[1].
                         pidWithDebug);
 
   // End of Outputs for SubSystem: '<S10>/pidWithDebug'
 
   // Update for UnitDelay: '<S10>/Unit Delay'
-  fcsModel_DW.CoreSubsys[1].UnitDelay_DSTATE = yCmd;
+  fcsModel_DW.CoreSubsys[1].UnitDelay_DSTATE = rlim;
 
   // ForEachSliceAssignment generated from: '<S10>/pidDebug'
   fcsModel_Y.fcsDebug.innerLoopCtrlDebug.angRateCtrlDebug.pidDebug[1] =
     rtb_BusCreator_o;
 
   // ForEachSliceAssignment generated from: '<S10>/angAccelCmd_radps2'
-  rtb_ImpAsg_InsertedFor_angAccel[1] = yCmd;
+  rtb_ImpAsg_InsertedFor_angRateC[1] = rlim;
 
   // ForEachSliceAssignment generated from: '<S10>/filtMeas'
-  fcsModel_Y.fcsDebug.innerLoopCtrlDebug.angRateCtrlDebug.meas[1] = pCmd;
+  fcsModel_Y.fcsDebug.innerLoopCtrlDebug.angRateCtrlDebug.meas[1] = plim;
 
   // ForEachSliceAssignment generated from: '<S10>/filtCmd'
-  fcsModel_Y.fcsDebug.innerLoopCtrlDebug.angRateCtrlDebug.cmd[1] = rCmd;
+  fcsModel_Y.fcsDebug.innerLoopCtrlDebug.angRateCtrlDebug.cmd[1] = ylim;
 
   // Outputs for Atomic SubSystem: '<S10>/Signal Conditioning Block'
   // ForEachSliceSelector generated from: '<S10>/ctrlInputs' incorporates:
@@ -1301,41 +1355,41 @@ void fcsModel::step()
 
   fcsMod_SignalConditioningBlock1(rtb_ctrlInputsArray[2].cmd,
     &fcsModel_U.ctrlParams.angRateCtrlParams.cmdSignalConditioningParamsArray[2],
-    &rCmd, 0.004, &fcsModel_DW.CoreSubsys[2].SignalConditioningBlock);
+    &ylim, 0.004, &fcsModel_DW.CoreSubsys[2].SignalConditioningBlock);
 
   // End of Outputs for SubSystem: '<S10>/Signal Conditioning Block'
 
   // Outputs for Atomic SubSystem: '<S10>/Signal Conditioning Block1'
   fcsMod_SignalConditioningBlock1(rtb_ctrlInputsArray[2].meas,
     &fcsModel_U.ctrlParams.angRateCtrlParams.measSignalConditioningParamsArray[2],
-    &pCmd, 0.004, &fcsModel_DW.CoreSubsys[2].SignalConditioningBlock1);
+    &plim, 0.004, &fcsModel_DW.CoreSubsys[2].SignalConditioningBlock1);
 
   // End of Outputs for SubSystem: '<S10>/Signal Conditioning Block1'
 
   // Outputs for Atomic SubSystem: '<S10>/pidWithDebug'
-  fcsModel_pidWithDebug(0.0, rCmd, pCmd, rtb_ctrlInputsArray[2].integratorReset,
+  fcsModel_pidWithDebug(0.0, ylim, plim, rtb_ctrlInputsArray[2].integratorReset,
                         &fcsModel_U.ctrlParams.angRateCtrlParams.ctrlParamsArray[
-                        2], fcsModel_DW.CoreSubsys[2].UnitDelay_DSTATE, &yCmd,
+                        2], fcsModel_DW.CoreSubsys[2].UnitDelay_DSTATE, &rlim,
                         &rtb_BusCreator_o, 0.004, &fcsModel_DW.CoreSubsys[2].
                         pidWithDebug);
 
   // End of Outputs for SubSystem: '<S10>/pidWithDebug'
 
   // Update for UnitDelay: '<S10>/Unit Delay'
-  fcsModel_DW.CoreSubsys[2].UnitDelay_DSTATE = yCmd;
+  fcsModel_DW.CoreSubsys[2].UnitDelay_DSTATE = rlim;
 
   // ForEachSliceAssignment generated from: '<S10>/pidDebug'
   fcsModel_Y.fcsDebug.innerLoopCtrlDebug.angRateCtrlDebug.pidDebug[2] =
     rtb_BusCreator_o;
 
   // ForEachSliceAssignment generated from: '<S10>/angAccelCmd_radps2'
-  rtb_ImpAsg_InsertedFor_angAccel[2] = yCmd;
+  rtb_ImpAsg_InsertedFor_angRateC[2] = rlim;
 
   // ForEachSliceAssignment generated from: '<S10>/filtMeas'
-  fcsModel_Y.fcsDebug.innerLoopCtrlDebug.angRateCtrlDebug.meas[2] = pCmd;
+  fcsModel_Y.fcsDebug.innerLoopCtrlDebug.angRateCtrlDebug.meas[2] = plim;
 
   // ForEachSliceAssignment generated from: '<S10>/filtCmd'
-  fcsModel_Y.fcsDebug.innerLoopCtrlDebug.angRateCtrlDebug.cmd[2] = rCmd;
+  fcsModel_Y.fcsDebug.innerLoopCtrlDebug.angRateCtrlDebug.cmd[2] = ylim;
 
   // End of Outputs for SubSystem: '<S7>/For Each Subsystem'
   // End of Outputs for SubSystem: '<S2>/Angular Rate Controller'
@@ -1345,27 +1399,23 @@ void fcsModel::step()
   //   ForEachSliceAssignment generated from: '<S10>/angAccelCmd_radps2'
 
   for (int32_T ii{0}; ii < 3; ii++) {
-    rtb_ImpAsg_InsertedFor_angRateC[ii] = 0.0;
-    rtb_ImpAsg_InsertedFor_angRateC[ii] += fcsModel_ConstP.Constant_Value_n[ii] *
-      rtb_ImpAsg_InsertedFor_angAccel[0];
-    rtb_ImpAsg_InsertedFor_angRateC[ii] += fcsModel_ConstP.Constant_Value_n[ii +
-      3] * rtb_ImpAsg_InsertedFor_angAccel[1];
-    rtb_ImpAsg_InsertedFor_angRateC[ii] += fcsModel_ConstP.Constant_Value_n[ii +
-      6] * rtb_ImpAsg_InsertedFor_angAccel[2];
+    rtb_Switch[ii] = 0.0;
+    rtb_Switch[ii] += fcsModel_ConstP.Constant_Value_n[ii] *
+      rtb_ImpAsg_InsertedFor_angRateC[0];
+    rtb_Switch[ii] += fcsModel_ConstP.Constant_Value_n[ii + 3] *
+      rtb_ImpAsg_InsertedFor_angRateC[1];
+    rtb_Switch[ii] += fcsModel_ConstP.Constant_Value_n[ii + 6] *
+      rtb_ImpAsg_InsertedFor_angRateC[2];
   }
 
   // End of Product: '<S2>/Matrix Multiply'
 
   // SignalConversion generated from: '<S1>/Matrix Multiply' incorporates:
   //   BusCreator: '<S2>/Bus Creator1'
-  //   MATLAB Function: '<S4>/Interpret RC In Cmds'
 
-  pCmd_tmp_tmp = -(((tCmd * tCmd * 8.5458804152826638E-6 +
-                     -1.9060550862738522E-9 * std::pow(tCmd, 3.0)) +
-                    -0.011298232595401985 * tCmd) + 4.6650659714392448) * 46.0;
-  rCmd = rtb_ImpAsg_InsertedFor_angRateC[0];
-  pCmd = rtb_ImpAsg_InsertedFor_angRateC[1];
-  yCmd = rtb_ImpAsg_InsertedFor_angRateC[2];
+  rlim = rtb_Switch[0];
+  plim = rtb_Switch[1];
+  tCmd_unitRange = rtb_Switch[2];
 
   // RelationalOperator: '<S6>/Compare' incorporates:
   //   Constant: '<S6>/Constant'
@@ -1375,23 +1425,31 @@ void fcsModel::step()
   resetIntegrator = (state == enumStateMachine::INACTIVE);
 
   // BusCreator: '<Root>/Bus Creator' incorporates:
+  //   BusCreator: '<S2>/Bus Creator1'
+  //   MATLAB Function: '<S3>/assembleOuterLoopToInnerLoopBus'
   //   Outport: '<Root>/fcsDebug'
 
+  fcsModel_Y.fcsDebug.allocDebug.thrustCmd_N = tlim;
+  fcsModel_Y.fcsDebug.allocDebug.xMomCmd_Nm = rtb_Switch[0];
+  fcsModel_Y.fcsDebug.allocDebug.yMomCmd_Nm = rtb_Switch[1];
+  fcsModel_Y.fcsDebug.allocDebug.zMomCmd_Nm = rtb_Switch[2];
   fcsModel_Y.fcsDebug.state = state;
+  fcsModel_Y.fcsDebug.flightMode = rtb_flightMode;
   for (int32_T ii{0}; ii < 4; ii++) {
     // Product: '<S1>/Matrix Multiply' incorporates:
     //   Constant: '<S1>/Constant'
+    //   MATLAB Function: '<S3>/assembleOuterLoopToInnerLoopBus'
 
-    tCmd = ((fcsModel_ConstP.Constant_Value_c[ii + 4] * rCmd +
-             fcsModel_ConstP.Constant_Value_c[ii] * pCmd_tmp_tmp) +
-            fcsModel_ConstP.Constant_Value_c[ii + 8] * pCmd) +
-      fcsModel_ConstP.Constant_Value_c[ii + 12] * yCmd;
+    ylim = ((fcsModel_ConstP.Constant_Value_c[ii + 4] * rlim +
+             fcsModel_ConstP.Constant_Value_c[ii] * tlim) +
+            fcsModel_ConstP.Constant_Value_c[ii + 8] * plim) +
+      fcsModel_ConstP.Constant_Value_c[ii + 12] * tCmd_unitRange;
 
     // Saturate: '<S1>/Saturation'
-    if (tCmd > 616850.27506808483) {
-      tCmd = 616850.27506808483;
-    } else if (tCmd < 0.0) {
-      tCmd = 0.0;
+    if (ylim > 616850.27506808483) {
+      ylim = 616850.27506808483;
+    } else if (ylim < 0.0) {
+      ylim = 0.0;
     }
 
     // End of Saturate: '<S1>/Saturation'
@@ -1400,7 +1458,7 @@ void fcsModel::step()
     //   Sqrt: '<S1>/Sqrt'
     //   UnitConversion: '<S5>/Unit Conversion'
 
-    tCmd = 9.5492965855137211 * std::sqrt(tCmd) - -0.92734095767679814 *
+    ylim = 9.5492965855137211 * std::sqrt(ylim) - -0.92734095767679814 *
       fcsModel_DW.DiscreteTransferFcn_states[ii];
 
     // Switch: '<S1>/Switch'
@@ -1411,14 +1469,14 @@ void fcsModel::step()
       // Outport: '<Root>/actuatorsCmds' incorporates:
       //   DiscreteTransferFcn: '<S1>/Discrete Transfer Fcn'
 
-      fcsModel_Y.actuatorsCmds[ii] = 0.036329521161600868 * tCmd +
+      fcsModel_Y.actuatorsCmds[ii] = 0.036329521161600868 * ylim +
         0.036329521161600868 * fcsModel_DW.DiscreteTransferFcn_states[ii];
     }
 
     // End of Switch: '<S1>/Switch'
 
     // Update for DiscreteTransferFcn: '<S1>/Discrete Transfer Fcn'
-    fcsModel_DW.DiscreteTransferFcn_states[ii] = tCmd;
+    fcsModel_DW.DiscreteTransferFcn_states[ii] = ylim;
   }
 }
 

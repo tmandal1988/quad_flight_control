@@ -34,7 +34,7 @@ EkfBase<T>::~EkfBase(){
 }
 
 template <typename T>
-void EkfBase<T>::Run(MatrixInv<T> state_sensor_val, MatrixInv<T> meas_sensor_val, bool meas_indices[]){
+void EkfBase<T>::Run(const MatrixInv<T> &state_sensor_val, const MatrixInv<T> &meas_sensor_val, const bool meas_indices []){
 	PropagateState(state_sensor_val);
 	ComputeStateJacobian(state_sensor_val);
 

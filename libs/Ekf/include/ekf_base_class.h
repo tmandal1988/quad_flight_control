@@ -24,7 +24,7 @@ class EkfBase{
 		// destructor
 		~EkfBase();
 
-		void Run(MatrixInv<T> state_sensor_val, MatrixInv<T> meas_sensor_val, bool meas_indices[]);
+		void Run(const MatrixInv<T> &state_sensor_val, const MatrixInv<T> &meas_sensor_val, const bool meas_indices []);
 		MatrixInv<T> GetCurrentState(){ return current_state_; }
 		MatrixInv<T> GetStateJacobian(){ return state_jacobian_; }
 		MatrixInv<T> GetSensorMeasurement(){ return computed_meas_; }
@@ -42,12 +42,12 @@ class EkfBase{
 
 
 		// member functions
-		virtual void PropagateState(MatrixInv<T> state_sensor_val) = 0;
-		virtual void ComputeStateJacobian(MatrixInv<T> state_sensor_val) = 0;
-		virtual void ComputeStateNoiseJacobian(MatrixInv<T> previous_state) = 0;
-		virtual void GetMeas(MatrixInv<T> meas_sensor_val) = 0;
-		virtual void ComputeMeasJacobian(MatrixInv<T> meas_sensor_val) = 0;
-		virtual void ComputeMeasNoiseJacobian(MatrixInv<T> meas_sensor_val) = 0;
+		virtual void PropagateState(const MatrixInv<T> &state_sensor_val) = 0;
+		virtual void ComputeStateJacobian(const MatrixInv<T> &state_sensor_val) = 0;
+		virtual void ComputeStateNoiseJacobian(const MatrixInv<T> &previous_state) = 0;
+		virtual void GetMeas(const MatrixInv<T> &meas_sensor_val) = 0;
+		virtual void ComputeMeasJacobian(const MatrixInv<T> &meas_sensor_val) = 0;
+		virtual void ComputeMeasNoiseJacobian(const MatrixInv<T> &meas_sensor_val) = 0;
 		virtual void ComputeMeasFromState() = 0;
 
 		void ComputeKalmanGainSequential(size_t r_idx);

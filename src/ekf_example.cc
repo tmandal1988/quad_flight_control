@@ -28,9 +28,10 @@
 #include <sys/mman.h>
 #include <iterator>
 
-// Flags to use EKF or Mahony
+/**************************Flags to use EKF or/and Mahony*******************************/
 bool use_mahony_filter = true;
 bool use_ekf = false;
+/**************************Flags to use EKF or/and Mahony*******************************/
 
 static fcsModel fcsModel_Obj;          // Instance of FCS model class
 
@@ -98,6 +99,13 @@ int main(int argc, char *argv[]){
 	quat[0] = 1;
 	float mh_euler[3] = {0};
 
+	/****************SAMPLE TIME VARIABLES*************************************/
+	//Sample time
+	float dt_s = 0.004;
+	//Sample Step
+	size_t dt_count = 4000;
+	/****************SAMPLE TIME VARIABLES*************************************/
+
 
   // Initial State Variable for EKF
 	MatrixInv<float> initial_state(15, 1);
@@ -122,6 +130,10 @@ int main(int argc, char *argv[]){
 	// P init
 	initial_covariance_p.Diag({30*DEG2RAD, 30*DEG2RAD, 30*DEG2RAD, 0.01, 0.01, 0.01, 100, 100, 100,
 							   10, 10, 10, 0.1, 0.1, 0.1});	
+
+	/****************SECONDARY FILTER DEBUG*************************************/
+	MatrixInv<float> secondary_filter_debug(3, 1);
+	/****************SECONDARY FILTER DEBUG*************************************/
 
 
 	// NED to BODY DCM
@@ -157,7 +169,7 @@ int main(int argc, char *argv[]){
 
   GetQuatFromEuler(init_att_array, quat);
 
-  MahonyFilter m_filt(0.0, 2.0, 0.004, quat);	
+  MahonyFilter m_filt(0.0, 2.0, dt_s, quat);	
 
 
 	gps_reader.InitializeGps(30);
@@ -173,7 +185,7 @@ int main(int argc, char *argv[]){
 	}
 
 	// Create an 15 state EKF object
-	Ekf15Dof<float> imu_gps_ekf(0.004, initial_state, process_noise_q, meas_noise_r, initial_covariance_p);
+	Ekf15Dof<float> imu_gps_ekf(dt_s, initial_state, process_noise_q, meas_noise_r, initial_covariance_p);
 
 	// Make sure EKF always uses Magnetometer in the update step
 	meas_indices[0] = true;
@@ -221,7 +233,7 @@ int main(int argc, char *argv[]){
 	rc_periods_ph[4] = -1;
 	rc_periods_ph[5] = -1;
 	rc_periods_ph[6] = -1;
-	data_writer.UpdateDataBuffer(0, 0, zero_array, sensor_meas, initial_state, gps_meas_indices, rc_periods_ph, ExtY_fcsModel_T_);
+	data_writer.UpdateDataBuffer(0, 0, zero_array, sensor_meas, initial_state, secondary_filter_debug, gps_meas_indices, rc_periods_ph, ExtY_fcsModel_T_);
 
 	// Loop counter
 	size_t loop_count = 0;
@@ -229,7 +241,7 @@ int main(int argc, char *argv[]){
 	// 50 Hz flag
 	bool fifty_hz_flag = false;
 	// initialize the duration
-	chrono::microseconds delta (4000); 
+	chrono::microseconds delta (dt_count); 
 	auto duration = chrono::duration_cast<chrono::microseconds> (delta);
 	auto duration_count = duration.count();
 	// start time
@@ -255,7 +267,7 @@ int main(int argc, char *argv[]){
     		fifty_hz_flag = false;
     	}
 
-    	/* With till 4000us has passed
+    	/* With till dt_countus has passed
     	*/
     	loop_start = chrono::high_resolution_clock::now();
 
@@ -296,9 +308,9 @@ int main(int argc, char *argv[]){
     		m_filt.MahonyFilter9Dof(imu_data, gyro_offset);
     		m_filt.GetCurrentQuat(quat);
     		GetEulerFromQuat(quat, mh_euler);
-    		current_state(0) = mh_euler[0];
-    		current_state(1) = mh_euler[1];
-    		current_state(2) = mh_euler[2];
+    		secondary_filter_debug(0) = mh_euler[0];
+    		secondary_filter_debug(1) = mh_euler[1];
+    		secondary_filter_debug(2) = mh_euler[2];
     		// if (fifty_hz_flag){
     		// 	printf("Roll [deg]: %+7.3f, Pitch[deg]: %+7.3f, Yaw[deg]: %+7.3f\n", mh_euler[0]*180/3.14, mh_euler[1]*180/3.14, mh_euler[2]*180/3.14);
     		// }
@@ -307,7 +319,7 @@ int main(int argc, char *argv[]){
       //########################################
       // Assign the state values to the model input structure
       for(size_t idx = 0; idx < 3; idx++){
-      	stateEstimate_.attitude_rad[idx] = current_state(idx);
+      	stateEstimate_.attitude_rad[idx] = mh_euler[idx];
       	// stateEstimate_.bodyAngRates_radps[idx] = ( state_sensor_val(idx) - current_state(idx + 3) );
       	stateEstimate_.bodyAngRates_radps[idx] = imu_data[idx] - gyro_offset[idx];
       	stateEstimate_.nedVel_mps[idx] = current_state(idx + 9);
@@ -361,17 +373,17 @@ int main(int argc, char *argv[]){
 
 
       if(fifty_hz_flag){
-        	data_writer.UpdateDataBuffer(duration_count, loop_count, imu_data, sensor_meas, current_state, gps_meas_indices, rc_periods, ExtY_fcsModel_T_);
+        	data_writer.UpdateDataBuffer(duration_count, loop_count, imu_data, sensor_meas, current_state, secondary_filter_debug, gps_meas_indices, rc_periods, ExtY_fcsModel_T_);
 	    }
 
 	  //   if (remainder(loop_count, 50) == 0){
-	  //   	printf("Roll [deg]: %+7.3f, Pitch[deg]: %+7.3f, Yaw[deg]: %+7.3f\n", current_state(0)*RAD2DEG, current_state(1)*RAD2DEG, current_state(2)*RAD2DEG);
-	  //   	// printf("Pos N [m]: %+7.3f, Pos E [m]: %+7.3f, Pos D[m]: %+7.3f\n", current_state(6), current_state(7), current_state(8));
-	  //   	// printf("Vel N [m]: %+7.3f, Vel E [m]: %+7.3f, Vel D[m]: %+7.3f\n", current_state(9), current_state(10), current_state(11));
-	  //   	// printf("Throttle: %d, Roll: %d, Pitch: %d, Yaw: %d, Sw1: %d, Sw2: %d, Sw3: %d, State: %d\n", ExtU_fcsModel_T_->rcCmdsIn.throttleCmd_nd, ExtU_fcsModel_T_->rcCmdsIn.joystickXCmd_nd, 
-	  //   	// 	ExtU_fcsModel_T_->rcCmdsIn.joystickYCmd_nd, ExtU_fcsModel_T_->rcCmdsIn.joystickZCmd_nd, ExtU_fcsModel_T_->rcCmdsIn.rcSwitch1_nd, ExtU_fcsModel_T_->rcCmdsIn.rcSwitch2_nd, 
-	  //   	// 	ExtU_fcsModel_T_->rcCmdsIn.rcSwitch3_nd, ExtY_fcsModel_T_.fcsDebug.state);
-	  //   	// // printf("%g, %g, %g, %g, %d\n",ExtY_fcsModel_T_.actuatorsCmds[0], ExtY_fcsModel_T_.actuatorsCmds[1], ExtY_fcsModel_T_.actuatorsCmds[2], ExtY_fcsModel_T_.actuatorsCmds[3], ExtY_fcsModel_T_.fcsDebug.state);
+	  // //   	printf("Roll [deg]: %+7.3f, Pitch[deg]: %+7.3f, Yaw[deg]: %+7.3f\n", current_state(0)*RAD2DEG, current_state(1)*RAD2DEG, current_state(2)*RAD2DEG);
+	  // //   	// printf("Pos N [m]: %+7.3f, Pos E [m]: %+7.3f, Pos D[m]: %+7.3f\n", current_state(6), current_state(7), current_state(8));
+	  // //   	// printf("Vel N [m]: %+7.3f, Vel E [m]: %+7.3f, Vel D[m]: %+7.3f\n", current_state(9), current_state(10), current_state(11));
+	  //   	printf("Throttle: %d, Roll: %d, Pitch: %d, Yaw: %d, Sw1: %d, Sw2: %d, Sw3: %d, State: %d, Flight Mode: %d\n", ExtU_fcsModel_T_->rcCmdsIn.throttleCmd_nd, ExtU_fcsModel_T_->rcCmdsIn.joystickXCmd_nd, 
+	  //   		ExtU_fcsModel_T_->rcCmdsIn.joystickYCmd_nd, ExtU_fcsModel_T_->rcCmdsIn.joystickZCmd_nd, ExtU_fcsModel_T_->rcCmdsIn.rcSwitch1_nd, ExtU_fcsModel_T_->rcCmdsIn.rcSwitch2_nd, 
+	  //   		ExtU_fcsModel_T_->rcCmdsIn.rcSwitch3_nd, ExtY_fcsModel_T_.fcsDebug.state, ExtY_fcsModel_T_.fcsDebug.flightMode);
+	  // //   	// // printf("%g, %g, %g, %g, %d\n",ExtY_fcsModel_T_.actuatorsCmds[0], ExtY_fcsModel_T_.actuatorsCmds[1], ExtY_fcsModel_T_.actuatorsCmds[2], ExtY_fcsModel_T_.actuatorsCmds[3], ExtY_fcsModel_T_.fcsDebug.state);
 	  //   	printf("############################################\n");
 		// }
 
@@ -442,11 +454,11 @@ int main(int argc, char *argv[]){
     loop_end = std::chrono::high_resolution_clock::now();
 
     duration_count = chrono::duration_cast<chrono::microseconds>(loop_end - loop_start).count();
-    while(duration_count < 4000){
+    while(duration_count < dt_count){
     	duration_count = chrono::duration_cast<chrono::microseconds>(std::chrono::high_resolution_clock::now() - loop_start).count();
     }
     // duration_count = duration.count();
-    // time_start_us_count = time_start_us_count + 4000;
+    // time_start_us_count = time_start_us_count + dt_count;
    	//cout<<loop_count<<"\n";
    	if(sigint_flag == 1)
    		break;

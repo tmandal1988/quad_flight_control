@@ -3,9 +3,9 @@
 //
 // Code generated for Simulink model 'fcsModel'.
 //
-// Model version                  : 1.59
+// Model version                  : 1.67
 // Simulink Coder version         : 9.7 (R2022a) 13-Nov-2021
-// C/C++ source code generated on : Sun Oct 22 13:19:40 2023
+// C/C++ source code generated on : Fri Oct 27 23:29:18 2023
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM 7
@@ -40,7 +40,8 @@ enum class enumStateMachine
 // Defines the flight mode in use
 enum class enumFlightMode
   : int32_T {
-  STABILIZE = 0,                       // Default value
+  ACRO = 0,                            // Default value
+  STABILIZE,
   VEL_CONTROL
 };
 
@@ -275,14 +276,29 @@ struct busInnerLoopCtrlDebug
 
 #endif
 
+#ifndef DEFINED_TYPEDEF_FOR_busOuterLoopCtrlDebug_
+#define DEFINED_TYPEDEF_FOR_busOuterLoopCtrlDebug_
+
+// Bus containing debug data from the outer loop controller
+struct busOuterLoopCtrlDebug
+{
+  // Force command
+  real_T frcCmd_N;
+};
+
+#endif
+
 #ifndef DEFINED_TYPEDEF_FOR_busFcsDebug_
 #define DEFINED_TYPEDEF_FOR_busFcsDebug_
 
 // Debug data from FCS
 struct busFcsDebug
 {
+  busInnerLoopToAlloc allocDebug;
   busInnerLoopCtrlDebug innerLoopCtrlDebug;
+  busOuterLoopCtrlDebug outerLoopCtrlDebug;
   enumStateMachine state;
+  enumFlightMode flightMode;
 };
 
 #endif
@@ -397,28 +413,28 @@ struct struct_5FgSWMQlmJmj4xXmurngRB
 
 #endif
 
-#ifndef DEFINED_TYPEDEF_FOR_struct_RgPxAEXAj72sD2xo4DfKOE_
-#define DEFINED_TYPEDEF_FOR_struct_RgPxAEXAj72sD2xo4DfKOE_
+#ifndef DEFINED_TYPEDEF_FOR_struct_haOLK1NlGG6dPRJJ1mBkaE_
+#define DEFINED_TYPEDEF_FOR_struct_haOLK1NlGG6dPRJJ1mBkaE_
 
-struct struct_RgPxAEXAj72sD2xo4DfKOE
+struct struct_haOLK1NlGG6dPRJJ1mBkaE
 {
-  std::array<real_T, 4> roll_nd;
-  std::array<real_T, 4> pitch_nd;
-  std::array<real_T, 4> yaw_nd;
-  std::array<real_T, 4> throttle_nd;
+  std::array<real_T, 2> roll_nd;
+  std::array<real_T, 2> pitch_nd;
+  std::array<real_T, 2> yaw_nd;
+  std::array<real_T, 2> throttle_nd;
 };
 
 #endif
 
-#ifndef DEFINED_TYPEDEF_FOR_struct_IRXRNwOPQ4vCQfNg7QNIgD_
-#define DEFINED_TYPEDEF_FOR_struct_IRXRNwOPQ4vCQfNg7QNIgD_
+#ifndef DEFINED_TYPEDEF_FOR_struct_vdslHYxQvd0qmqXCsDpEBF_
+#define DEFINED_TYPEDEF_FOR_struct_vdslHYxQvd0qmqXCsDpEBF_
 
-struct struct_IRXRNwOPQ4vCQfNg7QNIgD
+struct struct_vdslHYxQvd0qmqXCsDpEBF
 {
   struct_5FgSWMQlmJmj4xXmurngRB cmdLimits;
   std::array<real_T, 2> pwmLimits;
   real_T pwmMtrArm;
-  struct_RgPxAEXAj72sD2xo4DfKOE coeffs;
+  struct_haOLK1NlGG6dPRJJ1mBkaE coeffs;
 };
 
 #endif
