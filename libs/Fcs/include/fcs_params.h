@@ -10,7 +10,7 @@ busInnerLoopCtrlParams fcs_ctrl_params;
 
 void AssignFcsCtrlParams(){
 	//**************************************************
-	fcs_ctrl_params.attCtrlParams.ctrlParamsArray[0].Kp = 5.00000000;
+	fcs_ctrl_params.attCtrlParams.ctrlParamsArray[0].Kp = 2.50000000;
 	//#################################################*
 
 	//**************************************************
@@ -44,7 +44,7 @@ void AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.attCtrlParams.ctrlParamsArray[1].Kp = 5.00000000;
+	fcs_ctrl_params.attCtrlParams.ctrlParamsArray[1].Kp = 2.500000000;
 	//#################################################*
 
 	//**************************************************
