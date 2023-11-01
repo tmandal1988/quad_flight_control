@@ -289,6 +289,8 @@ int main(int argc, char *argv[]){
 					baro_reader.GetBaroPressAndTemp(baro_data);
 					sensor_meas(9) = baro_data[0];
 					sensor_meas(10) = baro_data[1];
+					stateEstimate_.pressure_mbar = baro_data[0];
+					stateEstimate_.temp_c = baro_data[1];
 					// printf("Pressure(millibar): %g, Temperature(C): %g\n", baro_data[0], baro_data[1]);
     	}
 

@@ -5,7 +5,7 @@
 //
 // Model version                  : 1.67
 // Simulink Coder version         : 9.7 (R2022a) 13-Nov-2021
-// C/C++ source code generated on : Fri Oct 27 23:29:18 2023
+// C/C++ source code generated on : Tue Oct 31 18:48:12 2023
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM 7
@@ -105,6 +105,8 @@ struct busStateEstimate
   std::array<real_T, 3> bodyAngRates_radps;
   busGeodeticPos geodeticPos;
   std::array<real_T, 3> nedVel_mps;
+  real_T pressure_mbar;
+  real_T temp_c;
   std::array<real_T, 9> ned2BodyDcm_nd;
   std::array<real_T, 9> ned2FepDcm_nd;
 };
