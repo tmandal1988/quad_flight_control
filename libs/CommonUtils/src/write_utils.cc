@@ -62,6 +62,9 @@ void WriteHelper::UpdateDataBuffer(long long dt_ms, size_t count, float* const& 
 				data_to_save1_[data_buff_idx1_].ned_vel_mps[imu_idx] = sensor_meas(imu_idx + 6);
 			}
 
+			data_to_save1_[data_buff_idx1_].baro_data[0] = sensor_meas(9);
+			data_to_save1_[data_buff_idx1_].baro_data[1] = sensor_meas(10);
+
 			for(size_t d_idx = 0; d_idx < ekf_current_state.get_nrows(); d_idx++){
 				data_to_save1_[data_buff_idx1_].ekf_current_state[d_idx] = ekf_current_state(d_idx);
 			}
@@ -124,6 +127,9 @@ void WriteHelper::UpdateDataBuffer(long long dt_ms, size_t count, float* const& 
 				data_to_save2_[data_buff_idx2_].ned_pos_m[imu_idx] = sensor_meas(imu_idx + 3);
 				data_to_save2_[data_buff_idx2_].ned_vel_mps[imu_idx] = sensor_meas(imu_idx + 6);
 			}
+
+			data_to_save2_[data_buff_idx2_].baro_data[0] = sensor_meas(9);
+			data_to_save2_[data_buff_idx2_].baro_data[1] = sensor_meas(10);
 
 			for(size_t d_idx = 0; d_idx < ekf_current_state.get_nrows(); d_idx++){
 				data_to_save2_[data_buff_idx2_].ekf_current_state[d_idx] = ekf_current_state(d_idx);

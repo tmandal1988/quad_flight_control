@@ -12,6 +12,7 @@
 #include <gps_utils.h>
 #include <write_utils.h>
 #include <imu_utils.h>
+#include <baro_utils.h>
 #include <mahony_filter.h>
 #include <rc_input_utils.h>
 #include <pwm_output_utils.h>
@@ -52,6 +53,8 @@ int main(int argc, char *argv[]){
 	ImuHelper imu_reader("mpu");
 	imu_reader.InitializeImu();
 
+	BaroHelper baro_reader;
+	baro_reader.StartBaroReader(1, 20);
 
 	RcInputHelper rc_reader(8);
 	rc_reader.InitializeRcInput();
@@ -85,7 +88,7 @@ int main(int argc, char *argv[]){
 	// Register signals 
 	signal(SIGINT, sigint_handler); 
 
-  // Variables to read data from the IMU
+  /****************Variables to read data from the IMU*************************************/
   // Accels
   float accel[3];
   //Gyros
@@ -93,6 +96,11 @@ int main(int argc, char *argv[]){
   float gyro_offset[3];
   //Mags
   float mag[3];
+  /****************Variables to read data from the IMU*************************************/
+
+  /****************Variables to read data from the Baro*************************************/
+  float baro_data[2];
+  /****************Variables to read data from the Baro*************************************/
 
 	//Quat
 	float quat[4] = {0};
@@ -113,7 +121,7 @@ int main(int argc, char *argv[]){
 	MatrixInv<float> current_state(15, 1);
   
   // Variable used in the measurement update of the EKF
-	MatrixInv<float> sensor_meas(9, 1);
+	MatrixInv<float> sensor_meas(11, 1);
 	// Sensor values used in the time propagation stage of the EKF
 	MatrixInv<float> state_sensor_val(6, 1);
 	// Q matrix of the EKF
@@ -274,6 +282,14 @@ int main(int argc, char *argv[]){
     	// Make all the measurement flags corresponding to position and velocity false
 			for( size_t idx_meas = 1; idx_meas < 7; idx_meas++ ){
     		meas_indices[idx_meas] = false;
+    	}
+
+    	// Read Baro data at 50 Hz
+    	if (fifty_hz_flag){
+					baro_reader.GetBaroPressAndTemp(baro_data);
+					sensor_meas(9) = baro_data[0];
+					sensor_meas(10) = baro_data[1];
+					// printf("Pressure(millibar): %g, Temperature(C): %g\n", baro_data[0], baro_data[1]);
     	}
 
     	// Read IMU data

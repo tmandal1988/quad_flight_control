@@ -16,6 +16,8 @@ struct DataFields{
 	// GPS NED position and velocity if available;
 	float ned_pos_m[3];
 	float ned_vel_mps[3];
+	// Baro Data
+	float baro_data[2];
 	// Current EKF State
 	float ekf_current_state[16];
 	// Secondary Filter Debug

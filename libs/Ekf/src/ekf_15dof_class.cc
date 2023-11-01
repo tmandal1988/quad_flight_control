@@ -268,7 +268,7 @@ void Ekf15Dof<T>::ComputeStateNoiseJacobian(const MatrixInv<T> &previous_state){
 template <typename T>
 void Ekf15Dof<T>::GetMeas(const MatrixInv<T> &meas_sensor_val){
 	/* First 3 indices should be magnetometer x, y, z readings in body frame,
-	next 3 indices should be GPS measured position translated into NED frame and last
+	next 3 indices should be GPS measured position translated into NED frame and next
 	3 indices should be GPS measured NED velocity*/
 
 	//Compute heading from magnetometer
