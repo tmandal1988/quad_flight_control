@@ -31,7 +31,7 @@
 
 /**************************Flags to use EKF or/and Mahony*******************************/
 bool use_mahony_filter = true;
-bool use_ekf = false;
+bool use_ekf = true;
 /**************************Flags to use EKF or/and Mahony*******************************/
 
 static fcsModel fcsModel_Obj;          // Instance of FCS model class
@@ -358,8 +358,8 @@ int main(int argc, char *argv[]){
       }
 
 
-      stateEstimate_.geodeticPos.lat_rad = raw_lat_lon_alt[0];
-      stateEstimate_.geodeticPos.lon_rad = raw_lat_lon_alt[1];
+      stateEstimate_.geodeticPos.lat_rad = current_state(6);
+      stateEstimate_.geodeticPos.lon_rad = current_state(7);
       stateEstimate_.geodeticPos.alt_m = current_state(8);
 
       ExtU_fcsModel_T_->stateEstimate = stateEstimate_;
