@@ -2,13 +2,16 @@
 
 template <typename T>
 EkfBase<T>::EkfBase(size_t num_states, size_t num_meas, size_t num_states_sensor, T sample_time_s,
-					MatrixInv<T> initial_state, MatrixInv<T> process_noise_q, MatrixInv<T> meas_noise_r, MatrixInv<T> initial_covariance_p):
+					MatrixInv<T> initial_state, MatrixInv<T> process_noise_q, MatrixInv<T> meas_noise_r, MatrixInv<T> initial_covariance_p,
+					bool compute_q_each_iter, float process_noise_eps):
 			 num_states_(num_states),
 			 num_meas_(num_meas),
 			 num_states_sensor_(num_states_sensor),
 			 sample_time_s_(sample_time_s),
 			 process_noise_q_(process_noise_q),
-			 meas_noise_r_(meas_noise_r){	
+			 meas_noise_r_(meas_noise_r),
+			 compute_q_each_iter_(compute_q_each_iter),
+			 process_noise_eps_(process_noise_eps){	
 		
 		initial_state_ = initial_state;
 		current_state_ = initial_state;
@@ -26,6 +29,10 @@ EkfBase<T>::EkfBase(size_t num_states, size_t num_meas, size_t num_states_sensor
 
 		kalman_eye_ = MatrixInv<T> (num_states_, num_states_, "eye");
 		kalman_gain_seq_ = MatrixInv<T> (num_states_, 1);
+
+		map_controls_to_state_ = MatrixInv<T> (num_states_, num_states_sensor_);
+		process_noise_eps_matrix_ = MatrixInv<T> (num_states_, num_states_, "eye");
+		process_noise_eps_matrix_ = process_noise_eps_matrix_*process_noise_eps_;
 }
 
 template <typename T>
@@ -43,6 +50,12 @@ void EkfBase<T>::Run(const MatrixInv<T> &state_sensor_val, const MatrixInv<T> &m
 	ComputeMeasJacobian(meas_sensor_val);
 
 	//P = F*P*F' + L*Q*L';
+	// if (compute_q_each_iter_){
+	// 	ComputeControlToStateMap();
+	// 	covariance_p_ = state_jacobian_*covariance_p_*state_jacobian_.Transpose() + map_controls_to_state_*process_noise_q_*map_controls_to_state_.Transpose() + process_noise_eps_matrix_;
+	// }else{
+	// 	covariance_p_ = state_jacobian_*covariance_p_*state_jacobian_.Transpose() + process_noise_q_;
+	// }
 	covariance_p_ = state_jacobian_*covariance_p_*state_jacobian_.Transpose() + process_noise_q_;
 
 	current_state_ = time_propagated_state_;

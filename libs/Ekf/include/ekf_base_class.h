@@ -19,7 +19,8 @@ class EkfBase{
 	public:
 		// constructors
 		EkfBase(size_t num_states, size_t num_meas, size_t num_states_sensor, T sample_time_s, 
-			MatrixInv<T> initial_state, MatrixInv<T> process_noise_q, MatrixInv<T> meas_noise_r, MatrixInv<T> initial_covariance_p);
+			MatrixInv<T> initial_state, MatrixInv<T> process_noise_q, MatrixInv<T> meas_noise_r, MatrixInv<T> initial_covariance_p, 
+			bool compute_q_each_iter, float process_noise_eps);
 
 		// destructor
 		~EkfBase();
@@ -49,10 +50,11 @@ class EkfBase{
 		virtual void ComputeMeasJacobian(const MatrixInv<T> &meas_sensor_val) = 0;
 		virtual void ComputeMeasNoiseJacobian(const MatrixInv<T> &meas_sensor_val) = 0;
 		virtual void ComputeMeasFromState() = 0;
+		virtual void ComputeControlToStateMap() = 0;
 
 		void ComputeKalmanGainSequential(size_t r_idx);
 
-		
+		bool compute_q_each_iter_;
 
 		// EKF variables
 		MatrixInv<T> initial_state_;
@@ -61,6 +63,7 @@ class EkfBase{
 
 		const MatrixInv<T> process_noise_q_;
 		const MatrixInv<T> meas_noise_r_;
+		T process_noise_eps_;
 		MatrixInv<T> covariance_p_;
 
 		// Variables to run EKF
@@ -73,6 +76,8 @@ class EkfBase{
 		MatrixInv<T> inv_part_of_kalman_gain_;
 		MatrixInv<T> kalman_gain_;
 		MatrixInv<T> kalman_gain_seq_;
+		MatrixInv<T> map_controls_to_state_;
+		MatrixInv<T> process_noise_eps_matrix_;
 
 		MatrixInv<T> kalman_eye_;
 };

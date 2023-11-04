@@ -34,7 +34,8 @@ template <typename T>
 class Ekf16DofQuat:public EkfBase<T>{
 	public:
 		// constructors
-		Ekf16DofQuat(T sample_time_s, MatrixInv<T> initial_state, MatrixInv<T> process_noise_q, MatrixInv<T> meas_noise_r, MatrixInv<T> initial_covariance_p);
+		Ekf16DofQuat(T sample_time_s, MatrixInv<T> initial_state, MatrixInv<T> process_noise_q, MatrixInv<T> meas_noise_r, MatrixInv<T> initial_covariance_p,
+					 bool compute_q_each_iter = false, float process_noise_eps = 1e-8);
 
 		// Run method specific to this EKF formulation
 		void Run(const MatrixInv<T> &state_sensor_val, const MatrixInv<T> &meas_sensor_val, const bool meas_indices []);
@@ -54,6 +55,7 @@ class Ekf16DofQuat:public EkfBase<T>{
 		void ComputeMeasJacobian(const MatrixInv<T> &meas_sensor_val);
 		void ComputeMeasNoiseJacobian(const MatrixInv<T> &meas_sensor_val);
 		void ComputeMeasFromState();
+		void ComputeControlToStateMap();
 
 		MatrixInv<T> g_;			
 };

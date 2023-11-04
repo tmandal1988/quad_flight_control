@@ -2,7 +2,7 @@
 #include "fcsModel_types.h"
 
 
-#define RPM_TO_PWM_SCALE 0.13653333
+#define RPM_TO_PWM_SCALE 0.17964912
 
 
 busInnerLoopCtrlParams fcs_ctrl_params;
@@ -10,7 +10,7 @@ busInnerLoopCtrlParams fcs_ctrl_params;
 
 void AssignFcsCtrlParams(){
 	//**************************************************
-	fcs_ctrl_params.attCtrlParams.ctrlParamsArray[0].Kp = 2.50000000;
+	fcs_ctrl_params.attCtrlParams.ctrlParamsArray[0].Kp = 1.50000000;
 	//#################################################*
 
 	//**************************************************
@@ -44,7 +44,7 @@ void AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.attCtrlParams.ctrlParamsArray[1].Kp = 2.500000000;
+	fcs_ctrl_params.attCtrlParams.ctrlParamsArray[1].Kp = 1.80000000;
 	//#################################################*
 
 	//**************************************************
@@ -78,7 +78,7 @@ void AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.attCtrlParams.ctrlParamsArray[2].Kp = 5.00000000;
+	fcs_ctrl_params.attCtrlParams.ctrlParamsArray[2].Kp = 1.50000000;
 	//#################################################*
 
 	//**************************************************
@@ -132,7 +132,7 @@ void AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.attCtrlParams.cmdSignalConditioningParamsArray[0].filterParams.filterBandwidth_radps = 62.83185307;
+	fcs_ctrl_params.attCtrlParams.cmdSignalConditioningParamsArray[0].filterParams.filterBandwidth_radps = 31.41592654;
 	//#################################################*
 
 	//**************************************************
@@ -160,7 +160,7 @@ void AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.attCtrlParams.cmdSignalConditioningParamsArray[1].filterParams.filterBandwidth_radps = 62.83185307;
+	fcs_ctrl_params.attCtrlParams.cmdSignalConditioningParamsArray[1].filterParams.filterBandwidth_radps = 31.41592654;
 	//#################################################*
 
 	//**************************************************
@@ -188,7 +188,7 @@ void AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.attCtrlParams.cmdSignalConditioningParamsArray[2].filterParams.filterBandwidth_radps = 62.83185307;
+	fcs_ctrl_params.attCtrlParams.cmdSignalConditioningParamsArray[2].filterParams.filterBandwidth_radps = 31.41592654;
 	//#################################################*
 
 	//**************************************************
@@ -216,7 +216,7 @@ void AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.attCtrlParams.measSignalConditioningParamsArray[0].filterParams.filterBandwidth_radps = 314.15926536;
+	fcs_ctrl_params.attCtrlParams.measSignalConditioningParamsArray[0].filterParams.filterBandwidth_radps = 94.24777961;
 	//#################################################*
 
 	//**************************************************
@@ -244,7 +244,7 @@ void AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.attCtrlParams.measSignalConditioningParamsArray[1].filterParams.filterBandwidth_radps = 314.15926536;
+	fcs_ctrl_params.attCtrlParams.measSignalConditioningParamsArray[1].filterParams.filterBandwidth_radps = 94.24777961;
 	//#################################################*
 
 	//**************************************************
@@ -272,7 +272,7 @@ void AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.attCtrlParams.measSignalConditioningParamsArray[2].filterParams.filterBandwidth_radps = 314.15926536;
+	fcs_ctrl_params.attCtrlParams.measSignalConditioningParamsArray[2].filterParams.filterBandwidth_radps = 94.24777961;
 	//#################################################*
 
 	//**************************************************
@@ -280,7 +280,7 @@ void AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.angRateCtrlParams.ctrlParamsArray[0].Kp = 45.00000000;
+	fcs_ctrl_params.angRateCtrlParams.ctrlParamsArray[0].Kp = 30.00000000;
 	//#################################################*
 
 	//**************************************************
@@ -314,7 +314,7 @@ void AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.angRateCtrlParams.ctrlParamsArray[1].Kp = 60.00000000;
+	fcs_ctrl_params.angRateCtrlParams.ctrlParamsArray[1].Kp = 45.00000000;
 	//#################################################*
 
 	//**************************************************
@@ -348,7 +348,7 @@ void AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.angRateCtrlParams.ctrlParamsArray[2].Kp = 60.00000000;
+	fcs_ctrl_params.angRateCtrlParams.ctrlParamsArray[2].Kp = 45.00000000;
 	//#################################################*
 
 	//**************************************************
@@ -402,7 +402,7 @@ void AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.angRateCtrlParams.cmdSignalConditioningParamsArray[0].filterParams.filterBandwidth_radps = 188.49555922;
+	fcs_ctrl_params.angRateCtrlParams.cmdSignalConditioningParamsArray[0].filterParams.filterBandwidth_radps = 94.24777961;
 	//#################################################*
 
 	//**************************************************
@@ -430,7 +430,7 @@ void AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.angRateCtrlParams.cmdSignalConditioningParamsArray[1].filterParams.filterBandwidth_radps = 188.49555922;
+	fcs_ctrl_params.angRateCtrlParams.cmdSignalConditioningParamsArray[1].filterParams.filterBandwidth_radps = 94.24777961;
 	//#################################################*
 
 	//**************************************************
@@ -458,7 +458,7 @@ void AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.angRateCtrlParams.cmdSignalConditioningParamsArray[2].filterParams.filterBandwidth_radps = 188.49555922;
+	fcs_ctrl_params.angRateCtrlParams.cmdSignalConditioningParamsArray[2].filterParams.filterBandwidth_radps = 94.24777961;
 	//#################################################*
 
 	//**************************************************
@@ -486,7 +486,7 @@ void AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.angRateCtrlParams.measSignalConditioningParamsArray[0].filterParams.filterBandwidth_radps = 628.31853072;
+	fcs_ctrl_params.angRateCtrlParams.measSignalConditioningParamsArray[0].filterParams.filterBandwidth_radps = 314.15926536;
 	//#################################################*
 
 	//**************************************************
@@ -514,7 +514,7 @@ void AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.angRateCtrlParams.measSignalConditioningParamsArray[1].filterParams.filterBandwidth_radps = 628.31853072;
+	fcs_ctrl_params.angRateCtrlParams.measSignalConditioningParamsArray[1].filterParams.filterBandwidth_radps = 314.15926536;
 	//#################################################*
 
 	//**************************************************
@@ -542,7 +542,7 @@ void AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.angRateCtrlParams.measSignalConditioningParamsArray[2].filterParams.filterBandwidth_radps = 628.31853072;
+	fcs_ctrl_params.angRateCtrlParams.measSignalConditioningParamsArray[2].filterParams.filterBandwidth_radps = 314.15926536;
 	//#################################################*
 
 	//**************************************************

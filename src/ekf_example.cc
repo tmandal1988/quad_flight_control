@@ -124,17 +124,21 @@ int main(int argc, char *argv[]){
 	MatrixInv<float> sensor_meas(11, 1);
 	// Sensor values used in the time propagation stage of the EKF
 	MatrixInv<float> state_sensor_val(6, 1);
-	// Q matrix of the EKF
-	MatrixInv<float> process_noise_q(15, 15, "eye");
+	
 	// P matrix initial
 	MatrixInv<float> initial_covariance_p(15, 15, "eye");
-	// Angle process noise
+
+	// Q matrix of the EKF
+	// MatrixInv<float> process_noise_q(6, 6, "eye");
+	// process_noise_q.Diag({1e-5, 1e-5, 1e-5, 1e-5, 1e-5, 1e-5});
+	MatrixInv<float> process_noise_q(15, 15, "eye");
 	process_noise_q.Diag({0.000001, 0.000001, 0.000001, 0.000000001, 0.000000001, 0.000000001,
 						  0.000000001, 0.000000001, 0.000000001, 0.000001, 0.000001, 0.000001,
 						  0.000000001, 0.000000001, 0.000000001});
 	// R matrix of the EKF
 	MatrixInv<float> meas_noise_r(7, 7, "eye");
-	meas_noise_r.Diag({0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01});
+	meas_noise_r.Diag({0.001, 0.1, 0.1, 0.1, 0.01, 0.01, 0.01});
+	// meas_noise_r.Diag({0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001});
 	// P init
 	initial_covariance_p.Diag({30*DEG2RAD, 30*DEG2RAD, 30*DEG2RAD, 0.01, 0.01, 0.01, 100, 100, 100,
 							   10, 10, 10, 0.1, 0.1, 0.1});	
@@ -394,8 +398,8 @@ int main(int argc, char *argv[]){
         	data_writer.UpdateDataBuffer(duration_count, loop_count, imu_data, sensor_meas, current_state, secondary_filter_debug, gps_meas_indices, rc_periods, ExtY_fcsModel_T_);
 	    }
 
-	  //   if (remainder(loop_count, 50) == 0){
-	  // //   	printf("Roll [deg]: %+7.3f, Pitch[deg]: %+7.3f, Yaw[deg]: %+7.3f\n", current_state(0)*RAD2DEG, current_state(1)*RAD2DEG, current_state(2)*RAD2DEG);
+	    // if (remainder(loop_count, 50) == 0){
+	    // 	printf("Roll [deg]: %+7.3f, Pitch[deg]: %+7.3f, Yaw[deg]: %+7.3f\n", current_state(0)*RAD2DEG, current_state(1)*RAD2DEG, current_state(2)*RAD2DEG);
 	  // //   	// printf("Pos N [m]: %+7.3f, Pos E [m]: %+7.3f, Pos D[m]: %+7.3f\n", current_state(6), current_state(7), current_state(8));
 	  // //   	// printf("Vel N [m]: %+7.3f, Vel E [m]: %+7.3f, Vel D[m]: %+7.3f\n", current_state(9), current_state(10), current_state(11));
 	  //   	printf("Throttle: %d, Roll: %d, Pitch: %d, Yaw: %d, Sw1: %d, Sw2: %d, Sw3: %d, State: %d, Flight Mode: %d\n", ExtU_fcsModel_T_->rcCmdsIn.throttleCmd_nd, ExtU_fcsModel_T_->rcCmdsIn.joystickXCmd_nd, 

@@ -1,8 +1,9 @@
 #include "ekf_16dof_quat_class.h"
 
 template <typename T>
-Ekf16DofQuat<T>::Ekf16DofQuat(T sample_time_s, MatrixInv<T> initial_state, MatrixInv<T> process_noise_q, MatrixInv<T> meas_noise_r, MatrixInv<T> initial_covariance_p):
-			EkfBase<T>(NUM_STATES, NUM_MEAS, NUM_STATES_SENSOR, sample_time_s, initial_state, process_noise_q, meas_noise_r, initial_covariance_p){	
+Ekf16DofQuat<T>::Ekf16DofQuat(T sample_time_s, MatrixInv<T> initial_state, MatrixInv<T> process_noise_q, MatrixInv<T> meas_noise_r, MatrixInv<T> initial_covariance_p,
+					  bool compute_q_each_iter, float process_noise_eps): EkfBase<T>(NUM_STATES, NUM_MEAS, NUM_STATES_SENSOR, 
+					  sample_time_s, initial_state, process_noise_q, meas_noise_r, initial_covariance_p, compute_q_each_iter, process_noise_eps){	
 
 	g_ = MatrixInv<T>(3, 1);
 	g_(2) = 9.81;
@@ -82,6 +83,10 @@ void Ekf16DofQuat<T>::PropagateState(const MatrixInv<T> &state_sensor_val){
 	this->time_propagated_state_(13) = this->current_state_(13);
 	this->time_propagated_state_(14) = this->current_state_(14);
 	this->time_propagated_state_(15) = this->current_state_(15);
+}
+
+template <typename T>
+void Ekf16DofQuat<T>::ComputeControlToStateMap(){
 }
 
 template <typename T>

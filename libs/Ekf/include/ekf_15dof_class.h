@@ -21,7 +21,8 @@ template <typename T>
 class Ekf15Dof:public EkfBase<T>{
 	public:
 		// constructors
-		Ekf15Dof(T sample_time_s, MatrixInv<T> initial_state, MatrixInv<T> process_noise_q, MatrixInv<T> meas_noise_r, MatrixInv<T> initial_covariance_p);
+		Ekf15Dof(T sample_time_s, MatrixInv<T> initial_state, MatrixInv<T> process_noise_q, MatrixInv<T> meas_noise_r, MatrixInv<T> initial_covariance_p,
+			bool compute_q_each_iter = false, float process_noise_eps = 1e-8);
 
 		// destructor
 		~Ekf15Dof();	
@@ -36,6 +37,7 @@ class Ekf15Dof:public EkfBase<T>{
 		void ComputeMeasNoiseJacobian(const MatrixInv<T> &meas_sensor_val);
 		void ComputeMeasFromState();
 
+		void ComputeControlToStateMap();
 		void ComputeTrignometricValues();
 
 		// trignometric values
@@ -49,6 +51,11 @@ class Ekf15Dof:public EkfBase<T>{
 
 		T s_psi;
 		T c_psi;
+
+		// Intermediate matrices
+		MatrixInv<T> body_rates_2_euler_rates_;
+		MatrixInv<T> c_b2ned_;
+
 
 		MatrixInv<T> g;
 
