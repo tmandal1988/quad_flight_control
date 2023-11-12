@@ -107,8 +107,8 @@ bool MPU9250::initialize()
         {0x00, MPUREG_PWR_MGMT_2},     // Enable Acc & Gyro
         {0x01, MPUREG_CONFIG},         // Use DLPF set Gyroscope bandwidth 184Hz, temperature bandwidth 188Hz
         {0x18, MPUREG_GYRO_CONFIG},    // +-2000dps
-        {3<<3, MPUREG_ACCEL_CONFIG},   // +-16G
-        {0x08, MPUREG_ACCEL_CONFIG_2}, // Set Acc Data Rates, Enable Acc LPF , Bandwidth 184Hz
+        {0x18, MPUREG_ACCEL_CONFIG},   // +-16G
+        {0x01, MPUREG_ACCEL_CONFIG_2}, // Set Acc Data Rates, Enable Acc LPF , Bandwidth 184Hz
         {0x30, MPUREG_INT_PIN_CFG},    //
         //{0x40, MPUREG_I2C_MST_CTRL},   // I2C Speed 348 kHz
         //{0x20, MPUREG_USER_CTRL},      // Enable AUX

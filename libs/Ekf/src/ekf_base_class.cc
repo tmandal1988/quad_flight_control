@@ -46,7 +46,6 @@ void EkfBase<T>::Run(const MatrixInv<T> &state_sensor_val, const MatrixInv<T> &m
 	ComputeStateJacobian(state_sensor_val);
 
 	GetMeas(meas_sensor_val);
-	ComputeMeasFromState();
 	ComputeMeasJacobian(meas_sensor_val);
 
 	//P = F*P*F' + L*Q*L';
@@ -62,6 +61,7 @@ void EkfBase<T>::Run(const MatrixInv<T> &state_sensor_val, const MatrixInv<T> &m
 	// sequentially update state with measurement
 	for(size_t idx_r = 0; idx_r < num_meas_; idx_r++){
 		if (meas_indices[idx_r]){
+			ComputeMeasFromState(idx_r);
 			ComputeKalmanGainSequential(idx_r);
 			MatrixInv<T> meas_jacobian_row = meas_jacobian_.GetRow(idx_r);
 			current_state_ = current_state_ + kalman_gain_seq_*( computed_meas_(idx_r) - meas_from_propogated_state_(idx_r) );

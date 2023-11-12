@@ -49,7 +49,7 @@ class EkfBase{
 		virtual void GetMeas(const MatrixInv<T> &meas_sensor_val) = 0;
 		virtual void ComputeMeasJacobian(const MatrixInv<T> &meas_sensor_val) = 0;
 		virtual void ComputeMeasNoiseJacobian(const MatrixInv<T> &meas_sensor_val) = 0;
-		virtual void ComputeMeasFromState() = 0;
+		virtual void ComputeMeasFromState(size_t r_idx) = 0;
 		virtual void ComputeControlToStateMap() = 0;
 
 		void ComputeKalmanGainSequential(size_t r_idx);

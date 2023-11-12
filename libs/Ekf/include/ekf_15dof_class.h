@@ -35,10 +35,11 @@ class Ekf15Dof:public EkfBase<T>{
 		void GetMeas(const MatrixInv<T> &meas_sensor_val);
 		void ComputeMeasJacobian(const MatrixInv<T> &meas_sensor_val);
 		void ComputeMeasNoiseJacobian(const MatrixInv<T> &meas_sensor_val);
-		void ComputeMeasFromState();
+		void ComputeMeasFromState(size_t r_idx);
 
 		void ComputeControlToStateMap();
 		void ComputeTrignometricValues();
+		T WrapToPi(T ang_rad);
 
 		// trignometric values
 		T s_phi;

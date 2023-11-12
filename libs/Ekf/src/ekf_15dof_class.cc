@@ -49,69 +49,50 @@ inline void Ekf15Dof<T>::ComputeTrignometricValues(){
 	c_psi = cos(this->current_state_(2));
 
 }
+template <typename T>
+inline T Ekf15Dof<T>::WrapToPi(T ang_rad){
+	return ang_rad - 2*PI*floor( (ang_rad + PI) / PIx2 ); 
+}
 
 template <typename T>
 void Ekf15Dof<T>::PropagateState(const MatrixInv<T> &state_sensor_val){
 	// wrap the yaw angle	
-	// this->current_state_(2) = remainder(this->current_state_(2) + PI, PIx2) - PI;
+	this->current_state_(2) = WrapToPi( this->current_state_(2) );
 
 	ComputeTrignometricValues();
 	T dt = this->sample_time_s_;
 
-	MatrixInv<T> propogated_euler_ang(3, 1);
-	MatrixInv<T> propogated_velocity(3, 1);
+	this->time_propagated_state_(0) = this->current_state_(0) - dt*(this->current_state_(3) - state_sensor_val(0) + c_phi*t_theta*(this->current_state_(5) - state_sensor_val(2)) + s_phi*t_theta*(this->current_state_(4) - state_sensor_val(1)));
 
-	body_rates_2_euler_rates_ = { {1, s_phi*t_theta, c_phi*t_theta}, 
-								  {0, c_phi, -s_phi}, 
-								  {0, s_phi/c_theta, c_phi/c_theta} };
+	this->time_propagated_state_(1) = this->current_state_(1) - dt*(c_phi*(this->current_state_(4) - state_sensor_val(1)) - s_phi*(this->current_state_(5) - state_sensor_val(2)));
 
-	c_b2ned_ = { {c_psi*c_theta, c_psi*s_phi*s_theta - c_phi*s_psi, s_phi*s_psi + c_phi*c_psi*s_theta},
-				 {c_theta*s_psi, c_phi*c_psi + s_phi*s_psi*s_theta, c_phi*s_psi*s_theta - c_psi*s_phi},
-				 {-s_theta, c_theta*s_phi, c_phi*c_theta} };
+	this->time_propagated_state_(2) = this->current_state_(2) - dt*((s_phi*(this->current_state_(4) - state_sensor_val(1)))/c_theta + (c_phi*(this->current_state_(5) - state_sensor_val(2)))/c_theta);
 
-
-	MatrixInv<T> angular_rate_vector = { {state_sensor_val(0) - this->current_state_(3)},
-										{state_sensor_val(1) - this->current_state_(4)},
-										{state_sensor_val(2) - this->current_state_(5)} };
-	MatrixInv<T> accel_vector = { {state_sensor_val(3) - this->current_state_(12)},
-								  {state_sensor_val(4) - this->current_state_(13)},
-								  {state_sensor_val(5) - this->current_state_(14)} };
-
-
-	propogated_euler_ang = body_rates_2_euler_rates_*angular_rate_vector*dt;
-
-	propogated_velocity = (c_b2ned_*accel_vector + g)*dt;
-
-	// propagate phi
-	this->time_propagated_state_(0) = this->current_state_(0) + propogated_euler_ang(0);
-	this->time_propagated_state_(1) = this->current_state_(1) + propogated_euler_ang(1);
-	this->time_propagated_state_(2) = this->current_state_(2) + propogated_euler_ang(2);
-
-	if ( abs(this->time_propagated_state_(2)) > PI ){
-		this->time_propagated_state_(2) = -( this->time_propagated_state_(2)/abs(this->time_propagated_state_(2)) )*( PI - abs(this->time_propagated_state_(2)) ) ;
-	}
-	
-	// propagate gyro bias
 	this->time_propagated_state_(3) = this->current_state_(3);
+
 	this->time_propagated_state_(4) = this->current_state_(4);
+
 	this->time_propagated_state_(5) = this->current_state_(5);
 
-	// propagate NED X position
-	this->time_propagated_state_(6) = this->current_state_(6) + dt*this->current_state_(9);
-	// propagate NED Y position
-	this->time_propagated_state_(7) = this->current_state_(7) + dt*this->current_state_(10);
-	// propagate NED Z position
-	this->time_propagated_state_(8) = this->current_state_(8) + dt*this->current_state_(11);
+	this->time_propagated_state_(6) = this->current_state_(6) + this->current_state_(9)*dt;
 
-	// propagate NED X velocity
-	this->time_propagated_state_(9) = this->current_state_(9) + propogated_velocity(0);
-	this->time_propagated_state_(10) = this->current_state_(10) + propogated_velocity(1);
-	this->time_propagated_state_(11) = this->current_state_(11) + propogated_velocity(2);
+	this->time_propagated_state_(7) = this->current_state_(7) + this->current_state_(10)*dt;
 
-	// // propagate accel bias
+	this->time_propagated_state_(8) = this->current_state_(8) + this->current_state_(11)*dt;
+
+	this->time_propagated_state_(9) = this->current_state_(9) + dt*((s_phi*s_psi + c_phi*c_psi*s_theta)*(state_sensor_val(5) - this->current_state_(14)) - (c_phi*s_psi - c_psi*s_phi*s_theta)*(state_sensor_val(4) - this->current_state_(13)) + c_psi*c_theta*(state_sensor_val(3) - this->current_state_(12)));
+
+	this->time_propagated_state_(10) = this->current_state_(10) + dt*((c_phi*c_psi + s_phi*s_psi*s_theta)*(state_sensor_val(4) - this->current_state_(13)) - (c_psi*s_phi - c_phi*s_psi*s_theta)*(state_sensor_val(5) - this->current_state_(14)) + c_theta*s_psi*(state_sensor_val(3) - this->current_state_(12)));
+
+	this->time_propagated_state_(11) = this->current_state_(11) + dt*(g(2) - s_theta*(state_sensor_val(3) - this->current_state_(12)) + c_phi*c_theta*(state_sensor_val(5) - this->current_state_(14)) + c_theta*s_phi*(state_sensor_val(4) - this->current_state_(13)));
+
 	this->time_propagated_state_(12) = this->current_state_(12);
+
 	this->time_propagated_state_(13) = this->current_state_(13);
+
 	this->time_propagated_state_(14) = this->current_state_(14);
+
+
 }
 
 template <typename T>
@@ -301,10 +282,10 @@ void Ekf15Dof<T>::GetMeas(const MatrixInv<T> &meas_sensor_val){
 	// this->computed_meas_(0) = atan2(-mag2d(1), mag2d(0)) + magnetic_declination;
 	this->computed_meas_(0) = atan2(-my*c_phi + mz*s_phi, mx*c_theta + (my*s_phi + mz*c_phi)*s_theta) + magnetic_declination;
 
-	while (this->computed_meas_(0) > this->time_propagated_state_(2) + PI){
+	while (this->computed_meas_(0) > this->current_state_(2) + PI){
 			this->computed_meas_(0) = this->computed_meas_(0) - PIx2;
 	}
-	while (this->computed_meas_(0) < this->time_propagated_state_(2) - PI){
+	while (this->computed_meas_(0) < this->current_state_(2) - PI){
 			this->computed_meas_(0) = this->computed_meas_(0) + PIx2;
 	}
 
@@ -327,9 +308,9 @@ void Ekf15Dof<T>::ComputeMeasNoiseJacobian(const MatrixInv<T> &meas_sensor_val){
 }
 
 template <typename T>
-inline void Ekf15Dof<T>::ComputeMeasFromState(){
+inline void Ekf15Dof<T>::ComputeMeasFromState(size_t r_idx){
 	// In this case it is y = H*x
-	this->meas_from_propogated_state_ = this->meas_jacobian_*this->time_propagated_state_;
+	this->meas_from_propogated_state_(r_idx) = (this->meas_jacobian_.GetRow(r_idx)*this->current_state_)(0);
 }
 
 // Explicit template instantiation

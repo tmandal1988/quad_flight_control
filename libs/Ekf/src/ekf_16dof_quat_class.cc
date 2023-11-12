@@ -289,7 +289,7 @@ void Ekf16DofQuat<T>::ComputeMeasNoiseJacobian(const MatrixInv<T> &meas_sensor_v
 }
 
 template <typename T>
-void Ekf16DofQuat<T>::ComputeMeasFromState(){
+void Ekf16DofQuat<T>::ComputeMeasFromState(size_t r_idx){
 
 	// Easy to use names
 	T q0 	= this->time_propagated_state_(0);

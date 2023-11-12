@@ -132,13 +132,12 @@ int main(int argc, char *argv[]){
 	// MatrixInv<float> process_noise_q(6, 6, "eye");
 	// process_noise_q.Diag({1e-5, 1e-5, 1e-5, 1e-5, 1e-5, 1e-5});
 	MatrixInv<float> process_noise_q(15, 15, "eye");
-	process_noise_q.Diag({0.000001, 0.000001, 0.000001, 0.000000001, 0.000000001, 0.000000001,
-						  0.000000001, 0.000000001, 0.000000001, 0.000001, 0.000001, 0.000001,
-						  0.000000001, 0.000000001, 0.000000001});
+	process_noise_q.Diag({0.000001, 0.000001, 0.000001, 1e-8, 1e-8, 1e-8, 1e-8, 1e-8,
+    									  1e-8, 0.005, 0.005, 0.005, 1e-8, 1e-8, 1e-8});
 	// R matrix of the EKF
 	MatrixInv<float> meas_noise_r(7, 7, "eye");
-	meas_noise_r.Diag({0.001, 0.1, 0.1, 0.1, 0.01, 0.01, 0.01});
-	// meas_noise_r.Diag({0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001});
+	meas_noise_r.Diag({0.5, 10, 10, 10, 0.01, 0.01, 0.01});
+	//meas_noise_r.Diag({0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001});
 	// P init
 	initial_covariance_p.Diag({30*DEG2RAD, 30*DEG2RAD, 30*DEG2RAD, 0.01, 0.01, 0.01, 100, 100, 100,
 							   10, 10, 10, 0.1, 0.1, 0.1});	
@@ -209,8 +208,6 @@ int main(int argc, char *argv[]){
 	int* rc_periods;
 
 	//##############################################################
-	// FCS Ctrl Params from fcs_params.h
-	AssignFcsCtrlParams();
 	// fcsModel input variable
 	fcsModel::ExtU_fcsModel_T *ExtU_fcsModel_T_ =  new fcsModel::ExtU_fcsModel_T;
 	
@@ -220,8 +217,8 @@ int main(int argc, char *argv[]){
   busRcInCmds rcCmdsIn_;
   // Sensor inuput to the model
   busStateEstimate stateEstimate_;
-  // From fcs_params.h
-  ExtU_fcsModel_T_->ctrlParams = fcs_ctrl_params;
+  // FCS Ctrl Params from fcs_params.h
+  ExtU_fcsModel_T_->ctrlParams = AssignFcsCtrlParams();
 
   // fcsModel output variable
   fcsModel::ExtY_fcsModel_T ExtY_fcsModel_T_;
@@ -341,7 +338,8 @@ int main(int argc, char *argv[]){
       //########################################
       // Assign the state values to the model input structure
       for(size_t idx = 0; idx < 3; idx++){
-      	stateEstimate_.attitude_rad[idx] = mh_euler[idx];
+      	//stateEstimate_.attitude_rad[idx] = mh_euler[idx];
+      	stateEstimate_.attitude_rad[idx] = current_state(idx);
       	// stateEstimate_.bodyAngRates_radps[idx] = ( state_sensor_val(idx) - current_state(idx + 3) );
       	stateEstimate_.bodyAngRates_radps[idx] = imu_data[idx] - gyro_offset[idx];
       	stateEstimate_.nedVel_mps[idx] = current_state(idx + 9);
@@ -394,9 +392,9 @@ int main(int argc, char *argv[]){
   		}
 
 
-      if(fifty_hz_flag){
+     if(fifty_hz_flag){
         	data_writer.UpdateDataBuffer(duration_count, loop_count, imu_data, sensor_meas, current_state, secondary_filter_debug, gps_meas_indices, rc_periods, ExtY_fcsModel_T_);
-	    }
+	   }
 
 	    // if (remainder(loop_count, 50) == 0){
 	    // 	printf("Roll [deg]: %+7.3f, Pitch[deg]: %+7.3f, Yaw[deg]: %+7.3f\n", current_state(0)*RAD2DEG, current_state(1)*RAD2DEG, current_state(2)*RAD2DEG);

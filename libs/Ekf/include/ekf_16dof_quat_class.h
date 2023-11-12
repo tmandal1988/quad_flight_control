@@ -54,7 +54,7 @@ class Ekf16DofQuat:public EkfBase<T>{
 		void GetMeas(const MatrixInv<T> &meas_sensor_val);
 		void ComputeMeasJacobian(const MatrixInv<T> &meas_sensor_val);
 		void ComputeMeasNoiseJacobian(const MatrixInv<T> &meas_sensor_val);
-		void ComputeMeasFromState();
+		void ComputeMeasFromState(size_t r_idx);
 		void ComputeControlToStateMap();
 
 		MatrixInv<T> g_;			
