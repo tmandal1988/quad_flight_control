@@ -67,6 +67,24 @@ void AssignFcsData(const FcsOutput &fcs_output, DataFields data_to_save[], size_
 	data_to_save[data_index].fcsOut[56] = fcs_output.fcsDebug.outerLoopCtrlDebug.velCtrlDebug.pidDebug[2].proportionalOutput;
 	data_to_save[data_index].fcsOut[57] = fcs_output.fcsDebug.outerLoopCtrlDebug.velCtrlDebug.pidDebug[2].integralOutput;
 	data_to_save[data_index].fcsOut[58] = fcs_output.fcsDebug.outerLoopCtrlDebug.velCtrlDebug.pidDebug[2].derivativeOutput;
-	data_to_save[data_index].fcsOut[59] = static_cast<float>(fcs_output.fcsDebug.state);
-	data_to_save[data_index].fcsOut[60] = static_cast<float>(fcs_output.fcsDebug.flightMode);
+	data_to_save[data_index].fcsOut[59] = fcs_output.fcsDebug.outerLoopCtrlDebug.posCtrlDebug.cmd[0];
+	data_to_save[data_index].fcsOut[60] = fcs_output.fcsDebug.outerLoopCtrlDebug.posCtrlDebug.cmd[1];
+	data_to_save[data_index].fcsOut[61] = fcs_output.fcsDebug.outerLoopCtrlDebug.posCtrlDebug.cmd[2];
+	data_to_save[data_index].fcsOut[62] = fcs_output.fcsDebug.outerLoopCtrlDebug.posCtrlDebug.meas[0];
+	data_to_save[data_index].fcsOut[63] = fcs_output.fcsDebug.outerLoopCtrlDebug.posCtrlDebug.meas[1];
+	data_to_save[data_index].fcsOut[64] = fcs_output.fcsDebug.outerLoopCtrlDebug.posCtrlDebug.meas[2];
+	data_to_save[data_index].fcsOut[65] = fcs_output.fcsDebug.outerLoopCtrlDebug.posCtrlDebug.pidDebug[0].output;
+	data_to_save[data_index].fcsOut[66] = fcs_output.fcsDebug.outerLoopCtrlDebug.posCtrlDebug.pidDebug[0].proportionalOutput;
+	data_to_save[data_index].fcsOut[67] = fcs_output.fcsDebug.outerLoopCtrlDebug.posCtrlDebug.pidDebug[0].integralOutput;
+	data_to_save[data_index].fcsOut[68] = fcs_output.fcsDebug.outerLoopCtrlDebug.posCtrlDebug.pidDebug[0].derivativeOutput;
+	data_to_save[data_index].fcsOut[69] = fcs_output.fcsDebug.outerLoopCtrlDebug.posCtrlDebug.pidDebug[1].output;
+	data_to_save[data_index].fcsOut[70] = fcs_output.fcsDebug.outerLoopCtrlDebug.posCtrlDebug.pidDebug[1].proportionalOutput;
+	data_to_save[data_index].fcsOut[71] = fcs_output.fcsDebug.outerLoopCtrlDebug.posCtrlDebug.pidDebug[1].integralOutput;
+	data_to_save[data_index].fcsOut[72] = fcs_output.fcsDebug.outerLoopCtrlDebug.posCtrlDebug.pidDebug[1].derivativeOutput;
+	data_to_save[data_index].fcsOut[73] = fcs_output.fcsDebug.outerLoopCtrlDebug.posCtrlDebug.pidDebug[2].output;
+	data_to_save[data_index].fcsOut[74] = fcs_output.fcsDebug.outerLoopCtrlDebug.posCtrlDebug.pidDebug[2].proportionalOutput;
+	data_to_save[data_index].fcsOut[75] = fcs_output.fcsDebug.outerLoopCtrlDebug.posCtrlDebug.pidDebug[2].integralOutput;
+	data_to_save[data_index].fcsOut[76] = fcs_output.fcsDebug.outerLoopCtrlDebug.posCtrlDebug.pidDebug[2].derivativeOutput;
+	data_to_save[data_index].fcsOut[77] = static_cast<float>(fcs_output.fcsDebug.state);
+	data_to_save[data_index].fcsOut[78] = static_cast<float>(fcs_output.fcsDebug.flightMode);
 }

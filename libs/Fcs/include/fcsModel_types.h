@@ -3,9 +3,9 @@
 //
 // Code generated for Simulink model 'fcsModel'.
 //
-// Model version                  : 1.74
+// Model version                  : 1.87
 // Simulink Coder version         : 9.7 (R2022a) 13-Nov-2021
-// C/C++ source code generated on : Sun Nov  5 13:38:48 2023
+// C/C++ source code generated on : Tue Nov 14 14:08:01 2023
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM 7
@@ -42,7 +42,7 @@ enum class enumFlightMode
   : int32_T {
   ACRO = 0,                            // Default value
   STABILIZE,
-  VEL_CONTROL
+  ALT_CONTROL
 };
 
 #endif
@@ -198,6 +198,19 @@ struct busInnerLoopCtrlParams
 
 #endif
 
+#ifndef DEFINED_TYPEDEF_FOR_busPosCtrlParams_
+#define DEFINED_TYPEDEF_FOR_busPosCtrlParams_
+
+// Position controller parameters
+struct busPosCtrlParams
+{
+  std::array<busPidParams, 3> ctrlParamsArray;
+  std::array<busSignalConditioningParams, 3> cmdSignalConditioningParamsArray;
+  std::array<busSignalConditioningParams, 3> measSignalConditioningParamsArray;
+};
+
+#endif
+
 #ifndef DEFINED_TYPEDEF_FOR_busVelCtrlParams_
 #define DEFINED_TYPEDEF_FOR_busVelCtrlParams_
 
@@ -211,6 +224,18 @@ struct busVelCtrlParams
 
 #endif
 
+#ifndef DEFINED_TYPEDEF_FOR_busOuterLoopCtrlParams_
+#define DEFINED_TYPEDEF_FOR_busOuterLoopCtrlParams_
+
+// Bus containing parameters for outer loop controllers
+struct busOuterLoopCtrlParams
+{
+  busPosCtrlParams posCtrlParams;
+  busVelCtrlParams velCtrlParams;
+};
+
+#endif
+
 #ifndef DEFINED_TYPEDEF_FOR_busFcsParams_
 #define DEFINED_TYPEDEF_FOR_busFcsParams_
 
@@ -218,7 +243,7 @@ struct busVelCtrlParams
 struct busFcsParams
 {
   busInnerLoopCtrlParams innerLoopCtrlParams;
-  busVelCtrlParams velCtrlParams;
+  busOuterLoopCtrlParams outerLoopCtrlParams;
 };
 
 #endif
@@ -316,6 +341,19 @@ struct busVelCtrlDebug
 
 #endif
 
+#ifndef DEFINED_TYPEDEF_FOR_busPosCtrlDebug_
+#define DEFINED_TYPEDEF_FOR_busPosCtrlDebug_
+
+// Debug data from position controllers
+struct busPosCtrlDebug
+{
+  std::array<real_T, 3> cmd;
+  std::array<real_T, 3> meas;
+  std::array<busPidDebug, 3> pidDebug;
+};
+
+#endif
+
 #ifndef DEFINED_TYPEDEF_FOR_busOuterLoopCtrlDebug_
 #define DEFINED_TYPEDEF_FOR_busOuterLoopCtrlDebug_
 
@@ -324,6 +362,7 @@ struct busOuterLoopCtrlDebug
 {
   real_T frcCmd_N;
   busVelCtrlDebug velCtrlDebug;
+  busPosCtrlDebug posCtrlDebug;
 };
 
 #endif
@@ -449,6 +488,40 @@ struct busVelCtrlInputs
 
 #endif
 
+#ifndef DEFINED_TYPEDEF_FOR_busPosCtrlInputs_
+#define DEFINED_TYPEDEF_FOR_busPosCtrlInputs_
+
+// Bus containing all the inputs necessary for position controllers
+struct busPosCtrlInputs
+{
+  std::array<busCtrlInputs, 3> ctrlInputsArray;
+  busGeodeticPos originGeodeticPos;
+};
+
+#endif
+
+#ifndef DEFINED_TYPEDEF_FOR_struct_1y5k1ON29JoR6B63XHXJZD_
+#define DEFINED_TYPEDEF_FOR_struct_1y5k1ON29JoR6B63XHXJZD_
+
+struct struct_1y5k1ON29JoR6B63XHXJZD
+{
+  real_T mean_sea_level_pressure_pa;
+  std::array<real_T, 2> secondOrderFilterParams;
+};
+
+#endif
+
+#ifndef DEFINED_TYPEDEF_FOR_struct_5H3wwZRzDLghhdjc3XusPG_
+#define DEFINED_TYPEDEF_FOR_struct_5H3wwZRzDLghhdjc3XusPG_
+
+struct struct_5H3wwZRzDLghhdjc3XusPG
+{
+  real_T center;
+  real_T deltaFromCenter;
+};
+
+#endif
+
 #ifndef DEFINED_TYPEDEF_FOR_struct_mmIgzrMBPVhvIbVLm0lB6F_
 #define DEFINED_TYPEDEF_FOR_struct_mmIgzrMBPVhvIbVLm0lB6F_
 
@@ -480,13 +553,19 @@ struct struct_haOLK1NlGG6dPRJJ1mBkaE
 
 #endif
 
-#ifndef DEFINED_TYPEDEF_FOR_struct_DEydpDXldT45WxqeQTuBID_
-#define DEFINED_TYPEDEF_FOR_struct_DEydpDXldT45WxqeQTuBID_
+#ifndef DEFINED_TYPEDEF_FOR_struct_jSdcJanNgJfESvFy5LCTQE_
+#define DEFINED_TYPEDEF_FOR_struct_jSdcJanNgJfESvFy5LCTQE_
 
-struct struct_DEydpDXldT45WxqeQTuBID
+struct struct_jSdcJanNgJfESvFy5LCTQE
 {
   struct_mmIgzrMBPVhvIbVLm0lB6F cmdLimits;
   std::array<real_T, 2> pwmLimits;
+  std::array<real_T, 2> pwmLimitsThrottle;
+  real_T pwmThrottleMid;
+  real_T pwmToCmdThrottleSlopeLow;
+  real_T pwmToCmdThrottleIncptLow;
+  real_T pwmToCmdThrottleSlopeHigh;
+  real_T pwmToCmdThrottleIncptHigh;
   real_T pwmMtrArm;
   struct_haOLK1NlGG6dPRJJ1mBkaE coeffs;
 };
