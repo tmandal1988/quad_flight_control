@@ -183,7 +183,10 @@ int main(int argc, char *argv[]){
   MahonyFilter m_filt(0.0, 2.0, dt_s, quat);	
 
 
-	gps_reader.InitializeGps(30);
+	bool gps_init_status = gps_reader.InitializeGps(30);
+	if(!gps_init_status){
+		printf("EKF needs GPS, using Mahony filter for attitude computation. ONLY USE STABILIZE MODE\n");
+	}
 	gps_reader.CreateGpsThread();
 	data_writer.StartFileWriteThread();
 	rc_reader.CreateRcInputReadThread();
@@ -292,7 +295,7 @@ int main(int argc, char *argv[]){
 					sensor_meas(10) = baro_data[1];
 					stateEstimate_.pressure_mbar = baro_data[0];
 					stateEstimate_.temp_c = baro_data[1];
-					// printf("Pressure(millibar): %g, Temperature(C): %g\n", baro_data[0], baro_data[1]);
+					//printf("Pressure(millibar): %g, Temperature(C): %g\n", baro_data[0], baro_data[1]);
     	}
 
     	// Read IMU data
@@ -338,10 +341,17 @@ int main(int argc, char *argv[]){
       //########################################
       // Assign the state values to the model input structure
       for(size_t idx = 0; idx < 3; idx++){
-      	//stateEstimate_.attitude_rad[idx] = mh_euler[idx];
-      	stateEstimate_.attitude_rad[idx] = current_state(idx);
+      	if(gps_init_status){
+      		stateEstimate_.attitude_rad[idx] = current_state(idx);
+      		stateEstimate_.bodyAngRates_radps[idx] = ( state_sensor_val(idx) - current_state(idx + 3) );
+      	}else{      		
+      		stateEstimate_.attitude_rad[idx] = mh_euler[idx];
+      		stateEstimate_.bodyAngRates_radps[idx] = imu_data[idx] - gyro_offset[idx];
+      	}
+      	//
       	// stateEstimate_.bodyAngRates_radps[idx] = ( state_sensor_val(idx) - current_state(idx + 3) );
-      	stateEstimate_.bodyAngRates_radps[idx] = imu_data[idx] - gyro_offset[idx];
+      	// stateEstimate_.bodyAngRates_radps[idx] = imu_data[idx] - gyro_offset[idx];
+      	stateEstimate_.nedPos_m[idx] = current_state(idx + 6);
       	stateEstimate_.nedVel_mps[idx] = current_state(idx + 9);
       }
       

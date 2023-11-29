@@ -3,9 +3,9 @@
 //
 // Code generated for Simulink model 'fcsModel'.
 //
-// Model version                  : 1.87
+// Model version                  : 1.91
 // Simulink Coder version         : 9.7 (R2022a) 13-Nov-2021
-// C/C++ source code generated on : Tue Nov 14 14:08:01 2023
+// C/C++ source code generated on : Mon Nov 27 14:03:40 2023
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM 7
@@ -104,6 +104,7 @@ struct busStateEstimate
   std::array<real_T, 3> attitude_rad;
   std::array<real_T, 3> bodyAngRates_radps;
   busGeodeticPos geodeticPos;
+  std::array<real_T, 3> nedPos_m;
   std::array<real_T, 3> nedVel_mps;
   real_T pressure_mbar;
   real_T temp_c;
@@ -473,6 +474,18 @@ struct busRcOutCmds
   // Dimensionalized command computed using yaw stick input.
   // Interpreted unit depends on the flight mode.
   real_T yawStick;
+
+  // Velocity Command in given X axis generated from RC interpreter in flight modes that
+  // require altitude hold
+  real_T vxStick_mps;
+
+  // Velocity Command in given Y axis generated from RC interpreter in flight modes that
+  // require altitude hold
+  real_T vyStick_mps;
+
+  // Velocity Command in given Z axis generated from RC interpreter in flight modes that
+  // require altitude hold
+  real_T vzStick_mps;
 };
 
 #endif
@@ -511,13 +524,14 @@ struct struct_1y5k1ON29JoR6B63XHXJZD
 
 #endif
 
-#ifndef DEFINED_TYPEDEF_FOR_struct_5H3wwZRzDLghhdjc3XusPG_
-#define DEFINED_TYPEDEF_FOR_struct_5H3wwZRzDLghhdjc3XusPG_
+#ifndef DEFINED_TYPEDEF_FOR_struct_YSjXhEpMC1LYZqGeNUk2hH_
+#define DEFINED_TYPEDEF_FOR_struct_YSjXhEpMC1LYZqGeNUk2hH_
 
-struct struct_5H3wwZRzDLghhdjc3XusPG
+struct struct_YSjXhEpMC1LYZqGeNUk2hH
 {
   real_T center;
-  real_T deltaFromCenter;
+  real_T posDeltaFromCenter;
+  real_T negDeltaFromCenter;
 };
 
 #endif
@@ -540,34 +554,39 @@ struct struct_mmIgzrMBPVhvIbVLm0lB6F
 
 #endif
 
-#ifndef DEFINED_TYPEDEF_FOR_struct_haOLK1NlGG6dPRJJ1mBkaE_
-#define DEFINED_TYPEDEF_FOR_struct_haOLK1NlGG6dPRJJ1mBkaE_
+#ifndef DEFINED_TYPEDEF_FOR_struct_bSGttGVktiVsoVvrNEqEKH_
+#define DEFINED_TYPEDEF_FOR_struct_bSGttGVktiVsoVvrNEqEKH_
 
-struct struct_haOLK1NlGG6dPRJJ1mBkaE
+struct struct_bSGttGVktiVsoVvrNEqEKH
 {
   std::array<real_T, 2> roll_nd;
   std::array<real_T, 2> pitch_nd;
   std::array<real_T, 2> yaw_nd;
   std::array<real_T, 2> throttle_nd;
+  std::array<real_T, 2> vx_nd;
+  std::array<real_T, 2> vy_nd;
+  std::array<real_T, 2> vz_nd;
 };
 
 #endif
 
-#ifndef DEFINED_TYPEDEF_FOR_struct_jSdcJanNgJfESvFy5LCTQE_
-#define DEFINED_TYPEDEF_FOR_struct_jSdcJanNgJfESvFy5LCTQE_
+#ifndef DEFINED_TYPEDEF_FOR_struct_dSuMXx0ZbQPg3ecb8q1VK_
+#define DEFINED_TYPEDEF_FOR_struct_dSuMXx0ZbQPg3ecb8q1VK_
 
-struct struct_jSdcJanNgJfESvFy5LCTQE
+struct struct_dSuMXx0ZbQPg3ecb8q1VK
 {
   struct_mmIgzrMBPVhvIbVLm0lB6F cmdLimits;
   std::array<real_T, 2> pwmLimits;
   std::array<real_T, 2> pwmLimitsThrottle;
   real_T pwmThrottleMid;
+  real_T pwmThrottleMidHigh;
+  real_T pwmThrottleMidLow;
   real_T pwmToCmdThrottleSlopeLow;
   real_T pwmToCmdThrottleIncptLow;
   real_T pwmToCmdThrottleSlopeHigh;
   real_T pwmToCmdThrottleIncptHigh;
   real_T pwmMtrArm;
-  struct_haOLK1NlGG6dPRJJ1mBkaE coeffs;
+  struct_bSGttGVktiVsoVvrNEqEKH coeffs;
 };
 
 #endif

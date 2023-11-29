@@ -40,7 +40,8 @@ ublox_check_flag(false){
 	}
 }
 
-void GpsHelper::InitializeGps(float wait_duration_sec){
+bool GpsHelper::InitializeGps(float wait_duration_sec){
+	bool gps_init_status = true;
 	// Test GPS connection
 	if(gps_.testConnection())
 	{
@@ -54,16 +55,20 @@ void GpsHelper::InitializeGps(float wait_duration_sec){
 	}else{
 		ublox_check_flag = false;
 		printf("Ublox test failed\n");
-		return;
+		return false;
 	}
 
 	// initialize the duration
 	// Recording the timestamp at the start of the code
-    auto start = chrono::high_resolution_clock::now();
-    auto duration = chrono::duration_cast<chrono::seconds>(start - start);
+    chrono::high_resolution_clock::time_point start_time;
+    chrono::high_resolution_clock::time_point loop_end;
+    chrono::microseconds delta (1000); 
+	auto duration = chrono::duration_cast<chrono::microseconds> (delta);
+    auto duration_count = duration.count();
+    start_time = chrono::high_resolution_clock::now();
 
     // Run the loop till we have the desired number of llh position and NED velocity data for EKF initialization
-	while( (gps_pos_count_ < n_gps_meas_count_) || (gps_vel_count_ < n_gps_meas_count_) && duration.count() < wait_duration_sec ){
+	while( (gps_pos_count_ < n_gps_meas_count_) || (gps_vel_count_ < n_gps_meas_count_)){
 		if  ( gps_3d_fix_ && ( gps_fix_count_ > n_valid_gps_count_ ) ){
 			if(GetLlhPos() && gps_pos_count_ < n_gps_meas_count_){
 				lat_ref_ += pos_data_[2];
@@ -105,11 +110,15 @@ void GpsHelper::InitializeGps(float wait_duration_sec){
 		}
 		cout.flush();
 		cout<<"GPS INITIALIZATION PROGRESS: "<< ( (float)(gps_pos_count_ + gps_vel_count_) * 100 )/(2*n_gps_meas_count_)<<" %\r";
-		if(sigint_flag == 1)
+		if(sigint_flag == 1 || (duration_count > (wait_duration_sec*1000000)) ){
+			printf("GPS Initialization Failed\n");
+			gps_init_status = false;
 	   		break;
+		}
 
-	   	auto end = chrono::high_resolution_clock::now();
-	   	duration = chrono::duration_cast<chrono::seconds>(end - start);
+	   	// Get the stop time and compute the duration
+    	loop_end = std::chrono::high_resolution_clock::now();
+    	duration_count = chrono::duration_cast<chrono::microseconds>(loop_end - start_time).count();
     }// While loop
     printf("\n");
 
@@ -122,6 +131,8 @@ void GpsHelper::InitializeGps(float wait_duration_sec){
     vned_init_[0] = vned_init_[0]/n_gps_meas_count_;
     vned_init_[1] = vned_init_[1]/n_gps_meas_count_;
     vned_init_[2] = vned_init_[2]/n_gps_meas_count_;
+
+    return gps_init_status;
 }
 
 void GpsHelper::GpsReadLoop(){

@@ -40,20 +40,31 @@ MS5611::MS5611(uint8_t address) {
  * This method reads coefficients stored in PROM.
  */
 void MS5611::initialize() {
+
+    initConstants();
     // Reading 6 calibration data values
     uint8_t buff[2];
+    uint16_t tmp;
     I2Cdev::readBytes(devAddr, MS5611_RA_C1, 2, buff);
-    C1 = buff[0]<<8 | buff[1];
+    tmp = buff[0]<<8 | buff[1];
+    C1_ *= tmp;
     I2Cdev::readBytes(devAddr, MS5611_RA_C2, 2, buff);
-    C2 = buff[0]<<8 | buff[1];
+    tmp = buff[0]<<8 | buff[1];
+    C2_ *= tmp;
     I2Cdev::readBytes(devAddr, MS5611_RA_C3, 2, buff);
-    C3 = buff[0]<<8 | buff[1];
+    tmp = buff[0]<<8 | buff[1];
+    C3_ *= tmp;
     I2Cdev::readBytes(devAddr, MS5611_RA_C4, 2, buff);
-    C4 = buff[0]<<8 | buff[1];
+    tmp = buff[0]<<8 | buff[1];
+    C4_ *= tmp;
     I2Cdev::readBytes(devAddr, MS5611_RA_C5, 2, buff);
-    C5 = buff[0]<<8 | buff[1];
+    tmp = buff[0]<<8 | buff[1];
+    C5_ *= tmp;
     I2Cdev::readBytes(devAddr, MS5611_RA_C6, 2, buff);
-    C6 = buff[0]<<8 | buff[1];
+    tmp = buff[0]<<8 | buff[1];
+    C6_ *= tmp;
+
+    // printf("C1: %g, C2: %g, C3: %g, C4: %g, C5: %g, C6: %g\n", C1_, C2_, C3_, C4_, C5_, C6_);
 
     update();
 }
@@ -107,10 +118,42 @@ void MS5611::readTemperature() {
  *  More info about these calculations is available in the datasheet.
  */
 void MS5611::calculatePressureAndTemperature() {
-    float dT = D2 - C5 * pow(2, 8);
-    TEMP = (2000 + ((dT * C6) / pow(2, 23)));
-    float OFF = C2 * pow(2, 16) + (C4 * dT) / pow(2, 7);
-    float SENS = C1 * pow(2, 15) + (C3 * dT) / pow(2, 8);
+    // float dT = D2 - C5 * pow(2, 8);
+    // TEMP = (2000 + ((dT * C6) / pow(2, 23)));
+    // float OFF = C2 * pow(2, 16) + (C4 * dT) / pow(2, 7);
+    // float SENS = C1 * pow(2, 15) + (C3 * dT) / pow(2, 8);
+
+    // float T2, OFF2, SENS2;
+
+    // if (TEMP >= 2000)
+    // {
+    //     T2 = 0;
+    //     OFF2 = 0;
+    //     SENS2 = 0;
+    // }
+    // if (TEMP < 2000)
+    // {
+    //     T2 = dT * dT / pow(2, 31);
+    //     OFF2 = 5 * pow(TEMP - 2000, 2) / 2;
+    //     SENS2 = OFF2 / 2;
+    // }
+    // if (TEMP < -1500)
+    // {
+    //     OFF2 = OFF2 + 7 * pow(TEMP + 1500, 2);
+    //     SENS2 = SENS2 + 11 * pow(TEMP + 1500, 2) / 2;
+    // }
+
+    // TEMP = TEMP - T2;
+    // OFF = OFF - OFF2;
+    // SENS = SENS - SENS2;
+
+    // // Final calculations
+    // PRES = ((D1 * SENS) / pow(2, 21) - OFF) / pow(2, 15) / 100;
+    // TEMP = TEMP / 100;
+    float dT = D2 - C5_;
+    TEMP = 2000 + dT * C6_;
+    float OFF = C2_ + C4_ * dT;
+    float SENS = C1_ + C3_ * dT;
 
     float T2, OFF2, SENS2;
 
@@ -122,14 +165,15 @@ void MS5611::calculatePressureAndTemperature() {
     }
     if (TEMP < 2000)
     {
-        T2 = dT * dT / pow(2, 31);
-        OFF2 = 5 * pow(TEMP - 2000, 2) / 2;
-        SENS2 = OFF2 / 2;
+        T2 = dT * dT * 4.6566128731E-10;
+        OFF2 = 2.5 * (TEMP - 2000)  * (TEMP - 2000);
+        SENS2 = 1.25 * OFF2;
     }
     if (TEMP < -1500)
     {
-        OFF2 = OFF2 + 7 * pow(TEMP + 1500, 2);
-        SENS2 = SENS2 + 11 * pow(TEMP + 1500, 2) / 2;
+        float t = (TEMP + 1500) * (TEMP + 1500);
+        OFF2 += 7 * t;
+        SENS2 += 5.5 * t;
     }
 
     TEMP = TEMP - T2;
@@ -137,8 +181,8 @@ void MS5611::calculatePressureAndTemperature() {
     SENS = SENS - SENS2;
 
     // Final calculations
-    PRES = ((D1 * SENS) / pow(2, 21) - OFF) / pow(2, 15) / 100;
-    TEMP = TEMP / 100;
+    PRES = (D1 * SENS * 4.76837158205E-7 - OFF) * 3.051757813E-5 * 0.01;
+    TEMP = TEMP * 0.01;
 }
 
 /** Perform pressure and temperature reading and calculation at once.
@@ -168,4 +212,18 @@ float MS5611::getTemperature() {
  */
 float MS5611::getPressure() {
 	return PRES;
+}
+
+void MS5611::initConstants(){
+//  constants that were multiplied in read() - datasheet page 8
+  //  do this once and you save CPU cycles
+  //
+  //                               datasheet ms5611    
+  //                                mode = 0;           
+  C1_ = 32768L;          //  SENSt1   = C1_ * 2^15 
+  C2_ = 65536L;          //  OFFt1    = C2_ * 2^16 
+  C3_ = 3.90625E-3;      //  TCS      = C3_ / 2^8 
+  C4_ = 7.8125E-3;       //  TCO      = C4_ / 2^7 
+  C5_ = 256;             //  Tref     = C5_ * 2^8 
+  C6_ = 1.1920928955E-7; //  TEMPSENS = C6_ / 2^23 
 }

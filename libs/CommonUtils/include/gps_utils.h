@@ -28,7 +28,7 @@ class GpsHelper{
 		~GpsHelper();
 
 		// To initialize the GPS
-		void InitializeGps(float wait_duration_sec);
+		bool InitializeGps(float wait_duration_sec);
 
 		// Useful function that can be used to read GPS data in a loop at the configured rate
 		// This function can be passed to a thread to update position and velocity data in thread safe way
