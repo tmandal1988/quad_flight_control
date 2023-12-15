@@ -6,5 +6,6 @@
 #define RAD2DEG			    57.2957795130823
 #define DEG2RAD 			0.0174532925199433
 #define G_SI 				9.80665
+#define SEA_LEVEL_PRESS_PA  101352.0
 
 #endif

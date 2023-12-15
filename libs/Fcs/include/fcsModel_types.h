@@ -5,7 +5,7 @@
 //
 // Model version                  : 1.91
 // Simulink Coder version         : 9.7 (R2022a) 13-Nov-2021
-// C/C++ source code generated on : Mon Nov 27 14:03:40 2023
+// C/C++ source code generated on : Thu Dec 14 12:33:05 2023
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM 7
@@ -106,8 +106,11 @@ struct busStateEstimate
   busGeodeticPos geodeticPos;
   std::array<real_T, 3> nedPos_m;
   std::array<real_T, 3> nedVel_mps;
+  std::array<real_T, 3> nedAccel_mps2;
   real_T pressure_mbar;
   real_T temp_c;
+  real_T aglEst_m;
+  real_T climbRateEst_mps;
   std::array<real_T, 9> ned2BodyDcm_nd;
   std::array<real_T, 9> ned2FepDcm_nd;
 };
@@ -221,6 +224,9 @@ struct busVelCtrlParams
   std::array<busPidParams, 3> ctrlParamsArray;
   std::array<busSignalConditioningParams, 3> cmdSignalConditioningParamsArray;
   std::array<busSignalConditioningParams, 3> measSignalConditioningParamsArray;
+  std::array<busSignalConditioningParams, 3> accelSignalConditioningParamsArray;
+  std::array<real_T, 3> accelFbGainsArray;
+  real_T baseMass_kg;
 };
 
 #endif
@@ -509,17 +515,6 @@ struct busPosCtrlInputs
 {
   std::array<busCtrlInputs, 3> ctrlInputsArray;
   busGeodeticPos originGeodeticPos;
-};
-
-#endif
-
-#ifndef DEFINED_TYPEDEF_FOR_struct_1y5k1ON29JoR6B63XHXJZD_
-#define DEFINED_TYPEDEF_FOR_struct_1y5k1ON29JoR6B63XHXJZD_
-
-struct struct_1y5k1ON29JoR6B63XHXJZD
-{
-  real_T mean_sea_level_pressure_pa;
-  std::array<real_T, 2> secondOrderFilterParams;
 };
 
 #endif

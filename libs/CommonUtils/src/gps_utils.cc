@@ -92,6 +92,7 @@ bool GpsHelper::InitializeGps(float wait_duration_sec){
 				if (!gps_3d_fix_){
 					cout<<"GPS 3D FIX OK\n"<<endl;
 				}
+				duration_count = 0;
 				gps_3d_fix_ = true;
 				// Increment the count that keeps track of how many valid 3D GPS fixes we have got so far
 				if (gps_fix_count_ <= n_valid_gps_count_)

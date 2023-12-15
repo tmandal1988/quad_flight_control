@@ -54,7 +54,17 @@ int main(int argc, char *argv[]){
 	imu_reader.InitializeImu();
 
 	BaroHelper baro_reader;
-	baro_reader.StartBaroReader(1, 20);
+	float baro_debug_data[9];
+	array<float, 3> baro_accel{0};
+	array<float, 3> baro_euler{0};
+	// baro_reader.SetComplimentaryFilterParams(0.005, 0.001);
+	baro_reader.SetKalmanFilterParams(array<float, 3> {100.0, 100.0, 100.0}, array<float, 3> {1e-6, 1e-6, 1e-6}, 
+										  array<float, 2>{0.01, 0.09});
+	baro_reader.StartBaroReader(1, 20);	
+	 // Mutex to guard resource access to baro data
+	mutex baro_out_mutex;
+	// usleep(400000);
+	// return 0;
 
 	RcInputHelper rc_reader(8);
 	rc_reader.InitializeRcInput();
@@ -121,7 +131,7 @@ int main(int argc, char *argv[]){
 	MatrixInv<float> current_state(15, 1);
   
   // Variable used in the measurement update of the EKF
-	MatrixInv<float> sensor_meas(11, 1);
+	MatrixInv<float> sensor_meas(20, 1);
 	// Sensor values used in the time propagation stage of the EKF
 	MatrixInv<float> state_sensor_val(6, 1);
 	
@@ -183,7 +193,7 @@ int main(int argc, char *argv[]){
   MahonyFilter m_filt(0.0, 2.0, dt_s, quat);	
 
 
-	bool gps_init_status = gps_reader.InitializeGps(30);
+	bool gps_init_status = gps_reader.InitializeGps(20);
 	if(!gps_init_status){
 		printf("EKF needs GPS, using Mahony filter for attitude computation. ONLY USE STABILIZE MODE\n");
 	}
@@ -268,6 +278,15 @@ int main(int argc, char *argv[]){
 	// long long loop_start_us;
 	bool is_mtr_armed = false;
 
+	// Intermediate trig variables for use in calculations
+	float s_phi;
+	float s_theta;
+	float s_psi;
+
+	float c_phi;
+	float c_theta;
+	float c_psi;
+
 	// loop
     while(1) {
     	/* Check if the current loop count is a multiple of 5 which will give a 50hz loop as main loop
@@ -286,16 +305,6 @@ int main(int argc, char *argv[]){
     	// Make all the measurement flags corresponding to position and velocity false
 			for( size_t idx_meas = 1; idx_meas < 7; idx_meas++ ){
     		meas_indices[idx_meas] = false;
-    	}
-
-    	// Read Baro data at 50 Hz
-    	if (fifty_hz_flag){
-					baro_reader.GetBaroPressAndTemp(baro_data);
-					sensor_meas(9) = baro_data[0];
-					sensor_meas(10) = baro_data[1];
-					stateEstimate_.pressure_mbar = baro_data[0];
-					stateEstimate_.temp_c = baro_data[1];
-					//printf("Pressure(millibar): %g, Temperature(C): %g\n", baro_data[0], baro_data[1]);
     	}
 
     	// Read IMU data
@@ -337,6 +346,68 @@ int main(int argc, char *argv[]){
     		// 	printf("Roll [deg]: %+7.3f, Pitch[deg]: %+7.3f, Yaw[deg]: %+7.3f\n", mh_euler[0]*180/3.14, mh_euler[1]*180/3.14, mh_euler[2]*180/3.14);
     		// }
     	}
+
+    	// Get NED to Body DCM
+      c_ned2b = GetDcm(current_state(0), current_state(1), current_state(2));
+
+      // //GET NED to FEP DCM
+      c_ned2fep = GetDcm(current_state(0), current_state(1), 0);
+
+    	// Read Baro data at 50 Hz
+    	if (fifty_hz_flag){
+    			unique_lock<mutex> baro_out_lock(baro_out_mutex);
+					baro_reader.GetBaroPressAndTemp(baro_data);
+					sensor_meas(9) = baro_data[0];
+					sensor_meas(10) = baro_data[1];
+					stateEstimate_.pressure_mbar = baro_data[0];
+					stateEstimate_.temp_c = baro_data[1];
+					// baro_reader.GetAglAndClimbRateEst(baro_data);
+					baro_reader.GetBaroDebugData(baro_debug_data);
+					for(size_t idx_b = 0; idx_b < 9; idx_b++){
+						sensor_meas(11 + idx_b) = baro_debug_data[idx_b];
+					}	
+					// sensor_meas(11) = baro_debug_data[6];
+					// sensor_meas(12) = baro_debug_data[7];
+					stateEstimate_.aglEst_m = baro_debug_data[6];
+					stateEstimate_.climbRateEst_mps = baro_debug_data[7];		
+
+					s_phi = sin(current_state(0));
+					s_theta = sin(current_state(1));
+					s_psi = sin(current_state(2));
+
+					c_phi = cos(current_state(0));
+					c_theta = cos(current_state(1));
+					c_psi = cos(current_state(2));
+
+					stateEstimate_.nedAccel_mps2[0] = imu_data[5]*(s_phi*s_psi + c_phi*c_psi*s_theta) - imu_data[4]*(c_phi*s_psi - 
+																						c_psi*s_phi*s_theta) + imu_data[3]*c_psi*c_theta;
+					stateEstimate_.nedAccel_mps2[1] = imu_data[4]*(c_phi*c_psi + s_phi*s_psi*s_theta) - imu_data[5]*(c_psi*s_phi - 
+																						c_phi*s_psi*s_theta) + imu_data[3]*c_theta*s_psi;
+					stateEstimate_.nedAccel_mps2[2] = -baro_debug_data[8];
+
+
+					if(gps_init_status){
+	    			baro_accel[0] = imu_data[3] - current_state(12);
+	    			baro_accel[1] = imu_data[4] - current_state(13);
+	    			baro_accel[2] = imu_data[5] - current_state(14);
+
+	    			baro_euler[0] = current_state(0);
+	    			baro_euler[1] = current_state(1);
+	    			baro_euler[2] = current_state(2);
+    			}else{      		
+
+	    			baro_accel[0] = imu_data[3];
+	    			baro_accel[1] = imu_data[4];
+	    			baro_accel[2] = imu_data[5];
+
+	    			baro_euler[0] = mh_euler[0];
+	    			baro_euler[1] = mh_euler[1];
+	    			baro_euler[2] = mh_euler[2];
+    			}
+    		baro_reader.SetBodyAccels(baro_accel);
+    		baro_reader.SetEulerAngles(baro_euler);						
+					// printf("Pressure(millibar): %g, Temperature(C): %g\n", baro_data[0], baro_data[1]);
+    	}
     	
       //########################################
       // Assign the state values to the model input structure
@@ -354,13 +425,6 @@ int main(int argc, char *argv[]){
       	stateEstimate_.nedPos_m[idx] = current_state(idx + 6);
       	stateEstimate_.nedVel_mps[idx] = current_state(idx + 9);
       }
-      
-
-      // Get NED to Body DCM
-      c_ned2b = GetDcm(current_state(0), current_state(1), current_state(2));
-
-      // //GET NED to FEP DCM
-      c_ned2fep = GetDcm(current_state(0), current_state(1), 0);
 
       for(size_t idx = 0; idx < 3; idx++){
       	for(size_t jdx = 0; jdx < 3; jdx++){
@@ -403,7 +467,7 @@ int main(int argc, char *argv[]){
 
 
      if(fifty_hz_flag){
-        	data_writer.UpdateDataBuffer(duration_count, loop_count, imu_data, sensor_meas, current_state, secondary_filter_debug, gps_meas_indices, rc_periods, ExtY_fcsModel_T_);
+        data_writer.UpdateDataBuffer(duration_count, loop_count, imu_data, sensor_meas, current_state, secondary_filter_debug, gps_meas_indices, rc_periods, ExtY_fcsModel_T_);
 	   }
 
 	    // if (remainder(loop_count, 50) == 0){

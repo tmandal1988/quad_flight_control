@@ -65,6 +65,16 @@ void WriteHelper::UpdateDataBuffer(long long dt_ms, size_t count, float* const& 
 			data_to_save1_[data_buff_idx1_].baro_data[0] = sensor_meas(9);
 			data_to_save1_[data_buff_idx1_].baro_data[1] = sensor_meas(10);
 
+			data_to_save1_[data_buff_idx1_].baro_data[2] = sensor_meas(11);
+			data_to_save1_[data_buff_idx1_].baro_data[3] = sensor_meas(12);
+			data_to_save1_[data_buff_idx1_].baro_data[4] = sensor_meas(13);
+			data_to_save1_[data_buff_idx1_].baro_data[5] = sensor_meas(14);
+			data_to_save1_[data_buff_idx1_].baro_data[6] = sensor_meas(15);
+			data_to_save1_[data_buff_idx1_].baro_data[7] = sensor_meas(16);
+			data_to_save1_[data_buff_idx1_].baro_data[8] = sensor_meas(17);
+			data_to_save1_[data_buff_idx1_].baro_data[9] = sensor_meas(18);
+			data_to_save1_[data_buff_idx1_].baro_data[10] = sensor_meas(19);
+
 			for(size_t d_idx = 0; d_idx < ekf_current_state.get_nrows(); d_idx++){
 				data_to_save1_[data_buff_idx1_].ekf_current_state[d_idx] = ekf_current_state(d_idx);
 			}
@@ -130,6 +140,16 @@ void WriteHelper::UpdateDataBuffer(long long dt_ms, size_t count, float* const& 
 
 			data_to_save2_[data_buff_idx2_].baro_data[0] = sensor_meas(9);
 			data_to_save2_[data_buff_idx2_].baro_data[1] = sensor_meas(10);
+
+			data_to_save2_[data_buff_idx2_].baro_data[2] = sensor_meas(11);
+			data_to_save2_[data_buff_idx2_].baro_data[3] = sensor_meas(12);
+			data_to_save2_[data_buff_idx2_].baro_data[4] = sensor_meas(13);
+			data_to_save2_[data_buff_idx2_].baro_data[5] = sensor_meas(14);
+			data_to_save2_[data_buff_idx2_].baro_data[6] = sensor_meas(15);
+			data_to_save2_[data_buff_idx2_].baro_data[7] = sensor_meas(16);
+			data_to_save2_[data_buff_idx2_].baro_data[8] = sensor_meas(17);
+			data_to_save2_[data_buff_idx2_].baro_data[9] = sensor_meas(18);
+			data_to_save2_[data_buff_idx2_].baro_data[10] = sensor_meas(19);
 
 			for(size_t d_idx = 0; d_idx < ekf_current_state.get_nrows(); d_idx++){
 				data_to_save2_[data_buff_idx2_].ekf_current_state[d_idx] = ekf_current_state(d_idx);

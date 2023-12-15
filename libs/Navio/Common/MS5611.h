@@ -67,7 +67,6 @@ class MS5611 {
 	    MS5611(uint8_t address = MS5611_DEFAULT_ADDRESS);
 
         void initialize();
-        void initConstants();
         bool testConnection();
 
 	    void refreshPressure(uint8_t OSR = MS5611_RA_D1_OSR_1024);
@@ -85,7 +84,6 @@ class MS5611 {
     private:
 	    uint8_t devAddr; // I2C device adress
 	    uint16_t C1, C2, C3, C4, C5, C6; // Calibration data
-	    float C1_, C2_, C3_, C4_, C5_, C6_; // Float Calibration data
 	    uint32_t D1, D2; // Raw measurement data
 	    float TEMP; // Calculated temperature
 	    float PRES; // Calculated pressure
