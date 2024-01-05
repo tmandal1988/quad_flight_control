@@ -3,9 +3,9 @@
 //
 // Code generated for Simulink model 'fcsModel'.
 //
-// Model version                  : 1.91
+// Model version                  : 1.99
 // Simulink Coder version         : 9.7 (R2022a) 13-Nov-2021
-// C/C++ source code generated on : Thu Dec 14 12:33:05 2023
+// C/C++ source code generated on : Thu Jan  4 16:21:26 2024
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM 7
@@ -40,9 +40,10 @@ enum class enumStateMachine
 // Defines the flight mode in use
 enum class enumFlightMode
   : int32_T {
-  ACRO = 0,                            // Default value
-  STABILIZE,
-  ALT_CONTROL
+  ACRO = 0,
+  STABILIZE,                           // Default value
+  ALT_CONTROL,
+  POS_CONTROL
 };
 
 #endif
@@ -227,6 +228,7 @@ struct busVelCtrlParams
   std::array<busSignalConditioningParams, 3> accelSignalConditioningParamsArray;
   std::array<real_T, 3> accelFbGainsArray;
   real_T baseMass_kg;
+  std::array<real_T, 2> accelCmdToAttitudeCmdScale_nd;
 };
 
 #endif
@@ -565,10 +567,10 @@ struct struct_bSGttGVktiVsoVvrNEqEKH
 
 #endif
 
-#ifndef DEFINED_TYPEDEF_FOR_struct_dSuMXx0ZbQPg3ecb8q1VK_
-#define DEFINED_TYPEDEF_FOR_struct_dSuMXx0ZbQPg3ecb8q1VK_
+#ifndef DEFINED_TYPEDEF_FOR_struct_Xq4y7UEUBgmlZe4NILRngF_
+#define DEFINED_TYPEDEF_FOR_struct_Xq4y7UEUBgmlZe4NILRngF_
 
-struct struct_dSuMXx0ZbQPg3ecb8q1VK
+struct struct_Xq4y7UEUBgmlZe4NILRngF
 {
   struct_mmIgzrMBPVhvIbVLm0lB6F cmdLimits;
   std::array<real_T, 2> pwmLimits;
@@ -576,6 +578,12 @@ struct struct_dSuMXx0ZbQPg3ecb8q1VK
   real_T pwmThrottleMid;
   real_T pwmThrottleMidHigh;
   real_T pwmThrottleMidLow;
+  real_T pwmRollStickMidHigh;
+  real_T pwmRollStickMidLow;
+  real_T pwmPitchStickMidHigh;
+  real_T pwmPitchStickMidLow;
+  real_T pwmYawStickMidHigh;
+  real_T pwmYawStickMidLow;
   real_T pwmToCmdThrottleSlopeLow;
   real_T pwmToCmdThrottleIncptLow;
   real_T pwmToCmdThrottleSlopeHigh;

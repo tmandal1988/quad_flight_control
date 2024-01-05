@@ -30,7 +30,7 @@
 #include <iterator>
 
 /**************************Flags to use EKF or/and Mahony*******************************/
-bool use_mahony_filter = true;
+bool use_mahony_filter = false;
 bool use_ekf = true;
 /**************************Flags to use EKF or/and Mahony*******************************/
 
@@ -57,14 +57,11 @@ int main(int argc, char *argv[]){
 	float baro_debug_data[9];
 	array<float, 3> baro_accel{0};
 	array<float, 3> baro_euler{0};
-	// baro_reader.SetComplimentaryFilterParams(0.005, 0.001);
 	baro_reader.SetKalmanFilterParams(array<float, 3> {100.0, 100.0, 100.0}, array<float, 3> {1e-6, 1e-6, 1e-6}, 
 										  array<float, 2>{0.01, 0.09});
 	baro_reader.StartBaroReader(1, 20);	
 	 // Mutex to guard resource access to baro data
 	mutex baro_out_mutex;
-	// usleep(400000);
-	// return 0;
 
 	RcInputHelper rc_reader(8);
 	rc_reader.InitializeRcInput();
@@ -195,6 +192,7 @@ int main(int argc, char *argv[]){
 
 	bool gps_init_status = gps_reader.InitializeGps(20);
 	if(!gps_init_status){
+		use_mahony_filter = true;
 		printf("EKF needs GPS, using Mahony filter for attitude computation. ONLY USE STABILIZE MODE\n");
 	}
 	gps_reader.CreateGpsThread();
@@ -289,16 +287,18 @@ int main(int argc, char *argv[]){
 
 	// loop
     while(1) {
+    	loop_count++;
+
     	/* Check if the current loop count is a multiple of 5 which will give a 50hz loop as main loop
     	runs at 250Hz
     	*/
-    	if(remainder(loop_count, 5) == 0){
+    	if(loop_count % 25 == 0){
     		fifty_hz_flag = true;
     	}else{
     		fifty_hz_flag = false;
     	}
 
-    	/* With till dt_countus has passed
+    	/* Get loop start time
     	*/
     	loop_start = chrono::high_resolution_clock::now();
 
@@ -310,6 +310,7 @@ int main(int argc, char *argv[]){
     	// Read IMU data
 	    imu_data = imu_reader.GetImuData();
 
+	    // Read GPS data
 	    gps_reader.GetRawLatLonAlt(raw_lat_lon_alt);
 		  gps_reader.GetGpsNedPosAndVel(ned_pos_and_vel_meas, gps_meas_indices);
 
@@ -321,7 +322,7 @@ int main(int argc, char *argv[]){
 		    	sensor_meas(imu_idx) =  imu_data[imu_idx + 6];
 		    }
 		    
-		    // Check if GPS position and velocity has been update and set appropriate flags
+		    // Check if GPS position and velocity has been updated and set appropriate flags
 		    for(size_t idx_meas = 0; idx_meas < 6; idx_meas++){
 		    	if(gps_meas_indices[idx_meas]){
 		    		sensor_meas(idx_meas + 3) = ned_pos_and_vel_meas[idx_meas];
@@ -342,9 +343,6 @@ int main(int argc, char *argv[]){
     		secondary_filter_debug(0) = mh_euler[0];
     		secondary_filter_debug(1) = mh_euler[1];
     		secondary_filter_debug(2) = mh_euler[2];
-    		// if (fifty_hz_flag){
-    		// 	printf("Roll [deg]: %+7.3f, Pitch[deg]: %+7.3f, Yaw[deg]: %+7.3f\n", mh_euler[0]*180/3.14, mh_euler[1]*180/3.14, mh_euler[2]*180/3.14);
-    		// }
     	}
 
     	// Get NED to Body DCM
@@ -355,22 +353,22 @@ int main(int argc, char *argv[]){
 
     	// Read Baro data at 50 Hz
     	if (fifty_hz_flag){
-    			unique_lock<mutex> baro_out_lock(baro_out_mutex);
-					baro_reader.GetBaroPressAndTemp(baro_data);
+    			{
+    				unique_lock<mutex> baro_out_lock(baro_out_mutex);
+						baro_reader.GetBaroPressAndTemp(baro_data);
+						baro_reader.GetBaroDebugData(baro_debug_data);
+					}
 					sensor_meas(9) = baro_data[0];
 					sensor_meas(10) = baro_data[1];
 					stateEstimate_.pressure_mbar = baro_data[0];
-					stateEstimate_.temp_c = baro_data[1];
-					// baro_reader.GetAglAndClimbRateEst(baro_data);
-					baro_reader.GetBaroDebugData(baro_debug_data);
+					stateEstimate_.temp_c = baro_data[1];					
 					for(size_t idx_b = 0; idx_b < 9; idx_b++){
 						sensor_meas(11 + idx_b) = baro_debug_data[idx_b];
 					}	
-					// sensor_meas(11) = baro_debug_data[6];
-					// sensor_meas(12) = baro_debug_data[7];
 					stateEstimate_.aglEst_m = baro_debug_data[6];
 					stateEstimate_.climbRateEst_mps = baro_debug_data[7];		
 
+					// Compute NED accels
 					s_phi = sin(current_state(0));
 					s_theta = sin(current_state(1));
 					s_psi = sin(current_state(2));
@@ -404,9 +402,11 @@ int main(int argc, char *argv[]){
 	    			baro_euler[1] = mh_euler[1];
 	    			baro_euler[2] = mh_euler[2];
     			}
-    		baro_reader.SetBodyAccels(baro_accel);
-    		baro_reader.SetEulerAngles(baro_euler);						
-					// printf("Pressure(millibar): %g, Temperature(C): %g\n", baro_data[0], baro_data[1]);
+    			{
+    				unique_lock<mutex> baro_out_lock(baro_out_mutex);
+    				baro_reader.SetBodyAccels(baro_accel);
+    				baro_reader.SetEulerAngles(baro_euler);		
+    			}				
     	}
     	
       //########################################
@@ -419,9 +419,7 @@ int main(int argc, char *argv[]){
       		stateEstimate_.attitude_rad[idx] = mh_euler[idx];
       		stateEstimate_.bodyAngRates_radps[idx] = imu_data[idx] - gyro_offset[idx];
       	}
-      	//
-      	// stateEstimate_.bodyAngRates_radps[idx] = ( state_sensor_val(idx) - current_state(idx + 3) );
-      	// stateEstimate_.bodyAngRates_radps[idx] = imu_data[idx] - gyro_offset[idx];
+ 
       	stateEstimate_.nedPos_m[idx] = current_state(idx + 6);
       	stateEstimate_.nedVel_mps[idx] = current_state(idx + 9);
       }
@@ -482,67 +480,26 @@ int main(int argc, char *argv[]){
 		// }
 
 		if(static_cast<uint8_t>(ExtY_fcsModel_T_.fcsDebug.state) != 0){
-			// if(!is_mtr_armed){
-			// 	//Bump up the throttle pwm and then bump down the throttle
-			// 	pwm_out_val[0] = static_cast<float>(PWM_CHECK_MIN_THRESHOLD*1.0);
-			// 	pwm_out_val[1] = static_cast<float>(PWM_CHECK_MIN_THRESHOLD*1.0);
-			// 	pwm_out_val[2] = static_cast<float>(PWM_CHECK_MIN_THRESHOLD*1.0);
-			// 	pwm_out_val[3] = static_cast<float>(PWM_CHECK_MIN_THRESHOLD*1.0);
-			// 	arm_loop_count += 1;
-			// 	//Check for a second
-			// 	if(remainder(arm_loop_count, 250) == 0){
-			// 		pwm_out_val[0] = static_cast<float>(PWM_CMD_MIN_THRESHOLD*1.0);
-			// 		pwm_out_val[1] = static_cast<float>(PWM_CMD_MIN_THRESHOLD*1.0);
-			// 		pwm_out_val[2] = static_cast<float>(PWM_CMD_MIN_THRESHOLD*1.0);
-			// 		pwm_out_val[3] = static_cast<float>(PWM_CMD_MIN_THRESHOLD*1.0);
-			// 		is_mtr_armed = true;
-			// 	}
-			// }else{
-			// 	arm_loop_count = 0;
 				if(rcCmdsIn_.throttleCmd_nd <= PWM_CHECK_MIN_THRESHOLD){
 					pwm_out_val[0] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
 					pwm_out_val[1] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
 					pwm_out_val[2] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
 					pwm_out_val[3] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
-					// printf("%d\n",rcCmdsIn_.throttleCmd_nd);
 				}else{
-					// pwm_out_val[0] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
-					// pwm_out_val[1] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
-					// pwm_out_val[2] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
-					// pwm_out_val[3] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
-					// printf("###############################\n");
-					// printf("%g, %g, %g, %g\n",pwm_out_val[0], pwm_out_val[1], pwm_out_val[2], pwm_out_val[3]);
-					// printf("###############################\n");
 			  	pwm_out_val[0] = max(PWM_CMD_MIN_THRESHOLD, min(PWM_CMD_MAX_THRESHOLD, ExtY_fcsModel_T_.actuatorsCmds[0]*RPM_TO_PWM_SCALE + PWM_MIN_THRESHOLD));
 			  	pwm_out_val[1] = max(PWM_CMD_MIN_THRESHOLD, min(PWM_CMD_MAX_THRESHOLD, ExtY_fcsModel_T_.actuatorsCmds[3]*RPM_TO_PWM_SCALE + PWM_MIN_THRESHOLD));
 			  	pwm_out_val[2] = max(PWM_CMD_MIN_THRESHOLD, min(PWM_CMD_MAX_THRESHOLD, ExtY_fcsModel_T_.actuatorsCmds[1]*RPM_TO_PWM_SCALE + PWM_MIN_THRESHOLD));
 			  	pwm_out_val[3] = max(PWM_CMD_MIN_THRESHOLD, min(PWM_CMD_MAX_THRESHOLD, ExtY_fcsModel_T_.actuatorsCmds[2]*RPM_TO_PWM_SCALE + PWM_MIN_THRESHOLD));
 				}
-			// }
 		}else{
-				// is_mtr_armed = false;
-				// arm_loop_count = 0;
-				// pwm_out_val[0] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
-				// pwm_out_val[1] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
-				// pwm_out_val[2] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
-				// pwm_out_val[3] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
 				pwm_out_val[0] = static_cast<float>(PWM_MIN_THRESHOLD*1.0);
 		  	pwm_out_val[1] = static_cast<float>(PWM_MIN_THRESHOLD*1.0);
 		  	pwm_out_val[2] = static_cast<float>(PWM_MIN_THRESHOLD*1.0);
 		  	pwm_out_val[3] = static_cast<float>(PWM_MIN_THRESHOLD*1.0);
 		}
-	  // if (remainder(loop_count, 50) == 0){
-	  // 	printf("%g, %g, %g, %g\n", ExtY_fcsModel_T_.actuatorsCmds[0], ExtY_fcsModel_T_.actuatorsCmds[1], ExtY_fcsModel_T_.actuatorsCmds[2], ExtY_fcsModel_T_.actuatorsCmds[3]);
-	  // 	// printf("%g, %g, %g, %g\n", pwm_out_val[0], pwm_out_val[1], pwm_out_val[2], pwm_out_val[3]);
-	  // }
 
-	  // if(ExtY_fcsModel_T_.actuatorsCmds[0] > 1.0 && ExtY_fcsModel_T_.actuatorsCmds[1] > 1.0 && ExtY_fcsModel_T_.actuatorsCmds[2] > 1.0 &&
-	  // 	ExtY_fcsModel_T_.actuatorsCmds[3] > 1.0 ){
-		// if(pwm_out_val[0] >= 800.0){
-	  	pwm_writer.SetPwmDutyCyle(pwm_out_val);
-		// }
+	  pwm_writer.SetPwmDutyCyle(pwm_out_val);
 
-		loop_count++;
 
     // Get the stop time and compute the duration
     loop_end = std::chrono::high_resolution_clock::now();
@@ -551,9 +508,7 @@ int main(int argc, char *argv[]){
     while(duration_count < dt_count){
     	duration_count = chrono::duration_cast<chrono::microseconds>(std::chrono::high_resolution_clock::now() - loop_start).count();
     }
-    // duration_count = duration.count();
-    // time_start_us_count = time_start_us_count + dt_count;
-   	//cout<<loop_count<<"\n";
+
    	if(sigint_flag == 1)
    		break;
 	}
