@@ -170,7 +170,7 @@ void BaroHelper::BaroReadLoopKalmanFilter(){
 	auto duration = chrono::duration_cast<chrono::microseconds> (delta);
 	auto duration_count = duration.count();
 
-	array< array<float, 3>, 3> p_cov_temp = {0};
+	array< array<float, 3>, 3> p_cov_tmp = {0};
 	float agl_est_tmp_m = 0;
 	float veh_ned_az_est_tmp_mps2 = 0;
 	float climb_rate_est_tmp_mps = 0;
@@ -206,47 +206,47 @@ void BaroHelper::BaroReadLoopKalmanFilter(){
 
 			// Update the covariance matrix
 			// 1 row
-			p_cov_temp[0][0] = p_cov_[0][0] + proc_noise_[0][0] + p_cov_[2][0]*sample_time_s_ + sample_time_s_*(p_cov_[0][2] + 
+			p_cov_tmp[0][0] = p_cov_[0][0] + proc_noise_[0][0] + p_cov_[2][0]*sample_time_s_ + sample_time_s_*(p_cov_[0][2] + 
 							   p_cov_[2][2]*sample_time_s_ + (p_cov_[1][2]*sample_time_s_sq)*0.5) + (p_cov_[1][0]*sample_time_s_sq)*0.5 + 
 							   (sample_time_s_sq*(p_cov_[0][1] + p_cov_[2][1]*sample_time_s_ + (p_cov_[1][1]*sample_time_s_sq)*0.5))*0.5;
 
-			p_cov_temp[0][1] = p_cov_[0][1] + p_cov_[2][1]*sample_time_s_ + (p_cov_[1][1]*sample_time_s_sq)*0.5;
+			p_cov_tmp[0][1] = p_cov_[0][1] + p_cov_[2][1]*sample_time_s_ + (p_cov_[1][1]*sample_time_s_sq)*0.5;
 
-			p_cov_temp[0][2] = p_cov_[0][2] + p_cov_[2][2]*sample_time_s_ + sample_time_s_*(p_cov_[0][1] + p_cov_[2][1]*sample_time_s_ + 
+			p_cov_tmp[0][2] = p_cov_[0][2] + p_cov_[2][2]*sample_time_s_ + sample_time_s_*(p_cov_[0][1] + p_cov_[2][1]*sample_time_s_ + 
 							   (p_cov_[1][1]*sample_time_s_sq)*0.5) + (p_cov_[1][2]*sample_time_s_sq)*0.5;
 			// 2 row
-			p_cov_temp[1][0] = p_cov_[1][0] + p_cov_[1][2]*sample_time_s_ + (p_cov_[1][1]*sample_time_s_sq)*0.5;
-			p_cov_temp[1][1] = p_cov_[1][1] + proc_noise_[1][1];
-			p_cov_temp[1][2] = p_cov_[1][2] + p_cov_[1][1]*sample_time_s_;
+			p_cov_tmp[1][0] = p_cov_[1][0] + p_cov_[1][2]*sample_time_s_ + (p_cov_[1][1]*sample_time_s_sq)*0.5;
+			p_cov_tmp[1][1] = p_cov_[1][1] + proc_noise_[1][1];
+			p_cov_tmp[1][2] = p_cov_[1][2] + p_cov_[1][1]*sample_time_s_;
 			// 3 row
-			p_cov_temp[2][0] = p_cov_[2][0] + (sample_time_s_sq*(p_cov_[2][1] + p_cov_[1][1]*sample_time_s_))*0.5 + p_cov_[1][0]*sample_time_s_ + 
+			p_cov_tmp[2][0] = p_cov_[2][0] + (sample_time_s_sq*(p_cov_[2][1] + p_cov_[1][1]*sample_time_s_))*0.5 + p_cov_[1][0]*sample_time_s_ + 
 							   sample_time_s_*(p_cov_[2][2] + p_cov_[1][2]*sample_time_s_);
-			p_cov_temp[2][1] = p_cov_[2][1] + p_cov_[1][1]*sample_time_s_;
-			p_cov_temp[2][2] = p_cov_[2][2] + proc_noise_[2][2] + p_cov_[1][2]*sample_time_s_ + sample_time_s_*(p_cov_[2][1] + p_cov_[1][1]*sample_time_s_);
+			p_cov_tmp[2][1] = p_cov_[2][1] + p_cov_[1][1]*sample_time_s_;
+			p_cov_tmp[2][2] = p_cov_[2][2] + proc_noise_[2][2] + p_cov_[1][2]*sample_time_s_ + sample_time_s_*(p_cov_[2][1] + p_cov_[1][1]*sample_time_s_);
 
 			// Compute Kalman Gain
 			// 1 row
-			k_gain_[0][0] = (p_cov_temp[0][0]*meas_noise_[1][1] + p_cov_temp[0][0]*p_cov_temp[1][1] - p_cov_temp[0][1]*p_cov_temp[1][0])/
-							(p_cov_temp[0][0]*meas_noise_[1][1] + p_cov_temp[1][1]*meas_noise_[0][0] + meas_noise_[0][0]*meas_noise_[1][1] + 
-							p_cov_temp[0][0]*p_cov_temp[1][1] - p_cov_temp[0][1]*p_cov_temp[1][0]);
+			k_gain_[0][0] = (p_cov_tmp[0][0]*meas_noise_[1][1] + p_cov_tmp[0][0]*p_cov_tmp[1][1] - p_cov_tmp[0][1]*p_cov_tmp[1][0])/
+							(p_cov_tmp[0][0]*meas_noise_[1][1] + p_cov_tmp[1][1]*meas_noise_[0][0] + meas_noise_[0][0]*meas_noise_[1][1] + 
+							p_cov_tmp[0][0]*p_cov_tmp[1][1] - p_cov_tmp[0][1]*p_cov_tmp[1][0]);
 
-			k_gain_[0][1] = (p_cov_temp[0][1]*meas_noise_[0][0])/(p_cov_temp[0][0]*meas_noise_[1][1] + p_cov_temp[1][1]*meas_noise_[0][0] + 
-							meas_noise_[0][0]*meas_noise_[1][1] + p_cov_temp[0][0]*p_cov_temp[1][1] - p_cov_temp[0][1]*p_cov_temp[1][0]);
+			k_gain_[0][1] = (p_cov_tmp[0][1]*meas_noise_[0][0])/(p_cov_tmp[0][0]*meas_noise_[1][1] + p_cov_tmp[1][1]*meas_noise_[0][0] + 
+							meas_noise_[0][0]*meas_noise_[1][1] + p_cov_tmp[0][0]*p_cov_tmp[1][1] - p_cov_tmp[0][1]*p_cov_tmp[1][0]);
 			// 2 row
-			k_gain_[1][0] = (p_cov_temp[1][0]*meas_noise_[1][1])/(p_cov_temp[0][0]*meas_noise_[1][1] + p_cov_temp[1][1]*meas_noise_[0][0] + 
-							meas_noise_[0][0]*meas_noise_[1][1] + p_cov_temp[0][0]*p_cov_temp[1][1] - p_cov_temp[0][1]*p_cov_temp[1][0]);
+			k_gain_[1][0] = (p_cov_tmp[1][0]*meas_noise_[1][1])/(p_cov_tmp[0][0]*meas_noise_[1][1] + p_cov_tmp[1][1]*meas_noise_[0][0] + 
+							meas_noise_[0][0]*meas_noise_[1][1] + p_cov_tmp[0][0]*p_cov_tmp[1][1] - p_cov_tmp[0][1]*p_cov_tmp[1][0]);
 
-			k_gain_[1][1] = (p_cov_temp[1][1]*meas_noise_[0][0] + p_cov_temp[0][0]*p_cov_temp[1][1] - p_cov_temp[0][1]*p_cov_temp[1][0])/
-							(p_cov_temp[0][0]*meas_noise_[1][1] + p_cov_temp[1][1]*meas_noise_[0][0] + meas_noise_[0][0]*meas_noise_[1][1] + 
-							p_cov_temp[0][0]*p_cov_temp[1][1] - p_cov_temp[0][1]*p_cov_temp[1][0]);
+			k_gain_[1][1] = (p_cov_tmp[1][1]*meas_noise_[0][0] + p_cov_tmp[0][0]*p_cov_tmp[1][1] - p_cov_tmp[0][1]*p_cov_tmp[1][0])/
+							(p_cov_tmp[0][0]*meas_noise_[1][1] + p_cov_tmp[1][1]*meas_noise_[0][0] + meas_noise_[0][0]*meas_noise_[1][1] + 
+							p_cov_tmp[0][0]*p_cov_tmp[1][1] - p_cov_tmp[0][1]*p_cov_tmp[1][0]);
 			// 3 row
-			k_gain_[2][0] = (p_cov_temp[2][0]*meas_noise_[1][1] - p_cov_temp[1][0]*p_cov_temp[2][1] + p_cov_temp[1][1]*p_cov_temp[2][0])/
-							(p_cov_temp[0][0]*meas_noise_[1][1] + p_cov_temp[1][1]*meas_noise_[0][0] + meas_noise_[0][0]*meas_noise_[1][1] +
-							p_cov_temp[0][0]*p_cov_temp[1][1] - p_cov_temp[0][1]*p_cov_temp[1][0]);
+			k_gain_[2][0] = (p_cov_tmp[2][0]*meas_noise_[1][1] - p_cov_tmp[1][0]*p_cov_tmp[2][1] + p_cov_tmp[1][1]*p_cov_tmp[2][0])/
+							(p_cov_tmp[0][0]*meas_noise_[1][1] + p_cov_tmp[1][1]*meas_noise_[0][0] + meas_noise_[0][0]*meas_noise_[1][1] +
+							p_cov_tmp[0][0]*p_cov_tmp[1][1] - p_cov_tmp[0][1]*p_cov_tmp[1][0]);
 
-			k_gain_[2][1] = (p_cov_temp[2][1]*meas_noise_[0][0] + p_cov_temp[0][0]*p_cov_temp[2][1] - p_cov_temp[0][1]*p_cov_temp[2][0])/
-							(p_cov_temp[0][0]*meas_noise_[1][1] + p_cov_temp[1][1]*meas_noise_[0][0] + meas_noise_[0][0]*meas_noise_[1][1] + 
-							p_cov_temp[0][0]*p_cov_temp[1][1] - p_cov_temp[0][1]*p_cov_temp[1][0]);
+			k_gain_[2][1] = (p_cov_tmp[2][1]*meas_noise_[0][0] + p_cov_tmp[0][0]*p_cov_tmp[2][1] - p_cov_tmp[0][1]*p_cov_tmp[2][0])/
+							(p_cov_tmp[0][0]*meas_noise_[1][1] + p_cov_tmp[1][1]*meas_noise_[0][0] + meas_noise_[0][0]*meas_noise_[1][1] + 
+							p_cov_tmp[0][0]*p_cov_tmp[1][1] - p_cov_tmp[0][1]*p_cov_tmp[1][0]);
 
 			// Update states
 			// 1 row
@@ -263,17 +263,17 @@ void BaroHelper::BaroReadLoopKalmanFilter(){
 			// Update covariance Matrix
 			// 1 row
 
-			p_cov_[0][0] = - p_cov_temp[0][0]*(k_gain_[0][0] - 1) - k_gain_[0][1]*p_cov_temp[1][0];
-			p_cov_[0][1] = - p_cov_temp[0][1]*(k_gain_[0][0] - 1) - k_gain_[0][1]*p_cov_temp[1][1];
-			p_cov_[0][2] = - p_cov_temp[0][2]*(k_gain_[0][0] - 1) - k_gain_[0][1]*p_cov_temp[1][2];
+			p_cov_[0][0] = - p_cov_tmp[0][0]*(k_gain_[0][0] - 1) - k_gain_[0][1]*p_cov_tmp[1][0];
+			p_cov_[0][1] = - p_cov_tmp[0][1]*(k_gain_[0][0] - 1) - k_gain_[0][1]*p_cov_tmp[1][1];
+			p_cov_[0][2] = - p_cov_tmp[0][2]*(k_gain_[0][0] - 1) - k_gain_[0][1]*p_cov_tmp[1][2];
 			// 2 row
-			p_cov_[1][0] = - p_cov_temp[1][0]*(k_gain_[1][1] - 1) - k_gain_[1][0]*p_cov_temp[0][0];
-			p_cov_[1][1] = - p_cov_temp[1][1]*(k_gain_[1][1] - 1) - k_gain_[1][0]*p_cov_temp[0][1];
-			p_cov_[1][2] = - p_cov_temp[1][2]*(k_gain_[1][1] - 1) - k_gain_[1][0]*p_cov_temp[0][2];
+			p_cov_[1][0] = - p_cov_tmp[1][0]*(k_gain_[1][1] - 1) - k_gain_[1][0]*p_cov_tmp[0][0];
+			p_cov_[1][1] = - p_cov_tmp[1][1]*(k_gain_[1][1] - 1) - k_gain_[1][0]*p_cov_tmp[0][1];
+			p_cov_[1][2] = - p_cov_tmp[1][2]*(k_gain_[1][1] - 1) - k_gain_[1][0]*p_cov_tmp[0][2];
 			// 3 row
-			p_cov_[2][0] = p_cov_temp[2][0] - k_gain_[2][0]*p_cov_temp[0][0] - k_gain_[2][1]*p_cov_temp[1][0];
-			p_cov_[2][1] = p_cov_temp[2][1] - k_gain_[2][0]*p_cov_temp[0][1] - k_gain_[2][1]*p_cov_temp[1][1];
-			p_cov_[2][2] = p_cov_temp[2][2] - k_gain_[2][0]*p_cov_temp[0][2] - k_gain_[2][1]*p_cov_temp[1][2];
+			p_cov_[2][0] = p_cov_tmp[2][0] - k_gain_[2][0]*p_cov_tmp[0][0] - k_gain_[2][1]*p_cov_tmp[1][0];
+			p_cov_[2][1] = p_cov_tmp[2][1] - k_gain_[2][0]*p_cov_tmp[0][1] - k_gain_[2][1]*p_cov_tmp[1][1];
+			p_cov_[2][2] = p_cov_tmp[2][2] - k_gain_[2][0]*p_cov_tmp[0][2] - k_gain_[2][1]*p_cov_tmp[1][2];
 
 	        // Do zero velocity update
 	        zupt_array[z_idx] = abs(veh_ned_az_mps2);

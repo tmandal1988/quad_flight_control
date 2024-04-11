@@ -3,9 +3,9 @@
 //
 // Code generated for Simulink model 'fcsModel'.
 //
-// Model version                  : 1.99
+// Model version                  : 1.100
 // Simulink Coder version         : 9.7 (R2022a) 13-Nov-2021
-// C/C++ source code generated on : Thu Jan  4 16:21:26 2024
+// C/C++ source code generated on : Mon Apr  8 11:00:11 2024
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM 7
@@ -57,12 +57,12 @@ const fcsModel::ConstP_fcsModel_T fcsModel_ConstP{
   // Expression: allocationDataStruct.allocationMatrix
   //  Referenced by: '<S1>/Constant'
 
-  { { -3333.8478425990475, -3333.8478425990484, -3333.8478425990484,
-      -3333.8478425990484, 16262.67240264774, -16262.67240264774,
-      -16262.67240264774, 16262.67240264774, 14686.554372817332,
-      14686.554372817332, -14686.554372817332, -14686.554372817332,
-      -61251.797633172762, 61251.797633172762, -61251.797633172762,
-      61251.797633172762 } },
+  { { -18260.93139809632, -18260.931398096309, -18260.931398096312,
+      -18260.931398096312, 89077.714137205781, -89077.71413720581,
+      -89077.714137205781, 89077.7141372058, 80444.631708577974,
+      80444.631708577959, -80444.631708577988, -80444.631708577974,
+      -152414.0730882342, 152414.0730882342, -152414.0730882342,
+      152414.07308823423 } },
 
   // Expression: vehicleConstants.inertia_kgm2
   //  Referenced by: '<S2>/Constant'

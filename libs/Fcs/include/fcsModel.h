@@ -3,9 +3,9 @@
 //
 // Code generated for Simulink model 'fcsModel'.
 //
-// Model version                  : 1.99
+// Model version                  : 1.100
 // Simulink Coder version         : 9.7 (R2022a) 13-Nov-2021
-// C/C++ source code generated on : Thu Jan  4 16:21:26 2024
+// C/C++ source code generated on : Mon Apr  8 11:00:11 2024
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM 7
@@ -22,6 +22,7 @@
 #include <array>
 
 // External data declarations for dependent source files
+extern const busZaccelCtrlDebug fcsModel_rtZbusZaccelCtrlDebug;// busZaccelCtrlDebug ground 
 extern const busFcsDebug fcsModel_rtZbusFcsDebug;// busFcsDebug ground
 
 // Class declaration for model fcsModel
@@ -47,6 +48,7 @@ class fcsModel final
     real_T UnitDelay_DSTATE;           // '<S13>/Unit Delay'
     real_T UnitDelay1_DSTATE;          // '<S13>/Unit Delay1'
     int8_T DiscreteTimeIntegrator_PrevRese;// '<S13>/Discrete-Time Integrator'
+    uint8_T DiscreteTimeIntegrator_IC_LOADI;// '<S13>/Discrete-Time Integrator'
   };
 
   // Block signals and states (default storage) for system '<S10>/Signal Conditioning Block1' 
@@ -90,6 +92,7 @@ class fcsModel final
     real_T UnitDelay_DSTATE;           // '<S119>/Unit Delay'
     real_T UnitDelay1_DSTATE;          // '<S119>/Unit Delay1'
     int8_T DiscreteTimeIntegrator_PrevRese;// '<S119>/Discrete-Time Integrator'
+    uint8_T DiscreteTimeIntegrator_IC_LOADI;// '<S119>/Discrete-Time Integrator' 
   };
 
   // Block signals and states (default storage) for system '<S103>/Signal Conditioning Block1' 
@@ -139,6 +142,7 @@ class fcsModel final
     uint16_T temporalCounter_i1;       // '<S4>/Chart'
     uint8_T is_active_c1_rcInterpreter;// '<S4>/Chart'
     uint8_T is_c1_rcInterpreter;       // '<S4>/Chart'
+    boolean_T throttle_is_up;          // '<S4>/Interpret RC In Cmds'
     boolean_T rcCheckFlag;             // '<S4>/Chart'
   };
 
@@ -254,10 +258,11 @@ class fcsModel final
     rtp_sampleTime_s, DW_DiscreteFirstOrderDerivFil_T *localDW);
 
   // private member function(s) for subsystem '<S10>/pidWithDebug'
+  static void fcsModel_pidWithDebug_Init(DW_pidWithDebug_fcsModel_T *localDW);
   static void fcsModel_pidWithDebug(real_T rtu_feedForward, real_T rtu_cmd,
-    real_T rtu_meas, boolean_T rtu_integratorReset, const busPidParams
-    *rtu_pidParamBus, real_T rtu_trackingCtrlCmd, real_T *rty_ctrlCmd,
-    busPidDebug *rty_pidDebug, real_T rtp_sampleTime_s,
+    real_T rtu_meas, boolean_T rtu_integratorReset, real_T rtu_integratorIc,
+    const busPidParams *rtu_pidParamBus, real_T rtu_trackingCtrlCmd, real_T
+    *rty_ctrlCmd, busPidDebug *rty_pidDebug, real_T rtp_sampleTime_s,
     DW_pidWithDebug_fcsModel_T *localDW);
 
   // private member function(s) for subsystem '<S29>/Compute Natural Frequency'
@@ -289,10 +294,11 @@ class fcsModel final
     *localDW);
 
   // private member function(s) for subsystem '<S103>/pidWithDebug'
+  static void fcsModel_pidWithDebug_m_Init(DW_pidWithDebug_fcsModel_i_T *localDW);
   static void fcsModel_pidWithDebug_j(real_T rtu_feedForward, real_T rtu_cmd,
-    real_T rtu_meas, boolean_T rtu_integratorReset, const busPidParams
-    *rtu_pidParamBus, real_T rtu_trackingCtrlCmd, real_T *rty_ctrlCmd,
-    busPidDebug *rty_pidDebug, real_T rtp_sampleTime_s,
+    real_T rtu_meas, boolean_T rtu_integratorReset, real_T rtu_integratorIc,
+    const busPidParams *rtu_pidParamBus, real_T rtu_trackingCtrlCmd, real_T
+    *rty_ctrlCmd, busPidDebug *rty_pidDebug, real_T rtp_sampleTime_s,
     DW_pidWithDebug_fcsModel_i_T *localDW);
 
   // private member function(s) for subsystem '<S103>/Signal Conditioning Block1'

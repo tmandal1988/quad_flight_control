@@ -476,7 +476,8 @@ int main(int argc, char *argv[]){
 	    	// 	ExtU_fcsModel_T_->rcCmdsIn.joystickYCmd_nd, ExtU_fcsModel_T_->rcCmdsIn.joystickZCmd_nd, ExtU_fcsModel_T_->rcCmdsIn.rcSwitch1_nd, ExtU_fcsModel_T_->rcCmdsIn.rcSwitch2_nd, 
 	    	// 	ExtU_fcsModel_T_->rcCmdsIn.rcSwitch3_nd, ExtY_fcsModel_T_.fcsDebug.state, ExtY_fcsModel_T_.fcsDebug.flightMode);
 	  // //   	// // printf("%g, %g, %g, %g, %d\n",ExtY_fcsModel_T_.actuatorsCmds[0], ExtY_fcsModel_T_.actuatorsCmds[1], ExtY_fcsModel_T_.actuatorsCmds[2], ExtY_fcsModel_T_.actuatorsCmds[3], ExtY_fcsModel_T_.fcsDebug.state);
-	    	// printf("############################################\n");
+	  //   	printf("Throttle: %d, Vz_Cmd: %+7.3f\n",ExtU_fcsModel_T_->rcCmdsIn.throttleCmd_nd, ExtY_fcsModel_T_.fcsDebug.outerLoopCtrlDebug.velCtrlDebug.cmd[2]);
+	  //   	printf("############################################\n");
 		// }
 
 		if(static_cast<uint8_t>(ExtY_fcsModel_T_.fcsDebug.state) != 0){
