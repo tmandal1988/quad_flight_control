@@ -616,7 +616,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.ctrlParamsArray[2].Kp = 0.10000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.ctrlParamsArray[2].Kp = 0.07500000;
 	//#################################################*
 
 	//**************************************************
@@ -886,11 +886,11 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[2].Kp = 0.30000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[2].Kp = 0.50000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[2].Ki = 0.10000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[2].Ki = 0.15000000;
 	//#################################################*
 
 	//**************************************************
@@ -898,7 +898,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[2].Kb = 0.35000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[2].Kb = 0.32000000;
 	//#################################################*
 
 	//**************************************************
@@ -1174,7 +1174,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//**************************************************
 	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelFbGainsArray[0] = 0.10000000;
 	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelFbGainsArray[1] = 0.10000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelFbGainsArray[2] = 0.20000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelFbGainsArray[2] = 0.10000000;
 	//#################################################*
 
 	//**************************************************
@@ -1184,7 +1184,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.baseMass_kg = 1.36000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.baseMass_kg = 1.34000000;
 	//#################################################*
 
 	//**************************************************
