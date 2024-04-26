@@ -613,7 +613,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.ctrlParamsArray[2].Kp = 0.15000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.ctrlParamsArray[2].Kp = 0.16500000;
 	//#################################################*
 
 	//**************************************************
@@ -1195,7 +1195,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.ctrlParams.Kp = 1.30000000;
+	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.ctrlParams.Kp = 1.33000000;
 	//#################################################*
 
 	//**************************************************
