@@ -258,8 +258,12 @@ int main(int argc, char *argv[]){
 	// Loop counter
 	size_t loop_count = 0;
 	size_t arm_loop_count = 0;
+	//125 Hz flag
+	bool one_twenty_five_hz_flag = false;
 	// 50 Hz flag
 	bool fifty_hz_flag = false;
+	// 10 Hz flag
+	bool ten_hz_flag = false;
 	// initialize the duration
 	chrono::microseconds delta (dt_count); 
 	auto duration = chrono::duration_cast<chrono::microseconds> (delta);
@@ -287,15 +291,33 @@ int main(int argc, char *argv[]){
 
 	// loop
     while(1) {
-    	loop_count++;
+    	loop_count++;    	
+
+    	/* Check if the current loop count is a multiple of 2 which will give a 125hz loop as main loop
+    	runs at 250Hz
+    	*/
+    	if(loop_count % 2 == 0){
+    		one_twenty_five_hz_flag = true;
+    	}else{
+    		one_twenty_five_hz_flag = false;
+    	}
 
     	/* Check if the current loop count is a multiple of 5 which will give a 50hz loop as main loop
     	runs at 250Hz
     	*/
-    	if(loop_count % 25 == 0){
+    	if(loop_count % 5 == 0){
     		fifty_hz_flag = true;
     	}else{
     		fifty_hz_flag = false;
+    	}
+
+    	/* Check if the current loop count is a multiple of 25 which will give a 10hz loop as main loop
+    	runs at 250Hz
+    	*/
+    	if(loop_count % 25 == 0){
+    		ten_hz_flag = true;
+    	}else{
+    		ten_hz_flag = false;
     	}
 
     	/* Get loop start time
@@ -464,7 +486,7 @@ int main(int argc, char *argv[]){
   		}
 
 
-     if(fifty_hz_flag){
+     if(ten_hz_flag){
         data_writer.UpdateDataBuffer(duration_count, loop_count, imu_data, sensor_meas, current_state, secondary_filter_debug, gps_meas_indices, rc_periods, ExtY_fcsModel_T_);
 	   }
 
@@ -487,10 +509,14 @@ int main(int argc, char *argv[]){
 					pwm_out_val[2] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
 					pwm_out_val[3] = static_cast<float>(rcCmdsIn_.throttleCmd_nd*1.0);
 				}else{
-			  	pwm_out_val[0] = max(PWM_CMD_MIN_THRESHOLD, min(PWM_CMD_MAX_THRESHOLD, ExtY_fcsModel_T_.actuatorsCmds[0]*RPM_TO_PWM_SCALE + PWM_MIN_THRESHOLD));
-			  	pwm_out_val[1] = max(PWM_CMD_MIN_THRESHOLD, min(PWM_CMD_MAX_THRESHOLD, ExtY_fcsModel_T_.actuatorsCmds[3]*RPM_TO_PWM_SCALE + PWM_MIN_THRESHOLD));
-			  	pwm_out_val[2] = max(PWM_CMD_MIN_THRESHOLD, min(PWM_CMD_MAX_THRESHOLD, ExtY_fcsModel_T_.actuatorsCmds[1]*RPM_TO_PWM_SCALE + PWM_MIN_THRESHOLD));
-			  	pwm_out_val[3] = max(PWM_CMD_MIN_THRESHOLD, min(PWM_CMD_MAX_THRESHOLD, ExtY_fcsModel_T_.actuatorsCmds[2]*RPM_TO_PWM_SCALE + PWM_MIN_THRESHOLD));
+			  	// pwm_out_val[0] = max(PWM_CMD_MIN_THRESHOLD, min(PWM_CMD_MAX_THRESHOLD, ExtY_fcsModel_T_.actuatorsCmds[0]*RPM_TO_PWM_SCALE + PWM_MIN_THRESHOLD));
+			  	// pwm_out_val[1] = max(PWM_CMD_MIN_THRESHOLD, min(PWM_CMD_MAX_THRESHOLD, ExtY_fcsModel_T_.actuatorsCmds[3]*RPM_TO_PWM_SCALE + PWM_MIN_THRESHOLD));
+			  	// pwm_out_val[2] = max(PWM_CMD_MIN_THRESHOLD, min(PWM_CMD_MAX_THRESHOLD, ExtY_fcsModel_T_.actuatorsCmds[1]*RPM_TO_PWM_SCALE + PWM_MIN_THRESHOLD));
+			  	// pwm_out_val[3] = max(PWM_CMD_MIN_THRESHOLD, min(PWM_CMD_MAX_THRESHOLD, ExtY_fcsModel_T_.actuatorsCmds[2]*RPM_TO_PWM_SCALE + PWM_MIN_THRESHOLD));
+			  	pwm_out_val[0] = ExtY_fcsModel_T_.actuatorsPwmCmds[0];
+			  	pwm_out_val[1] = ExtY_fcsModel_T_.actuatorsPwmCmds[3];
+			  	pwm_out_val[2] = ExtY_fcsModel_T_.actuatorsPwmCmds[1];
+			  	pwm_out_val[3] = ExtY_fcsModel_T_.actuatorsPwmCmds[2];
 				}
 		}else{
 				pwm_out_val[0] = static_cast<float>(PWM_MIN_THRESHOLD*1.0);

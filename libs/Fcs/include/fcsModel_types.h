@@ -3,9 +3,9 @@
 //
 // Code generated for Simulink model 'fcsModel'.
 //
-// Model version                  : 1.100
+// Model version                  : 1.101
 // Simulink Coder version         : 9.7 (R2022a) 13-Nov-2021
-// C/C++ source code generated on : Mon Apr  8 11:00:11 2024
+// C/C++ source code generated on : Wed Apr 24 14:47:06 2024
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM 7
@@ -229,6 +229,7 @@ struct busVelCtrlParams
   std::array<real_T, 3> accelFbGainsArray;
   std::array<real_T, 3> ffGainsArray;
   real_T baseMass_kg;
+  std::array<real_T, 2> baseMassMinMax_kg;
   std::array<real_T, 2> accelCmdToAttitudeCmdScale_nd;
 };
 
@@ -243,6 +244,7 @@ struct busZaccelCtrlParams
   busPidParams ctrlParams;
   busSignalConditioningParams cmdSignalConditioningParams;
   busSignalConditioningParams measSignalConditioningParams;
+  real_T ffGain;
 };
 
 #endif
@@ -602,10 +604,22 @@ struct struct_bSGttGVktiVsoVvrNEqEKH
 
 #endif
 
-#ifndef DEFINED_TYPEDEF_FOR_struct_721rXzqC6upTmPeAUcXHHF_
-#define DEFINED_TYPEDEF_FOR_struct_721rXzqC6upTmPeAUcXHHF_
+#ifndef DEFINED_TYPEDEF_FOR_struct_7H7ujBUuoTktv2vn3DMdcE_
+#define DEFINED_TYPEDEF_FOR_struct_7H7ujBUuoTktv2vn3DMdcE_
 
-struct struct_721rXzqC6upTmPeAUcXHHF
+struct struct_7H7ujBUuoTktv2vn3DMdcE
+{
+  real_T a;
+  real_T b;
+  real_T c;
+};
+
+#endif
+
+#ifndef DEFINED_TYPEDEF_FOR_struct_eOoIfVNgmaQXa53hgj2ZoG_
+#define DEFINED_TYPEDEF_FOR_struct_eOoIfVNgmaQXa53hgj2ZoG_
+
+struct struct_eOoIfVNgmaQXa53hgj2ZoG
 {
   struct_mmIgzrMBPVhvIbVLm0lB6F cmdLimits;
   std::array<real_T, 2> pwmLimits;
@@ -624,6 +638,10 @@ struct struct_721rXzqC6upTmPeAUcXHHF
   real_T pwmToCmdThrottleIncptHigh;
   real_T pwmMtrArm;
   struct_bSGttGVktiVsoVvrNEqEKH coeffs;
+  struct_7H7ujBUuoTktv2vn3DMdcE throttleUnitRangeMapCoeff;
+  struct_7H7ujBUuoTktv2vn3DMdcE vzLowRangeMapCoeff;
+  struct_7H7ujBUuoTktv2vn3DMdcE vzHighRangeMapCoeff;
+  struct_7H7ujBUuoTktv2vn3DMdcE fCmdRangeMapCoeff;
 };
 
 #endif

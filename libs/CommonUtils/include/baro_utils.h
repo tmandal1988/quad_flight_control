@@ -22,7 +22,7 @@ class BaroHelper{
 		// Destructor
 		~BaroHelper();
 
-		void StartBaroReader(int cpu_to_use, int32_t priority, float sample_time_s = 1.0/25.0);
+		void StartBaroReader(int cpu_to_use, int32_t priority, float sample_time_s = 1.0/100.0);
 		void GetBaroPressAndTemp(float baro_data[]);
 		void GetAglAndClimbRateEst(float baro_data[]);
 		void GetBaroDebugData(float baro_debug_data[]);

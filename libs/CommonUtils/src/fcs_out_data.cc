@@ -3,10 +3,15 @@
 
 void AssignFcsData(const FcsOutput &fcs_output, DataFields data_to_save[], size_t data_index){
 
-	data_to_save[data_index].actuator_cmds[0] = fcs_output.actuatorsCmds[0];
-	data_to_save[data_index].actuator_cmds[1] = fcs_output.actuatorsCmds[1];
-	data_to_save[data_index].actuator_cmds[2] = fcs_output.actuatorsCmds[2];
-	data_to_save[data_index].actuator_cmds[3] = fcs_output.actuatorsCmds[3];
+	// data_to_save[data_index].actuator_cmds[0] = fcs_output.actuatorsCmds[0];
+	// data_to_save[data_index].actuator_cmds[1] = fcs_output.actuatorsCmds[1];
+	// data_to_save[data_index].actuator_cmds[2] = fcs_output.actuatorsCmds[2];
+	// data_to_save[data_index].actuator_cmds[3] = fcs_output.actuatorsCmds[3];
+
+	data_to_save[data_index].actuator_cmds[0] = fcs_output.actuatorsPwmCmds[0];
+	data_to_save[data_index].actuator_cmds[1] = fcs_output.actuatorsPwmCmds[1];
+	data_to_save[data_index].actuator_cmds[2] = fcs_output.actuatorsPwmCmds[2];
+	data_to_save[data_index].actuator_cmds[3] = fcs_output.actuatorsPwmCmds[3];
 
 	data_to_save[data_index].fcsOut[0] = fcs_output.fcsDebug.allocDebug.thrustCmd_N;
 	data_to_save[data_index].fcsOut[1] = fcs_output.fcsDebug.allocDebug.xMomCmd_Nm;

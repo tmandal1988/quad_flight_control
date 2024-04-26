@@ -75,11 +75,11 @@ void BaroHelper::BaroReadLoopCompFilter(){
 		loop_start = chrono::high_resolution_clock::now();
 
 		barometer_.refreshPressure();
-		usleep(3500); // Waiting for pressure data ready
+		usleep(2500); // Waiting for pressure data ready
 		barometer_.readPressure();
 
 		barometer_.refreshTemperature();
-        usleep(3500); // Waiting for temperature data ready
+        usleep(2500); // Waiting for temperature data ready
         barometer_.readTemperature();
 
         // {
@@ -181,11 +181,11 @@ void BaroHelper::BaroReadLoopKalmanFilter(){
 		loop_start = chrono::high_resolution_clock::now();
 
 		barometer_.refreshPressure();
-		usleep(3500); // Waiting for pressure data ready
+		usleep(2500); // Waiting for pressure data ready
 		barometer_.readPressure();
 
 		barometer_.refreshTemperature();
-        usleep(3500); // Waiting for temperature data ready
+        usleep(2500); // Waiting for temperature data ready
         barometer_.readTemperature();
 
         // {
