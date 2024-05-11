@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.16.2)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(PROJECT_NAME IMUGPSEKF)
+set(PROJECT_NAME QUADFLIGHTCONTROL)
 
 # Set name of the project
 project(${PROJECT_NAME})
@@ -17,8 +17,7 @@ set(PROJECT_SOURCE_DIR
 )
 
 set(PROJECT_SOURCE
-	${PROJECT_SOURCE_DIR}/ekf_example.cc
-    #${PROJECT_SOURCE_DIR}/motor_tests.cc
+	${PROJECT_SOURCE_DIR}/quad_flight_control.cc
 )
 
 set(PROJECT_LIBRARIES_DIR
