@@ -4,11 +4,12 @@ Instead of using open source flight controller stacks, this repo contains a cust
 ## Hardware
  1. [Navio2 + Raspberry Pi](https://docs.emlid.com/navio2/) -  With SMP PREEMPT Emlid Raspberry Pi OS Buster image.
 2.  4 x # SunnySky X Series V3 X2216 V3 880KV motors
-3. 1 x FrSky Taranis Q X7 Digital Telemetry Radio System 2.4GHz ACCS
-4. 1 x FrSky X8R Receiver
-5. 4 x any 60A ESC with high update rate
-6. 1 x 4000mAh 4S 30C Lipo
-7. PM02D Power Module or any other DC-DC stepdown converter with 5.2V and 3A output. (See Navio2 doc for various options to power the board and the Pi)
+3.  2 x CCW 1045 props and 2 x CW 1045 props
+4. 1 x FrSky Taranis Q X7 Digital Telemetry Radio System 2.4GHz ACCS
+5. 1 x FrSky X8R Receiver
+6. 4 x any 60A ESC with high update rate
+7. 1 x 4000mAh 4S 30C Lipo
+8. PM02D Power Module or any other DC-DC stepdown converter with 5.2V and 3A output. (See Navio2 doc for various options to power the board and the Pi)
 
 ## Setup
 X-Frame quadrotor configuration
