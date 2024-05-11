@@ -216,7 +216,12 @@ int main(int argc, char *argv[]){
 	float* imu_data;
 
 	//Variable to read rc input data
-	int* rc_periods;
+	int* rc_periods = new int[7];
+
+	// Assign -1 to rc_periods to initialize
+	for(size_t rc_idx = 0; rc_idx < 7; rc_idx++){
+		rc_periods[rc_idx] = -1;
+	}
 
 	//##############################################################
 	// fcsModel input variable
@@ -245,15 +250,15 @@ int main(int argc, char *argv[]){
 
   //write the initial state
 	float zero_array[9] = {0};
-	int rc_periods_ph[7];
-	rc_periods_ph[0] = -1;
-	rc_periods_ph[1] = -1;
-	rc_periods_ph[2] = -1;
-	rc_periods_ph[3] = -1;
-	rc_periods_ph[4] = -1;
-	rc_periods_ph[5] = -1;
-	rc_periods_ph[6] = -1;
-	data_writer.UpdateDataBuffer(0, 0, zero_array, sensor_meas, initial_state, secondary_filter_debug, gps_meas_indices, rc_periods_ph, ExtY_fcsModel_T_);
+	// int rc_periods_ph[7];
+	// rc_periods_ph[0] = -1;
+	// rc_periods_ph[1] = -1;
+	// rc_periods_ph[2] = -1;
+	// rc_periods_ph[3] = -1;
+	// rc_periods_ph[4] = -1;
+	// rc_periods_ph[5] = -1;
+	// rc_periods_ph[6] = -1;
+	data_writer.UpdateDataBuffer(0, 0, zero_array, sensor_meas, initial_state, secondary_filter_debug, gps_meas_indices, rc_periods, ExtY_fcsModel_T_);
 
 	// Loop counter
 	size_t loop_count = 0;
@@ -470,8 +475,6 @@ int main(int argc, char *argv[]){
       	rcCmdsIn_.rcSwitch1_nd = rc_periods[4];
       	rcCmdsIn_.rcSwitch2_nd = rc_periods[5];
       	rcCmdsIn_.rcSwitch3_nd = rc_periods[6];
-
-
       }
 
       ExtU_fcsModel_T_->rcCmdsIn = rcCmdsIn_;
@@ -484,7 +487,6 @@ int main(int argc, char *argv[]){
   			fcsModel_Obj.step();
   			ExtY_fcsModel_T_ = fcsModel_Obj.getExternalOutputs();
   		}
-
 
      if(ten_hz_flag){
         data_writer.UpdateDataBuffer(duration_count, loop_count, imu_data, sensor_meas, current_state, secondary_filter_debug, gps_meas_indices, rc_periods, ExtY_fcsModel_T_);

@@ -75,6 +75,7 @@ void WriteHelper::UpdateDataBuffer(long long dt_ms, size_t count, float* const& 
 			data_to_save1_[data_buff_idx1_].baro_data[9] = sensor_meas(18);
 			data_to_save1_[data_buff_idx1_].baro_data[10] = sensor_meas(19);
 
+
 			for(size_t d_idx = 0; d_idx < ekf_current_state.get_nrows(); d_idx++){
 				data_to_save1_[data_buff_idx1_].ekf_current_state[d_idx] = ekf_current_state(d_idx);
 			}
@@ -90,6 +91,7 @@ void WriteHelper::UpdateDataBuffer(long long dt_ms, size_t count, float* const& 
 			for(size_t r_idx = 0; r_idx < 7; r_idx++){
 				data_to_save1_[data_buff_idx1_].rc_in[r_idx] = static_cast< float >(rc_periods[r_idx]);
 			}
+
 
 			AssignFcsData(fcs_output, data_to_save1_, data_buff_idx1_);
 
@@ -118,7 +120,6 @@ void WriteHelper::UpdateDataBuffer(long long dt_ms, size_t count, float* const& 
 			// 	data_to_save1_[data_buff_idx1_].ekf_computed_meas[tt_idx] = ekf_computed_meas(tt_idx);
 			// }
 			*/
-
 			data_buff_idx1_++;
 			if (data_buff_idx1_ == MAX_BUFF_SIZE){
 				is_data_buff1_full_.store(true);
@@ -194,7 +195,6 @@ void WriteHelper::UpdateDataBuffer(long long dt_ms, size_t count, float* const& 
 			// 	data_to_save2_[data_buff_idx2_].ekf_computed_meas[tt_idx] = ekf_computed_meas(tt_idx);
 			// }
 			*/
-
 			data_buff_idx2_++;
 			if (data_buff_idx2_ == MAX_BUFF_SIZE){
 				is_data_buff2_full_.store(true);
