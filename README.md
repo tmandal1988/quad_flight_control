@@ -33,6 +33,8 @@ X-Frame quadrotor configuration
 6. Use tmux and in a new session run `sudo ./build/QUADFLIGHTCONTROL`
 7. It will take some time to initialize the IMU and the EKF, if there is no GPS lock it will initialize Mahony Filter for attitude estimation instead of EKF.
 8. Better to log out of raspberry pi before flying
+9. To stop the code ssh back into raspberry pi and rejoin the tmux session and use `Ctrl + C`
+10. Flight data is saved in binary file `data_file.dat` which can be decoded using the .m script in extras folder. fcsDebug field names can be found in `libs\CommonUtils\src\fcs_out_data.cc`
 
 ## Flying
 1. Power up everything.
