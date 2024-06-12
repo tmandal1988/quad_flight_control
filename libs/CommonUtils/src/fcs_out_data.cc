@@ -3,15 +3,10 @@
 
 void AssignFcsData(const FcsOutput &fcs_output, DataFields data_to_save[], size_t data_index){
 
-	// data_to_save[data_index].actuator_cmds[0] = fcs_output.actuatorsCmds[0];
-	// data_to_save[data_index].actuator_cmds[1] = fcs_output.actuatorsCmds[1];
-	// data_to_save[data_index].actuator_cmds[2] = fcs_output.actuatorsCmds[2];
-	// data_to_save[data_index].actuator_cmds[3] = fcs_output.actuatorsCmds[3];
-
-	data_to_save[data_index].actuator_cmds[0] = fcs_output.actuatorsPwmCmds[0];
-	data_to_save[data_index].actuator_cmds[1] = fcs_output.actuatorsPwmCmds[1];
-	data_to_save[data_index].actuator_cmds[2] = fcs_output.actuatorsPwmCmds[2];
-	data_to_save[data_index].actuator_cmds[3] = fcs_output.actuatorsPwmCmds[3];
+	data_to_save[data_index].actuator_cmds[0] = fcs_output.actuatorsCmds[0];
+	data_to_save[data_index].actuator_cmds[1] = fcs_output.actuatorsCmds[1];
+	data_to_save[data_index].actuator_cmds[2] = fcs_output.actuatorsCmds[2];
+	data_to_save[data_index].actuator_cmds[3] = fcs_output.actuatorsCmds[3];
 
 	data_to_save[data_index].fcsOut[0] = fcs_output.fcsDebug.allocDebug.thrustCmd_N;
 	data_to_save[data_index].fcsOut[1] = fcs_output.fcsDebug.allocDebug.xMomCmd_Nm;
@@ -99,6 +94,18 @@ void AssignFcsData(const FcsOutput &fcs_output, DataFields data_to_save[], size_
 	data_to_save[data_index].fcsOut[83] = fcs_output.fcsDebug.outerLoopCtrlDebug.zAccelCtrlDebug.pidDebug.proportionalOutput;
 	data_to_save[data_index].fcsOut[84] = fcs_output.fcsDebug.outerLoopCtrlDebug.zAccelCtrlDebug.pidDebug.integralOutput;
 	data_to_save[data_index].fcsOut[85] = fcs_output.fcsDebug.outerLoopCtrlDebug.zAccelCtrlDebug.pidDebug.derivativeOutput;
-	data_to_save[data_index].fcsOut[86] = static_cast<float>(fcs_output.fcsDebug.state);
-	data_to_save[data_index].fcsOut[87] = static_cast<float>(fcs_output.fcsDebug.flightMode);
+	data_to_save[data_index].fcsOut[86] = fcs_output.fcsDebug.outerLoopCtrlDebug.xyBodyAccelCtrlDebug.cmd[0];
+	data_to_save[data_index].fcsOut[87] = fcs_output.fcsDebug.outerLoopCtrlDebug.xyBodyAccelCtrlDebug.cmd[1];
+	data_to_save[data_index].fcsOut[88] = fcs_output.fcsDebug.outerLoopCtrlDebug.xyBodyAccelCtrlDebug.meas[0];
+	data_to_save[data_index].fcsOut[89] = fcs_output.fcsDebug.outerLoopCtrlDebug.xyBodyAccelCtrlDebug.meas[1];
+	data_to_save[data_index].fcsOut[90] = fcs_output.fcsDebug.outerLoopCtrlDebug.xyBodyAccelCtrlDebug.pidDebug[0].output;
+	data_to_save[data_index].fcsOut[91] = fcs_output.fcsDebug.outerLoopCtrlDebug.xyBodyAccelCtrlDebug.pidDebug[0].proportionalOutput;
+	data_to_save[data_index].fcsOut[92] = fcs_output.fcsDebug.outerLoopCtrlDebug.xyBodyAccelCtrlDebug.pidDebug[0].integralOutput;
+	data_to_save[data_index].fcsOut[93] = fcs_output.fcsDebug.outerLoopCtrlDebug.xyBodyAccelCtrlDebug.pidDebug[0].derivativeOutput;
+	data_to_save[data_index].fcsOut[94] = fcs_output.fcsDebug.outerLoopCtrlDebug.xyBodyAccelCtrlDebug.pidDebug[1].output;
+	data_to_save[data_index].fcsOut[95] = fcs_output.fcsDebug.outerLoopCtrlDebug.xyBodyAccelCtrlDebug.pidDebug[1].proportionalOutput;
+	data_to_save[data_index].fcsOut[96] = fcs_output.fcsDebug.outerLoopCtrlDebug.xyBodyAccelCtrlDebug.pidDebug[1].integralOutput;
+	data_to_save[data_index].fcsOut[97] = fcs_output.fcsDebug.outerLoopCtrlDebug.xyBodyAccelCtrlDebug.pidDebug[1].derivativeOutput;
+	data_to_save[data_index].fcsOut[98] = static_cast<float>(fcs_output.fcsDebug.state);
+	data_to_save[data_index].fcsOut[99] = static_cast<float>(fcs_output.fcsDebug.flightMode);
 }

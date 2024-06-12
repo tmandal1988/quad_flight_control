@@ -3,9 +3,9 @@
 //
 // Code generated for Simulink model 'fcsModel'.
 //
-// Model version                  : 1.101
+// Model version                  : 1.103
 // Simulink Coder version         : 9.7 (R2022a) 13-Nov-2021
-// C/C++ source code generated on : Wed Apr 24 14:47:06 2024
+// C/C++ source code generated on : Mon Jun 10 17:10:25 2024
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM 7
@@ -230,7 +230,18 @@ struct busVelCtrlParams
   std::array<real_T, 3> ffGainsArray;
   real_T baseMass_kg;
   std::array<real_T, 2> baseMassMinMax_kg;
-  std::array<real_T, 2> accelCmdToAttitudeCmdScale_nd;
+};
+
+#endif
+
+#ifndef DEFINED_TYPEDEF_FOR_busXyBodyAccelCtrlParams_
+#define DEFINED_TYPEDEF_FOR_busXyBodyAccelCtrlParams_
+
+// Control parameters for xy body accel feedback
+struct busXyBodyAccelCtrlParams
+{
+  std::array<busPidParams, 2> ctrlParamsArray;
+  std::array<real_T, 2> ffGainsArray;
 };
 
 #endif
@@ -257,6 +268,7 @@ struct busOuterLoopCtrlParams
 {
   busPosCtrlParams posCtrlParams;
   busVelCtrlParams velCtrlParams;
+  busXyBodyAccelCtrlParams xyBodyAccelCtrlParams;
   busZaccelCtrlParams zAccelCtrlParams;
 };
 
@@ -399,6 +411,19 @@ struct busZaccelCtrlDebug
 
 #endif
 
+#ifndef DEFINED_TYPEDEF_FOR_busXyBodyAccelCtrIDebug_
+#define DEFINED_TYPEDEF_FOR_busXyBodyAccelCtrIDebug_
+
+// Debug data from xy body accel controller
+struct busXyBodyAccelCtrIDebug
+{
+  std::array<real_T, 2> cmd;
+  std::array<real_T, 2> meas;
+  std::array<busPidDebug, 2> pidDebug;
+};
+
+#endif
+
 #ifndef DEFINED_TYPEDEF_FOR_busOuterLoopCtrlDebug_
 #define DEFINED_TYPEDEF_FOR_busOuterLoopCtrlDebug_
 
@@ -409,6 +434,7 @@ struct busOuterLoopCtrlDebug
   busVelCtrlDebug velCtrlDebug;
   busPosCtrlDebug posCtrlDebug;
   busZaccelCtrlDebug zAccelCtrlDebug;
+  busXyBodyAccelCtrIDebug xyBodyAccelCtrlDebug;
 };
 
 #endif
