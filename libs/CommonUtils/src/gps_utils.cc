@@ -66,9 +66,9 @@ bool GpsHelper::InitializeGps(float wait_duration_sec){
 	auto duration = chrono::duration_cast<chrono::microseconds> (delta);
     auto duration_count = duration.count();
     start_time = chrono::high_resolution_clock::now();
-
     // Run the loop till we have the desired number of llh position and NED velocity data for EKF initialization
 	while( (gps_pos_count_ < n_gps_meas_count_) || (gps_vel_count_ < n_gps_meas_count_)){
+		// printf("GPS Pos Count: %d, GPS Vel Count: %d\r",gps_pos_count_, gps_vel_count_);
 		if  ( gps_3d_fix_ && ( gps_fix_count_ > n_valid_gps_count_ ) ){
 			if(GetLlhPos() && gps_pos_count_ < n_gps_meas_count_){
 				lat_ref_ += pos_data_[2];

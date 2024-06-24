@@ -92,13 +92,15 @@ public:
     UBXParser(UBXScanner* ubxsc);
     void updateMessageData();
     int decodeMessage(std::vector<double>& data);
+    int decodeMessageGeneric(std::string spi_device_name, std::vector<unsigned char>& data);
     int checkMessage();
 };
 
 class Ublox {
 public:
 enum message_t
-{
+{   
+    NAV_HPPOSLLH = 0x0114,
     NAV_POSLLH = 0x0102,
     NAV_STATUS = 0x0103,
     NAV_VELNED = 0x0112
@@ -110,14 +112,81 @@ private:
         PREAMBLE2 = 0x62,
 
         CLASS_CFG = 0x06,
+        MSG_CFG_RATE = 0x01,
+        RST_CFG = 0x09,
+        SOFT_RST_CFG = 0x04,
+        NAV5_CFG = 0x24,
 
-        MSG_CFG_RATE = 0x08
+        CLASS_NAV = 0x01,
+        MSG_HP_LLH = 0x14,
+        MSG_LLH = 0x02,
+        MSG_SOL_STATUS = 0x03,
+        MSG_VEL_NED = 0x12,
+
+
+        CFG_SAMPLE_RATE = 0x08
     };
 
     struct PACKED CfgNavRate {
         std::uint16_t measure_rate;
         std::uint16_t nav_rate;
         std::uint16_t timeref;
+    };
+
+    struct PACKED ResetCfgUblox {
+        std::uint8_t clear_mask1;
+        std::uint8_t clear_mask2;
+        std::uint8_t clear_mask3;
+        std::uint8_t clear_mask4;
+
+        std::uint8_t save_mask1;
+        std::uint8_t save_mask2;
+        std::uint8_t save_mask3;
+        std::uint8_t save_mask4;
+
+        std::uint8_t load_mask1;
+        std::uint8_t load_mask2;
+        std::uint8_t load_mask3;
+        std::uint8_t load_mask4;
+    };
+
+    struct PACKED CfgMeasrate{
+        std::uint8_t msg_class;
+        std::uint8_t msg_id;
+        std::uint8_t msg_rate;
+    };
+
+    struct PACKED ResetUblox {
+        std::uint16_t nav_bbr_mask;
+        std::uint8_t reset_mode;
+        std::uint8_t reserved;
+    };
+
+    struct PACKED CfgNavEng {
+        std::uint16_t set_mask;
+        std::uint8_t dyn_model;
+        std::uint8_t fix_mode;
+        std::int32_t fixed_alt;
+        std::uint32_t fixed_alt_var;
+        std::int8_t min_elev;
+        std::uint8_t dr_limit;
+        std::uint16_t p_dop;
+        std::uint16_t t_dop;
+        std::uint16_t p_acc;
+        std::uint16_t t_acc;
+        std::uint8_t static_hold_threshold;
+        std::uint8_t dgnss_timeout;
+        std::uint8_t cno_thresh_num_svs;
+        std::uint8_t cno_thresh;
+        std::uint8_t reserved1;
+        std::uint8_t reserved2;
+        std::uint16_t static_hold_max_dist;
+        std::uint8_t utc_standard;
+        std::uint8_t reserved3;
+        std::uint8_t reserved4;
+        std::uint8_t reserved5;
+        std::uint8_t reserved6;
+        std::uint8_t reserved7;
     };
 
     struct PACKED UbxHeader {
@@ -136,17 +205,21 @@ private:
     std::string spi_device_name;
     UBXScanner* scanner;
     UBXParser* parser;   
+    unsigned char* message;
 
 public:
     Ublox(std::string name = "/dev/spidev0.0");
     Ublox(std::string name, UBXScanner* scan, UBXParser* pars);
     int enableNAV_POSLLH();
+    int enableNAV_HPPOSLLH();
     int enableNAV_STATUS();
     int enableNAV_VELNED();
     int testConnection();
     int configureSolutionRate(std::uint16_t meas_rate,
                               std::uint16_t nav_rate = 1,
                               std::uint16_t timeref = 0);
+    int configureNavEngine();
+    int resetConfig();
     int decodeMessages();
     int decodeSingleMessage(message_t msg, std::vector<double>& position_data);
 
