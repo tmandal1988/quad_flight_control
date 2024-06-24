@@ -22,7 +22,7 @@ class GpsHelper{
 
 	public:
 		// Constructors
-		GpsHelper(size_t n_valid_gps_count = 10, size_t n_gps_meas_count = 10, uint16_t time_in_ms_bw_samples = 25);
+		GpsHelper(size_t n_valid_gps_count = 10, size_t n_gps_meas_count = 10, uint16_t time_in_ms_bw_samples = 50);
 
 		// Destructor
 		~GpsHelper();

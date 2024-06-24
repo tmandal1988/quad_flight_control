@@ -5,7 +5,7 @@
 //
 // Model version                  : 1.103
 // Simulink Coder version         : 9.7 (R2022a) 13-Nov-2021
-// C/C++ source code generated on : Wed Jun 12 08:37:41 2024
+// C/C++ source code generated on : Fri Jun 14 19:31:46 2024
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM 7
@@ -1886,7 +1886,7 @@ void fcsModel::step()
   // 'interpretRcInputs_function:180'                         rcParamsStruct.fCmdRangeMapCoeff.c)/ ... 
   // 'interpretRcInputs_function:181'                         rcParamsStruct.fCmdRangeMapCoeff.b; 
   fcsModel_DW.rcOutCmds.throttleStick = (static_cast<real_T>(tCmd) + -1000.0) /
-    900.0 * -100.0 + -50.0;
+    900.0 * -20.0 + -15.0;
 
   // 'interpretRcInputs_function:182' rcOutCmds.rollStick = rCmd_unitRange*rlim; 
   fcsModel_DW.rcOutCmds.rollStick = (static_cast<real_T>(rCmd) / 500.0 + -3.0) *

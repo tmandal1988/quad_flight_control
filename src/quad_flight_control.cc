@@ -190,7 +190,8 @@ int main(int argc, char *argv[]){
   MahonyFilter m_filt(0.0, 2.0, dt_s, quat);	
 
 
-	bool gps_init_status = gps_reader.InitializeGps(20);
+	bool gps_init_status = gps_reader.InitializeGps(30);
+
 	if(!gps_init_status){
 		use_mahony_filter = true;
 		printf("EKF needs GPS, using Mahony filter for attitude computation. ONLY USE STABILIZE MODE\n");
