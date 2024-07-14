@@ -57,8 +57,10 @@ int main(int argc, char *argv[]){
 	float baro_debug_data[9];
 	array<float, 3> baro_accel{0};
 	array<float, 3> baro_euler{0};
+	array<float, 2> baro_gps_alt_and_climb_rate_mps{0};
+	array<bool, 2> baro_gps_alt_and_climb_rate_flag{false};
 	baro_reader.SetKalmanFilterParams(array<float, 3> {100.0, 100.0, 100.0}, array<float, 3> {1e-6, 1e-6, 1e-6}, 
-										  array<float, 2>{0.01, 0.09});
+										  array<float, 4>{0.01, 0.09, 10, 0.01});
 	baro_reader.StartBaroReader(1, 20);	
 	 // Mutex to guard resource access to baro data
 	mutex baro_out_mutex;
@@ -196,6 +198,7 @@ int main(int argc, char *argv[]){
 		use_mahony_filter = true;
 		printf("EKF needs GPS, using Mahony filter for attitude computation. ONLY USE STABILIZE MODE\n");
 	}
+	baro_reader.SetGpsInitStatus(gps_init_status);
 	gps_reader.CreateGpsThread();
 	data_writer.StartFileWriteThread();
 	rc_reader.CreateRcInputReadThread();
@@ -420,6 +423,11 @@ int main(int argc, char *argv[]){
 	    			baro_euler[0] = current_state(0);
 	    			baro_euler[1] = current_state(1);
 	    			baro_euler[2] = current_state(2);
+
+	    			baro_gps_alt_and_climb_rate_flag[0] = gps_meas_indices[2];
+	    			baro_gps_alt_and_climb_rate_flag[1] = gps_meas_indices[5];
+	    			baro_gps_alt_and_climb_rate_mps[0] = -ned_pos_and_vel_meas[2];
+	    			baro_gps_alt_and_climb_rate_mps[1] = -ned_pos_and_vel_meas[5];
     			}else{      		
 
 	    			baro_accel[0] = imu_data[3];
@@ -429,11 +437,16 @@ int main(int argc, char *argv[]){
 	    			baro_euler[0] = mh_euler[0];
 	    			baro_euler[1] = mh_euler[1];
 	    			baro_euler[2] = mh_euler[2];
+	    			baro_gps_alt_and_climb_rate_flag[0] = false;
+	    			baro_gps_alt_and_climb_rate_flag[1] = false;
     			}
     			{
     				unique_lock<mutex> baro_out_lock(baro_out_mutex);
     				baro_reader.SetBodyAccels(baro_accel);
     				baro_reader.SetEulerAngles(baro_euler);		
+    				if(gps_init_status){
+    					baro_reader.SetGpsVelAndAlt(baro_gps_alt_and_climb_rate_mps, baro_gps_alt_and_climb_rate_flag);
+    				}
     			}				
     	}
     	

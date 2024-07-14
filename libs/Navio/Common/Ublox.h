@@ -116,6 +116,7 @@ private:
         RST_CFG = 0x09,
         SOFT_RST_CFG = 0x04,
         NAV5_CFG = 0x24,
+        PRT_CFG = 0x00,
 
         CLASS_NAV = 0x01,
         MSG_HP_LLH = 0x14,
@@ -189,6 +190,23 @@ private:
         std::uint8_t reserved7;
     };
 
+    struct PACKED CfgPrt{
+        std::uint8_t port_id;
+        std::uint8_t reserved1;
+        std::uint16_t tx_ready;
+        std::uint32_t spi_mode;
+        std::uint8_t reserved2;
+        std::uint8_t reserved3;
+        std::uint8_t reserved4;
+        std::uint8_t reserved5;
+        std::uint16_t in_proto_mask;
+        std::uint16_t out_proto_mask;
+        std::uint16_t flags;
+        std::uint8_t reserved6;
+        std::uint8_t reserved7;
+
+    };
+
     struct PACKED UbxHeader {
         std::uint8_t preamble1;
         std::uint8_t preamble2;
@@ -220,6 +238,7 @@ public:
                               std::uint16_t timeref = 0);
     int configureNavEngine();
     int resetConfig();
+    int configureUbloxSpiPort();
     int decodeMessages();
     int decodeSingleMessage(message_t msg, std::vector<double>& position_data);
 

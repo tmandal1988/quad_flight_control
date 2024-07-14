@@ -275,6 +275,106 @@ void BaroHelper::BaroReadLoopKalmanFilter(){
 			p_cov_[2][1] = p_cov_tmp[2][1] - k_gain_[2][0]*p_cov_tmp[0][1] - k_gain_[2][1]*p_cov_tmp[1][1];
 			p_cov_[2][2] = p_cov_tmp[2][2] - k_gain_[2][0]*p_cov_tmp[0][2] - k_gain_[2][1]*p_cov_tmp[1][2];
 
+			// If GPS Alt is available then do sequential update on it
+			if(gps_alt_new){
+				gps_alt_new = false;
+				// Compute Kalman Gain
+				// 1st row
+				k_gain_gps_[0][0] = p_cov_[0][0]/(p_cov_[0][0] + meas_noise_[2][2]);
+				// 2nd row
+				k_gain_gps_[0][1] = p_cov_[1][0]/(p_cov_[0][0] + meas_noise_[2][2]);
+				// 3rd row
+				k_gain_gps_[0][2] = p_cov_[2][0]/(p_cov_[0][0] + meas_noise_[2][2]);
+
+				// update states
+				// agl
+				agl_est_m_ = agl_est_m_ - k_gain_gps_[0][0]*(agl_est_m_ - gps_alt_m);
+				// ned az
+				veh_ned_az_est_mps2_ = veh_ned_az_est_mps2_ - k_gain_gps_[0][1]*(agl_est_m_ - gps_alt_m);
+				// cr
+				climb_rate_est_mps_ = climb_rate_est_mps_ - k_gain_gps_[0][2]*(agl_est_m_ - gps_alt_m);
+
+				//Update covariance
+				// 1 row
+				p_cov_tmp[0][0] = p_cov_[0][0];
+				p_cov_[0][0] = -p_cov_tmp[0][0]*(p_cov_tmp[0][0]/(p_cov_tmp[0][0] + meas_noise_[2][2]) - 1);
+
+				p_cov_tmp[0][1] = p_cov_[0][1];
+				p_cov_[0][1] = -p_cov_tmp[0][1]*(p_cov_tmp[0][0]/(p_cov_tmp[0][0] + meas_noise_[2][2]) - 1);
+
+				p_cov_tmp[0][2] = p_cov_[0][2];
+				p_cov_[0][2] = -p_cov_tmp[0][2]*(p_cov_tmp[0][0]/(p_cov_tmp[0][0] + meas_noise_[2][2]) - 1);
+
+				// 2 row
+				p_cov_tmp[1][0] = p_cov_[1][0];
+				p_cov_[1][0] = p_cov_tmp[1][0] - (p_cov_tmp[0][0]*p_cov_tmp[1][0])/(p_cov_tmp[0][0] + meas_noise_[2][2]);
+
+				p_cov_tmp[1][1] = p_cov_[1][1];
+				p_cov_[1][1] = p_cov_tmp[1][1] - (p_cov_tmp[0][1]*p_cov_tmp[1][0])/(p_cov_tmp[0][0] + meas_noise_[2][2]);
+
+				p_cov_tmp[1][2] = p_cov_[1][2];
+				p_cov_[1][2] = p_cov_tmp[1][2] - (p_cov_tmp[0][2]*p_cov_tmp[1][0])/(p_cov_tmp[0][0] + meas_noise_[2][2]);
+
+				// 3 row
+				p_cov_tmp[2][0] = p_cov_[2][0];
+				p_cov_[2][0] = p_cov_tmp[2][0] - (p_cov_tmp[0][0]*p_cov_tmp[2][0])/(p_cov_tmp[0][0] + meas_noise_[2][2]);
+
+				p_cov_tmp[2][1] = p_cov_[2][1];
+				p_cov_[2][1] = p_cov_tmp[2][1] - (p_cov_tmp[0][1]*p_cov_tmp[2][0])/(p_cov_tmp[0][0] + meas_noise_[2][2]);
+
+				p_cov_tmp[2][2] = p_cov_[2][2];
+				p_cov_[2][2] = p_cov_tmp[2][2] - (p_cov_tmp[0][2]*p_cov_tmp[2][0])/(p_cov_tmp[0][0] + meas_noise_[2][2]);
+
+			}
+
+			// // If GPS cr is available then do sequential update on it
+			if(gps_cr_new){
+				gps_cr_new = false;
+				// 1 row
+				k_gain_gps_[1][0] = p_cov_[0][2]/(p_cov_[2][2] + meas_noise_[3][3]);
+				// 2 row
+				k_gain_gps_[1][1] = p_cov_[1][2]/(p_cov_[2][2] + meas_noise_[3][3]);
+				// 3 row
+				k_gain_gps_[1][2] = p_cov_[2][2]/(p_cov_[2][2] + meas_noise_[3][3]);
+
+				// update states
+				// agl
+				agl_est_m_ = agl_est_m_ - k_gain_gps_[1][0]*(climb_rate_est_mps_ - gps_cr_mps);
+				// ned az
+				veh_ned_az_est_tmp_mps2 = veh_ned_az_est_tmp_mps2 - k_gain_gps_[1][1]*(climb_rate_est_mps_ - gps_cr_mps);
+				// cr
+				climb_rate_est_mps_ = climb_rate_est_mps_ - k_gain_gps_[1][2]*(climb_rate_est_mps_ - gps_cr_mps);
+
+				// 1 row
+				p_cov_tmp[0][0] = p_cov_[0][0];
+				p_cov_[0][0] = p_cov_tmp[0][0] - (p_cov_tmp[0][2]*p_cov_tmp[2][0])/(p_cov_tmp[2][2] + meas_noise_[3][3]);
+
+				p_cov_tmp[0][1] = p_cov_[0][1];
+				p_cov_[0][1] = p_cov_tmp[0][1] - (p_cov_tmp[0][2]*p_cov_tmp[2][1])/(p_cov_tmp[2][2] + meas_noise_[3][3]);
+
+				p_cov_tmp[0][2] = p_cov_[0][2];
+				p_cov_[0][2] = p_cov_tmp[0][2] - (p_cov_tmp[0][2]*p_cov_tmp[2][2])/(p_cov_tmp[2][2] + meas_noise_[3][3]);
+
+				// 2 row
+				p_cov_tmp[1][0] = p_cov_[1][0];
+				p_cov_[1][0] = p_cov_tmp[1][0] - (p_cov_tmp[1][2]*p_cov_tmp[2][0])/(p_cov_tmp[2][2] + meas_noise_[3][3]);
+
+				p_cov_tmp[1][1] = p_cov_[1][1];
+				p_cov_[1][1] = p_cov_tmp[1][1] - (p_cov_tmp[1][2]*p_cov_tmp[2][1])/(p_cov_tmp[2][2] + meas_noise_[3][3]);
+
+				p_cov_tmp[1][2] = p_cov_[1][2];
+				p_cov_[1][2] = p_cov_tmp[1][2] - (p_cov_tmp[1][2]*p_cov_tmp[2][2])/(p_cov_tmp[2][2] + meas_noise_[3][3]);
+				// 3 row
+				p_cov_tmp[2][0] = p_cov_[2][0];
+				p_cov_[2][0] = -p_cov_tmp[2][0]*(p_cov_tmp[2][2]/(p_cov_tmp[2][2] + meas_noise_[3][3]) - 1);
+
+				p_cov_tmp[2][1] = p_cov_[2][1];
+				p_cov_[2][1] = -p_cov_tmp[2][1]*(p_cov_tmp[2][2]/(p_cov_tmp[2][2] + meas_noise_[3][3]) - 1);
+
+				p_cov_tmp[2][2] = p_cov_[2][2];
+				p_cov_[2][2] = -p_cov_tmp[2][2]*(p_cov_tmp[2][2]/(p_cov_tmp[2][2] + meas_noise_[3][3]) - 1);
+			}
+
 	        // Do zero velocity update
 	        zupt_array[z_idx] = abs(veh_ned_az_mps2);
 	        size_t next_z_idx = (z_idx + 1) % zupt_length_;
@@ -339,6 +439,16 @@ void BaroHelper::SetInitHeight(){
 	h_init_m_ = 44330.0*( 1 - pow( (mean_init_press_pa/SEA_LEVEL_PRESS_PA),0.19 ) );
 }
 
+void BaroHelper::SetGpsInitStatus(const bool gps_init_status){
+	//If GPS is initialized then initial alt of NED GPS will be set to 0,
+	//therefore intial height estimated by baro will be the offset between,
+	//baro alt and gps alt
+	if(gps_init_status){
+		gps_initialized = true;
+		baro_alt_gps_alt_offset = h_init_m_;
+	}
+}
+
 float BaroHelper::ComputeBaroAgl(){
 	return 44330.0*( 1 - pow( (barometer_.getPressure()*100.0/SEA_LEVEL_PRESS_PA),0.19 ) ) - h_init_m_;
 }
@@ -363,7 +473,7 @@ void BaroHelper::SetComplimentaryFilterParams(const float accel_sigma, const flo
 }
 
 void BaroHelper::SetKalmanFilterParams(const array<float, 3> &p_cov_init, const array<float, 3> &proc_noise, 
-										  const array<float, 2> &meas_noise, const size_t zupt_length, const float zupt_threshold){
+										  const array<float, 4> &meas_noise, const size_t zupt_length, const float zupt_threshold){
 	p_cov_[0][0] = p_cov_init[0];
 	p_cov_[1][1] = p_cov_init[1];
 	p_cov_[2][2] = p_cov_init[2];
@@ -374,6 +484,9 @@ void BaroHelper::SetKalmanFilterParams(const array<float, 3> &p_cov_init, const 
 
 	meas_noise_[0][0] = meas_noise[0];
 	meas_noise_[1][1] = meas_noise[1];
+	meas_noise_[2][2] = meas_noise[2];
+	meas_noise_[3][3] = meas_noise[3];
+
 
 	zupt_length_ = zupt_length;
 	zupt_threshold_ = zupt_threshold;
@@ -388,6 +501,18 @@ void BaroHelper::ComputeComplimentaryFilterGain(const float sigma_accel, const f
 
 void BaroHelper::SetBodyAccels(const array<float, 3> &body_accel_mps2){
 	 body_accel_mps2_ = body_accel_mps2;
+}
+
+void BaroHelper::SetGpsVelAndAlt(const array<float, 2> &baro_gps_alt_and_climb_rate_mps, 
+	const array<bool, 2> & baro_gps_alt_and_climb_rate_flag){
+
+	if(gps_initialized){
+		gps_cr_mps = baro_gps_alt_and_climb_rate_mps[1];
+		// Add offset between baro and gps
+		gps_alt_m = baro_gps_alt_and_climb_rate_mps[0] + baro_alt_gps_alt_offset;
+		gps_cr_new = baro_gps_alt_and_climb_rate_flag[1];
+		gps_alt_new = baro_gps_alt_and_climb_rate_flag[0];
+	}
 }
 
 void BaroHelper::SetEulerAngles(const array<float, 3> &euler_angles_rad){
