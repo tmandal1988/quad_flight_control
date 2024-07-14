@@ -619,6 +619,11 @@ int Ublox::testConnection()
     //     std::cerr << "Could not configure HPPOSLLH for ublox over SPI\n";
     // }
 
+    if(configureUbloxSpiPort()<0){
+        std::cerr << "Could not configure SPI Port for ublox over SPI\n";
+        return 0;
+    }
+
     if (enableNAV_POSLLH()<0)
     {
         std::cerr << "Could not configure POSLLH for ublox over SPI\n";
@@ -740,6 +745,43 @@ int Ublox::configureNavEngine(){
         if(parser->decodeMessageGeneric(spi_device_name, raw_data) > 0)
         {
             if(raw_data[2] == 0x05 && raw_data[3] == 0x01 && raw_data[6] == CLASS_CFG && raw_data[7] == NAV5_CFG)
+                ack_received = 1;
+        }
+        count++;
+    }
+
+    if(send_status > 0 && ack_received > 0){
+        return 1;
+    }
+
+    return -1;
+}
+
+int Ublox::configureUbloxSpiPort(){
+    CfgPrt msg;
+    msg.port_id = 4;
+    msg.reserved1 = 0;
+    msg.tx_ready = 0;
+    msg.spi_mode = 0;
+    msg.reserved2 = 0;
+    msg.reserved3 = 0;
+    msg.reserved4 = 0;
+    msg.reserved5 = 0;
+    msg.in_proto_mask = 1;
+    msg.out_proto_mask = 1;
+    msg.flags = 0;
+    msg.reserved6 = 0;
+    msg.reserved7 = 0;
+
+    int send_status = _sendMessage(CLASS_CFG, PRT_CFG, &msg, sizeof(CfgPrt));
+
+    std::vector<unsigned char> raw_data;
+    int ack_received = -1;
+    int count = 0;
+    while(ack_received != 1 && count < 100){
+        if(parser->decodeMessageGeneric(spi_device_name, raw_data) > 0)
+        {
+            if(raw_data[2] == 0x05 && raw_data[3] == 0x01 && raw_data[6] == CLASS_CFG && raw_data[7] == PRT_CFG)
                 ack_received = 1;
         }
         count++;

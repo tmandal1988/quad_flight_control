@@ -22,16 +22,19 @@ class BaroHelper{
 		// Destructor
 		~BaroHelper();
 
-		void StartBaroReader(int cpu_to_use, int32_t priority, float sample_time_s = 1.0/100.0);
+		void StartBaroReader(int cpu_to_use, int32_t priority, float sample_time_s = 0.008);
 		void GetBaroPressAndTemp(float baro_data[]);
 		void GetAglAndClimbRateEst(float baro_data[]);
 		void GetBaroDebugData(float baro_debug_data[]);
 		void SetBodyAccels(const array<float, 3> &body_accel_mps2);
+		void SetGpsVelAndAlt(const array<float, 2> &baro_gps_alt_and_climb_rate_mps, 
+							 const array<bool, 2> & baro_gps_alt_and_climb_rate_flag);
+		void SetGpsInitStatus(const bool gps_init_status);
 		void SetEulerAngles(const array<float, 3> &euler_angles_rad);
 		void SetComplimentaryFilterParams(const float accel_sigma, const float baro_sigma, 
 										  const size_t zupt_length = 12, const float zupt_threshold_ = 0.5);
 		void SetKalmanFilterParams(const array<float, 3> &p_cov_init, const array<float, 3> &proc_noise, 
-								   const array<float, 2> &meas_noise, const size_t zupt_length = 12, 
+								   const array<float, 4> &meas_noise, const size_t zupt_length = 12, 
 								   const float zupt_threshold = 0.5);
 
 		bool is_baro_ready_;
@@ -61,6 +64,12 @@ class BaroHelper{
 		// Variables for Complimentary filter
 		float sample_time_s_;
 		array<float, 3> body_accel_mps2_{0};
+		float gps_cr_mps{0};
+		float gps_alt_m{0};
+		bool gps_alt_new{false};
+		bool gps_cr_new{false};
+		bool gps_initialized{false};
+		float baro_alt_gps_alt_offset{0};
 		array<float, 3> euler_angles_rad_{0};
 		array<float, 2> comp_kc_{NAN};
 
@@ -82,9 +91,10 @@ class BaroHelper{
 
 		// Variables for Kalman Filter
 		array< array<float, 3>, 3> proc_noise_{0};
-		array< array<float, 2>, 2> meas_noise_{0};
+		array< array<float, 4>, 4> meas_noise_{0};
 		array< array<float, 3>, 3> p_cov_{0};
 		array< array<float, 2>, 3> k_gain_{0};
+		array< array<float, 2>, 3> k_gain_gps_{0};
 		bool use_kalman_filter_;
 		float veh_ned_az_est_mps2_;
 
