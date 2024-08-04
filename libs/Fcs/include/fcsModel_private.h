@@ -3,9 +3,9 @@
 //
 // Code generated for Simulink model 'fcsModel'.
 //
-// Model version                  : 1.103
+// Model version                  : 1.112
 // Simulink Coder version         : 9.7 (R2022a) 13-Nov-2021
-// C/C++ source code generated on : Fri Jun 14 19:31:46 2024
+// C/C++ source code generated on : Sat Aug  3 00:09:24 2024
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM 7
@@ -20,6 +20,8 @@
 #include "rtwtypes.h"
 #include "fcsModel.h"
 
+extern real_T rt_urand_Upu32_Yd_f_pw(uint32_T *u);
+extern real_T rt_nrand_Upu32_Yd_f_pw(uint32_T *u);
 extern uint32_T plook_bincpag(real_T u, const real_T bp[], uint32_T maxIndex,
   real_T *fraction, uint32_T *prevIndex);
 extern real_T intrp1d_la(uint32_T bpIndex, real_T frac, const real_T table[],

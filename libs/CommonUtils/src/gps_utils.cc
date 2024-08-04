@@ -48,7 +48,7 @@ bool GpsHelper::InitializeGps(float wait_duration_sec){
 		ublox_check_flag = true;
 		printf("Ublox test OK\n");
 		printf("\n");
-		if ( !gps_.configureSolutionRate(time_in_ms_bw_samples_) )
+		if ( !gps_.configureSolutionRate(time_in_ms_bw_samples_, 50) )
 		{
 			printf("Setting new rate: FAILED\n");
 		}

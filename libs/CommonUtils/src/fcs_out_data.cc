@@ -106,6 +106,9 @@ void AssignFcsData(const FcsOutput &fcs_output, DataFields data_to_save[], size_
 	data_to_save[data_index].fcsOut[95] = fcs_output.fcsDebug.outerLoopCtrlDebug.xyBodyAccelCtrlDebug.pidDebug[1].proportionalOutput;
 	data_to_save[data_index].fcsOut[96] = fcs_output.fcsDebug.outerLoopCtrlDebug.xyBodyAccelCtrlDebug.pidDebug[1].integralOutput;
 	data_to_save[data_index].fcsOut[97] = fcs_output.fcsDebug.outerLoopCtrlDebug.xyBodyAccelCtrlDebug.pidDebug[1].derivativeOutput;
-	data_to_save[data_index].fcsOut[98] = static_cast<float>(fcs_output.fcsDebug.state);
-	data_to_save[data_index].fcsOut[99] = static_cast<float>(fcs_output.fcsDebug.flightMode);
+	data_to_save[data_index].fcsOut[98] = static_cast<float>(fcs_output.fcsDebug.sysIdDebug.chirpTrigger);
+	data_to_save[data_index].fcsOut[99] = static_cast<float>(fcs_output.fcsDebug.sysIdDebug.chirpType);
+	data_to_save[data_index].fcsOut[100] = fcs_output.fcsDebug.sysIdDebug.chirpSignal;
+	data_to_save[data_index].fcsOut[101] = static_cast<float>(fcs_output.fcsDebug.state);
+	data_to_save[data_index].fcsOut[102] = static_cast<float>(fcs_output.fcsDebug.flightMode);
 }

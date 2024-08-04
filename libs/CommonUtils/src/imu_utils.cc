@@ -23,6 +23,22 @@ void ImuHelper::InitializeImu(){
 
 }
 
+void ImuHelper::UpdateImuNotchFilterCoeffs(const array<float, 3> notch_filter_num, const array<float, 3> notch_filter_den){
+	notch_filter_num_ = notch_filter_num;
+	notch_filter_den_ = notch_filter_den;
+	for(size_t idx = 0; idx < 6; idx++){
+		gyro_accel_notch_filters_[idx].UpdateFilterCoeff(notch_filter_num_, notch_filter_den_);
+	}
+}
+
+void ImuHelper::EnableImuNotchFilters(){
+	enable_notch_filter_ = true;
+}
+
+void ImuHelper::DisableImuNotchFilters(){
+	enable_notch_filter_ = false;
+}
+
 void ImuHelper::ComputeGyroOffset(size_t num_samples){
 	//---------------------- Calculate the offset -----------------------------
     float offset[3] = {0.0, 0.0, 0.0};
@@ -36,7 +52,7 @@ void ImuHelper::ComputeGyroOffset(size_t num_samples){
         offset[1] += gyro_[1];
         offset[2] += gyro_[2];
 
-        usleep(10000);
+        usleep(5000);
     }
     offset[0]/=static_cast<float>(num_samples);
     offset[1]/=static_cast<float>(num_samples);
@@ -65,7 +81,7 @@ float* ImuHelper::ComputeInitialRollPitchAndYaw(size_t num_samples){
 			sum_accel[imu_idx] += accel_[imu_idx];
 			sum_mag[imu_idx] += mag_[imu_idx];
 		}
-		usleep(10);
+		usleep(5000);
 	}
 
 	// Compute average accel magnitude
@@ -92,7 +108,7 @@ float* ImuHelper::ComputeInitialRollPitchAndYaw(size_t num_samples){
 
 	// Compute heading from mag readings
 	MatrixInv<float> mag2d = GetMag3DTo2DProj(init_att_[0], init_att_[1])*mag_vector;
-	init_att_[2] = atan2(-mag2d(1), mag2d(0)) + MAG_DEC_;
+	init_att_[2] = atan2(mag2d(1), mag2d(0)) + MAG_DEC_;
 
 	return init_att_;
 }
@@ -118,7 +134,7 @@ MatrixInv<float> ImuHelper::CorrectMagData(MatrixInv<float> mag_vector){
 
 MatrixInv<float> ImuHelper::GetMag3DTo2DProj(float roll, float pitch){
 	MatrixInv<float> mag2d_projection = { {cos(pitch), sin(pitch)*sin(roll), sin(pitch)*cos(roll) },
-										  {     0    , 			cos(roll)  ,       -sin(roll)     }   };
+										  {     0    , 			-cos(roll)  ,       sin(roll)     }   };
 	return mag2d_projection;
 }
 
@@ -129,8 +145,14 @@ float* ImuHelper::GetImuData(){
 																	  {mag_[1]},
 																	  {mag_[2]} }) );
 	for(size_t imu_idx = 0; imu_idx < 3; imu_idx++){
-		imu_data_[imu_idx] = gyro_[imu_idx];
-		imu_data_[imu_idx + 3] = accel_[imu_idx];
+		if(enable_notch_filter_){
+			imu_data_[imu_idx] = gyro_accel_notch_filters_[imu_idx].Filter(gyro_[imu_idx]);
+			imu_data_[imu_idx + 3] = gyro_accel_notch_filters_[imu_idx + 3].Filter(accel_[imu_idx]);
+		}else{
+			imu_data_[imu_idx] = gyro_[imu_idx];
+			imu_data_[imu_idx + 3] = accel_[imu_idx];
+		}
+		
 		imu_data_[imu_idx + 6] = corrected_mag(imu_idx);
 	}
 

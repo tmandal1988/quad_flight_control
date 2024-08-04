@@ -3,9 +3,9 @@
 //
 // Code generated for Simulink model 'fcsModel'.
 //
-// Model version                  : 1.103
+// Model version                  : 1.112
 // Simulink Coder version         : 9.7 (R2022a) 13-Nov-2021
-// C/C++ source code generated on : Fri Jun 14 19:31:46 2024
+// C/C++ source code generated on : Sat Aug  3 00:09:24 2024
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM 7
@@ -30,6 +30,33 @@ enum class enumStateMachine
   INACTIVE = 0,                        // Default value
   MTR_ARMED,
   INFLIGHT
+};
+
+#endif
+
+#ifndef DEFINED_TYPEDEF_FOR_enumChirpTrigger_
+#define DEFINED_TYPEDEF_FOR_enumChirpTrigger_
+
+// Defines if chirp is on or off
+enum class enumChirpTrigger
+  : int32_T {
+  OFF = 0,                             // Default value
+  ON
+};
+
+#endif
+
+#ifndef DEFINED_TYPEDEF_FOR_enumChirpType_
+#define DEFINED_TYPEDEF_FOR_enumChirpType_
+
+// Defines where chirp is inejected
+enum class enumChirpType
+  : int32_T {
+  NONE = 0,                            // Default value
+  MX,
+  MY,
+  MZ,
+  FZ
 };
 
 #endif
@@ -230,6 +257,8 @@ struct busVelCtrlParams
   std::array<real_T, 3> ffGainsArray;
   real_T baseMass_kg;
   std::array<real_T, 2> baseMassMinMax_kg;
+  std::array<real_T, 2> firstOrderHeadingFilterNum;
+  std::array<real_T, 2> firstOrderHeadingFilterDen;
 };
 
 #endif
@@ -274,6 +303,29 @@ struct busOuterLoopCtrlParams
 
 #endif
 
+#ifndef DEFINED_TYPEDEF_FOR_busSysIdInjectionParams_
+#define DEFINED_TYPEDEF_FOR_busSysIdInjectionParams_
+
+// Bus containing necessary parameters to generate sysId inputs
+struct busSysIdInjectionParams
+{
+  real_T mxAmp;
+  real_T myAmp;
+  real_T mzAmp;
+  real_T fzAmp;
+  real_T fStart_Hz;
+  real_T fEnd_hz;
+  real_T tRec_s;
+  real_T fadeInTime_s;
+  real_T fadeOutTime_s;
+  real_T c1;
+  real_T c2;
+  std::array<real_T, 2> filterNum;
+  std::array<real_T, 2> filterDen;
+};
+
+#endif
+
 #ifndef DEFINED_TYPEDEF_FOR_busFcsParams_
 #define DEFINED_TYPEDEF_FOR_busFcsParams_
 
@@ -282,6 +334,7 @@ struct busFcsParams
 {
   busInnerLoopCtrlParams innerLoopCtrlParams;
   busOuterLoopCtrlParams outerLoopCtrlParams;
+  busSysIdInjectionParams sysIdInjectionParams;
 };
 
 #endif
@@ -439,6 +492,24 @@ struct busOuterLoopCtrlDebug
 
 #endif
 
+#ifndef DEFINED_TYPEDEF_FOR_busSysIdDebug_
+#define DEFINED_TYPEDEF_FOR_busSysIdDebug_
+
+// Bus containing chirp debug data
+struct busSysIdDebug
+{
+  // Chirp trigger signal
+  enumChirpTrigger chirpTrigger;
+
+  // Chirp type
+  enumChirpType chirpType;
+
+  // Chirp signal that was injected
+  real_T chirpSignal;
+};
+
+#endif
+
 #ifndef DEFINED_TYPEDEF_FOR_busFcsDebug_
 #define DEFINED_TYPEDEF_FOR_busFcsDebug_
 
@@ -448,6 +519,7 @@ struct busFcsDebug
   busInnerLoopToAlloc allocDebug;
   busInnerLoopCtrlDebug innerLoopCtrlDebug;
   busOuterLoopCtrlDebug outerLoopCtrlDebug;
+  busSysIdDebug sysIdDebug;
   enumStateMachine state;
   enumFlightMode flightMode;
 };

@@ -5,11 +5,11 @@
 busFcsParams AssignFcsCtrlParams(){
 	busFcsParams fcs_ctrl_params;
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.ctrlParamsArray[0].Kp = 1.70000000;
+	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.ctrlParamsArray[0].Kp = 1.30000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.ctrlParamsArray[0].Ki = 0.00750000;
+	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.ctrlParamsArray[0].Ki = 0.00000000;
 	//#################################################*
 
 	//**************************************************
@@ -17,7 +17,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.ctrlParamsArray[0].Kb = 0.08200000;
+	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.ctrlParamsArray[0].Kb = 0.00000000;
 	//#################################################*
 
 	//**************************************************
@@ -25,7 +25,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.ctrlParamsArray[0].filterBandwidth_radps = 125.66370614;
+	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.ctrlParamsArray[0].filterBandwidth_radps = 157.07963268;
 	//#################################################*
 
 	//**************************************************
@@ -39,11 +39,11 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.ctrlParamsArray[1].Kp = 1.70000000;
+	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.ctrlParamsArray[1].Kp = 1.30000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.ctrlParamsArray[1].Ki = 0.01000000;
+	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.ctrlParamsArray[1].Ki = 0.00000000;
 	//#################################################*
 
 	//**************************************************
@@ -51,7 +51,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.ctrlParamsArray[1].Kb = 0.07500000;
+	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.ctrlParamsArray[1].Kb = 0.00000000;
 	//#################################################*
 
 	//**************************************************
@@ -59,7 +59,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.ctrlParamsArray[1].filterBandwidth_radps = 125.66370614;
+	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.ctrlParamsArray[1].filterBandwidth_radps = 157.07963268;
 	//#################################################*
 
 	//**************************************************
@@ -73,11 +73,11 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.ctrlParamsArray[2].Kp = 1.50000000;
+	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.ctrlParamsArray[2].Kp = 2.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.ctrlParamsArray[2].Ki = 0.02000000;
+	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.ctrlParamsArray[2].Ki = 0.00000000;
 	//#################################################*
 
 	//**************************************************
@@ -85,7 +85,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.ctrlParamsArray[2].Kb = 0.08200000;
+	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.ctrlParamsArray[2].Kb = 0.00000000;
 	//#################################################*
 
 	//**************************************************
@@ -93,7 +93,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.ctrlParamsArray[2].filterBandwidth_radps = 125.66370614;
+	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.ctrlParamsArray[2].filterBandwidth_radps = 157.07963268;
 	//#################################################*
 
 	//**************************************************
@@ -127,7 +127,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.cmdSignalConditioningParamsArray[0].filterParams.filterBandwidth_radps = 471.23889804;
+	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.cmdSignalConditioningParamsArray[0].filterParams.filterBandwidth_radps = 157.07963268;
 	//#################################################*
 
 	//**************************************************
@@ -155,7 +155,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.cmdSignalConditioningParamsArray[1].filterParams.filterBandwidth_radps = 471.23889804;
+	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.cmdSignalConditioningParamsArray[1].filterParams.filterBandwidth_radps = 157.07963268;
 	//#################################################*
 
 	//**************************************************
@@ -183,7 +183,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.cmdSignalConditioningParamsArray[2].filterParams.filterBandwidth_radps = 18.84955592;
+	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.cmdSignalConditioningParamsArray[2].filterParams.filterBandwidth_radps = 31.41592654;
 	//#################################################*
 
 	//**************************************************
@@ -211,7 +211,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.measSignalConditioningParamsArray[0].filterParams.filterBandwidth_radps = 471.23889804;
+	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.measSignalConditioningParamsArray[0].filterParams.filterBandwidth_radps = 157.07963268;
 	//#################################################*
 
 	//**************************************************
@@ -239,7 +239,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.measSignalConditioningParamsArray[1].filterParams.filterBandwidth_radps = 471.23889804;
+	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.measSignalConditioningParamsArray[1].filterParams.filterBandwidth_radps = 157.07963268;
 	//#################################################*
 
 	//**************************************************
@@ -267,7 +267,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.measSignalConditioningParamsArray[2].filterParams.filterBandwidth_radps = 18.84955592;
+	fcs_ctrl_params.innerLoopCtrlParams.attCtrlParams.measSignalConditioningParamsArray[2].filterParams.filterBandwidth_radps = 31.41592654;
 	//#################################################*
 
 	//**************************************************
@@ -275,11 +275,11 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.ctrlParamsArray[0].Kp = 29.00000000;
+	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.ctrlParamsArray[0].Kp = 30.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.ctrlParamsArray[0].Ki = 0.00000000;
+	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.ctrlParamsArray[0].Ki = 1.50000000;
 	//#################################################*
 
 	//**************************************************
@@ -287,7 +287,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.ctrlParamsArray[0].Kb = 0.00000000;
+	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.ctrlParamsArray[0].Kb = 0.20000000;
 	//#################################################*
 
 	//**************************************************
@@ -295,7 +295,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.ctrlParamsArray[0].filterBandwidth_radps = 188.49555922;
+	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.ctrlParamsArray[0].filterBandwidth_radps = 314.15926536;
 	//#################################################*
 
 	//**************************************************
@@ -309,11 +309,11 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.ctrlParamsArray[1].Kp = 34.00000000;
+	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.ctrlParamsArray[1].Kp = 30.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.ctrlParamsArray[1].Ki = 0.00000000;
+	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.ctrlParamsArray[1].Ki = 1.50000000;
 	//#################################################*
 
 	//**************************************************
@@ -321,7 +321,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.ctrlParamsArray[1].Kb = 0.00000000;
+	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.ctrlParamsArray[1].Kb = 0.20000000;
 	//#################################################*
 
 	//**************************************************
@@ -329,7 +329,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.ctrlParamsArray[1].filterBandwidth_radps = 188.49555922;
+	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.ctrlParamsArray[1].filterBandwidth_radps = 314.15926536;
 	//#################################################*
 
 	//**************************************************
@@ -343,11 +343,11 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.ctrlParamsArray[2].Kp = 31.00000000;
+	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.ctrlParamsArray[2].Kp = 35.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.ctrlParamsArray[2].Ki = 0.00000000;
+	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.ctrlParamsArray[2].Ki = 2.00000000;
 	//#################################################*
 
 	//**************************************************
@@ -355,7 +355,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.ctrlParamsArray[2].Kb = 0.00000000;
+	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.ctrlParamsArray[2].Kb = 0.20000000;
 	//#################################################*
 
 	//**************************************************
@@ -363,7 +363,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.ctrlParamsArray[2].filterBandwidth_radps = 188.49555922;
+	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.ctrlParamsArray[2].filterBandwidth_radps = 314.15926536;
 	//#################################################*
 
 	//**************************************************
@@ -397,7 +397,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.cmdSignalConditioningParamsArray[0].filterParams.filterBandwidth_radps = 471.23889804;
+	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.cmdSignalConditioningParamsArray[0].filterParams.filterBandwidth_radps = 314.15926536;
 	//#################################################*
 
 	//**************************************************
@@ -425,7 +425,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.cmdSignalConditioningParamsArray[1].filterParams.filterBandwidth_radps = 471.23889804;
+	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.cmdSignalConditioningParamsArray[1].filterParams.filterBandwidth_radps = 314.15926536;
 	//#################################################*
 
 	//**************************************************
@@ -453,7 +453,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.cmdSignalConditioningParamsArray[2].filterParams.filterBandwidth_radps = 37.69911184;
+	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.cmdSignalConditioningParamsArray[2].filterParams.filterBandwidth_radps = 94.24777961;
 	//#################################################*
 
 	//**************************************************
@@ -481,7 +481,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.measSignalConditioningParamsArray[0].filterParams.filterBandwidth_radps = 471.23889804;
+	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.measSignalConditioningParamsArray[0].filterParams.filterBandwidth_radps = 314.15926536;
 	//#################################################*
 
 	//**************************************************
@@ -509,7 +509,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.measSignalConditioningParamsArray[1].filterParams.filterBandwidth_radps = 471.23889804;
+	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.measSignalConditioningParamsArray[1].filterParams.filterBandwidth_radps = 314.15926536;
 	//#################################################*
 
 	//**************************************************
@@ -537,7 +537,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.measSignalConditioningParamsArray[2].filterParams.filterBandwidth_radps = 37.69911184;
+	fcs_ctrl_params.innerLoopCtrlParams.angRateCtrlParams.measSignalConditioningParamsArray[2].filterParams.filterBandwidth_radps = 94.24777961;
 	//#################################################*
 
 	//**************************************************
@@ -545,7 +545,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.ctrlParamsArray[0].Kp = 0.17500000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.ctrlParamsArray[0].Kp = 0.50000000;
 	//#################################################*
 
 	//**************************************************
@@ -553,7 +553,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.ctrlParamsArray[0].Kd = 0.01000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.ctrlParamsArray[0].Kd = 0.00000000;
 	//#################################################*
 
 	//**************************************************
@@ -565,7 +565,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.ctrlParamsArray[0].filterBandwidth_radps = 125.66370614;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.ctrlParamsArray[0].filterBandwidth_radps = 15.70796327;
 	//#################################################*
 
 	//**************************************************
@@ -574,12 +574,12 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.ctrlParamsArray[0].outputRateLimits[0] = -100.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.ctrlParamsArray[0].outputRateLimits[1] = 100.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.ctrlParamsArray[0].outputRateLimits[0] = -250.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.ctrlParamsArray[0].outputRateLimits[1] = 250.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.ctrlParamsArray[1].Kp = 0.17500000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.ctrlParamsArray[1].Kp = 0.50000000;
 	//#################################################*
 
 	//**************************************************
@@ -587,7 +587,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.ctrlParamsArray[1].Kd = 0.01000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.ctrlParamsArray[1].Kd = 0.00000000;
 	//#################################################*
 
 	//**************************************************
@@ -599,7 +599,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.ctrlParamsArray[1].filterBandwidth_radps = 125.66370614;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.ctrlParamsArray[1].filterBandwidth_radps = 15.70796327;
 	//#################################################*
 
 	//**************************************************
@@ -608,8 +608,8 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.ctrlParamsArray[1].outputRateLimits[0] = -100.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.ctrlParamsArray[1].outputRateLimits[1] = 100.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.ctrlParamsArray[1].outputRateLimits[0] = -250.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.ctrlParamsArray[1].outputRateLimits[1] = 250.00000000;
 	//#################################################*
 
 	//**************************************************
@@ -633,7 +633,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.ctrlParamsArray[2].filterBandwidth_radps = 125.66370614;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.ctrlParamsArray[2].filterBandwidth_radps = 15.70796327;
 	//#################################################*
 
 	//**************************************************
@@ -642,8 +642,8 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.ctrlParamsArray[2].outputRateLimits[0] = -100.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.ctrlParamsArray[2].outputRateLimits[1] = 100.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.ctrlParamsArray[2].outputRateLimits[0] = -250.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.ctrlParamsArray[2].outputRateLimits[1] = 250.00000000;
 	//#################################################*
 
 	//**************************************************
@@ -652,18 +652,18 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[0].filteredInputRateLimits[0] = -50000.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[0].filteredInputRateLimits[1] = 50000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[0].filteredInputRateLimits[0] = -125000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[0].filteredInputRateLimits[1] = 125000.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[0].filteredInputAccelLimits[0] = -2500000.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[0].filteredInputAccelLimits[1] = 2500000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[0].filteredInputAccelLimits[0] = -15625000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[0].filteredInputAccelLimits[1] = 15625000.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[0].filteredInputJerkLimits[0] = -125000000.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[0].filteredInputJerkLimits[1] = 125000000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[0].filteredInputJerkLimits[0] = -1953125000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[0].filteredInputJerkLimits[1] = 1953125000.00000000;
 	//#################################################*
 
 	//**************************************************
@@ -680,18 +680,18 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[1].filteredInputRateLimits[0] = -50000.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[1].filteredInputRateLimits[1] = 50000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[1].filteredInputRateLimits[0] = -125000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[1].filteredInputRateLimits[1] = 125000.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[1].filteredInputAccelLimits[0] = -2500000.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[1].filteredInputAccelLimits[1] = 2500000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[1].filteredInputAccelLimits[0] = -15625000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[1].filteredInputAccelLimits[1] = 15625000.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[1].filteredInputJerkLimits[0] = -125000000.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[1].filteredInputJerkLimits[1] = 125000000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[1].filteredInputJerkLimits[0] = -1953125000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[1].filteredInputJerkLimits[1] = 1953125000.00000000;
 	//#################################################*
 
 	//**************************************************
@@ -708,22 +708,22 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[2].filteredInputRateLimits[0] = -50000.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[2].filteredInputRateLimits[1] = 50000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[2].filteredInputRateLimits[0] = -125000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[2].filteredInputRateLimits[1] = 125000.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[2].filteredInputAccelLimits[0] = -2500000.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[2].filteredInputAccelLimits[1] = 2500000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[2].filteredInputAccelLimits[0] = -15625000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[2].filteredInputAccelLimits[1] = 15625000.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[2].filteredInputJerkLimits[0] = -125000000.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[2].filteredInputJerkLimits[1] = 125000000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[2].filteredInputJerkLimits[0] = -1953125000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[2].filteredInputJerkLimits[1] = 1953125000.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[2].filterParams.filterBandwidth_radps = 471.23889804;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.cmdSignalConditioningParamsArray[2].filterParams.filterBandwidth_radps = 62.83185307;
 	//#################################################*
 
 	//**************************************************
@@ -736,18 +736,18 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[0].filteredInputRateLimits[0] = -5000000.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[0].filteredInputRateLimits[1] = 5000000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[0].filteredInputRateLimits[0] = -12500000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[0].filteredInputRateLimits[1] = 12500000.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[0].filteredInputAccelLimits[0] = -250000000.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[0].filteredInputAccelLimits[1] = 250000000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[0].filteredInputAccelLimits[0] = -1562500000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[0].filteredInputAccelLimits[1] = 1562500000.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[0].filteredInputJerkLimits[0] = -12500000000.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[0].filteredInputJerkLimits[1] = 12500000000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[0].filteredInputJerkLimits[0] = -195312500000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[0].filteredInputJerkLimits[1] = 195312500000.00000000;
 	//#################################################*
 
 	//**************************************************
@@ -764,18 +764,18 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[1].filteredInputRateLimits[0] = -5000000.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[1].filteredInputRateLimits[1] = 5000000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[1].filteredInputRateLimits[0] = -12500000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[1].filteredInputRateLimits[1] = 12500000.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[1].filteredInputAccelLimits[0] = -250000000.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[1].filteredInputAccelLimits[1] = 250000000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[1].filteredInputAccelLimits[0] = -1562500000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[1].filteredInputAccelLimits[1] = 1562500000.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[1].filteredInputJerkLimits[0] = -12500000000.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[1].filteredInputJerkLimits[1] = 12500000000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[1].filteredInputJerkLimits[0] = -195312500000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[1].filteredInputJerkLimits[1] = 195312500000.00000000;
 	//#################################################*
 
 	//**************************************************
@@ -792,22 +792,22 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[2].filteredInputRateLimits[0] = -5000000.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[2].filteredInputRateLimits[1] = 5000000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[2].filteredInputRateLimits[0] = -12500000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[2].filteredInputRateLimits[1] = 12500000.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[2].filteredInputAccelLimits[0] = -250000000.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[2].filteredInputAccelLimits[1] = 250000000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[2].filteredInputAccelLimits[0] = -1562500000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[2].filteredInputAccelLimits[1] = 1562500000.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[2].filteredInputJerkLimits[0] = -12500000000.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[2].filteredInputJerkLimits[1] = 12500000000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[2].filteredInputJerkLimits[0] = -195312500000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[2].filteredInputJerkLimits[1] = 195312500000.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[2].filterParams.filterBandwidth_radps = 471.23889804;
+	fcs_ctrl_params.outerLoopCtrlParams.posCtrlParams.measSignalConditioningParamsArray[2].filterParams.filterBandwidth_radps = 62.83185307;
 	//#################################################*
 
 	//**************************************************
@@ -815,19 +815,19 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[0].Kp = 0.65000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[0].Kp = 0.75000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[0].Ki = 0.07500000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[0].Ki = 0.10000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[0].Kd = 0.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[0].Kd = 0.00050000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[0].Kb = 0.32000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[0].Kb = 0.70000000;
 	//#################################################*
 
 	//**************************************************
@@ -844,24 +844,24 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[0].outputRateLimits[0] = -272.25000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[0].outputRateLimits[1] = 272.25000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[0].outputRateLimits[0] = -680.62500000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[0].outputRateLimits[1] = 680.62500000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[1].Kp = 0.65000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[1].Kp = 0.75000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[1].Ki = 0.07500000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[1].Ki = 0.10000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[1].Kd = 0.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[1].Kd = 0.00050000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[1].Kb = 0.32000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[1].Kb = 0.75000000;
 	//#################################################*
 
 	//**************************************************
@@ -878,12 +878,12 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[1].outputRateLimits[0] = -272.25000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[1].outputRateLimits[1] = 272.25000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[1].outputRateLimits[0] = -680.62500000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[1].outputRateLimits[1] = 680.62500000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[2].Kp = 0.80000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[2].Kp = 0.60000000;
 	//#################################################*
 
 	//**************************************************
@@ -912,32 +912,32 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[2].outputRateLimits[0] = -200.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[2].outputRateLimits[1] = 200.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[2].outputRateLimits[0] = -500.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ctrlParamsArray[2].outputRateLimits[1] = 500.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[0].filteredInputLimits[0] = -2.50000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[0].filteredInputLimits[1] = 2.50000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[0].filteredInputLimits[0] = -5.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[0].filteredInputLimits[1] = 5.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[0].filteredInputRateLimits[0] = -125.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[0].filteredInputRateLimits[1] = 125.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[0].filteredInputRateLimits[0] = -625.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[0].filteredInputRateLimits[1] = 625.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[0].filteredInputAccelLimits[0] = -6250.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[0].filteredInputAccelLimits[1] = 6250.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[0].filteredInputAccelLimits[0] = -78125.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[0].filteredInputAccelLimits[1] = 78125.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[0].filteredInputJerkLimits[0] = -312500.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[0].filteredInputJerkLimits[1] = 312500.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[0].filteredInputJerkLimits[0] = -9765625.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[0].filteredInputJerkLimits[1] = 9765625.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[0].filterParams.filterBandwidth_radps = 62.83185307;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[0].filterParams.filterBandwidth_radps = 125.66370614;
 	//#################################################*
 
 	//**************************************************
@@ -945,27 +945,27 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[1].filteredInputLimits[0] = -2.50000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[1].filteredInputLimits[1] = 2.50000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[1].filteredInputLimits[0] = -5.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[1].filteredInputLimits[1] = 5.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[1].filteredInputRateLimits[0] = -125.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[1].filteredInputRateLimits[1] = 125.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[1].filteredInputRateLimits[0] = -625.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[1].filteredInputRateLimits[1] = 625.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[1].filteredInputAccelLimits[0] = -6250.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[1].filteredInputAccelLimits[1] = 6250.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[1].filteredInputAccelLimits[0] = -78125.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[1].filteredInputAccelLimits[1] = 78125.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[1].filteredInputJerkLimits[0] = -312500.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[1].filteredInputJerkLimits[1] = 312500.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[1].filteredInputJerkLimits[0] = -9765625.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[1].filteredInputJerkLimits[1] = 9765625.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[1].filterParams.filterBandwidth_radps = 62.83185307;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[1].filterParams.filterBandwidth_radps = 125.66370614;
 	//#################################################*
 
 	//**************************************************
@@ -973,27 +973,27 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[2].filteredInputLimits[0] = -2.50000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[2].filteredInputLimits[1] = 2.50000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[2].filteredInputLimits[0] = -5.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[2].filteredInputLimits[1] = 5.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[2].filteredInputRateLimits[0] = -125.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[2].filteredInputRateLimits[1] = 125.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[2].filteredInputRateLimits[0] = -625.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[2].filteredInputRateLimits[1] = 625.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[2].filteredInputAccelLimits[0] = -6250.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[2].filteredInputAccelLimits[1] = 6250.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[2].filteredInputAccelLimits[0] = -78125.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[2].filteredInputAccelLimits[1] = 78125.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[2].filteredInputJerkLimits[0] = -312500.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[2].filteredInputJerkLimits[1] = 312500.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[2].filteredInputJerkLimits[0] = -9765625.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[2].filteredInputJerkLimits[1] = 9765625.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[2].filterParams.filterBandwidth_radps = 471.23889804;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.cmdSignalConditioningParamsArray[2].filterParams.filterBandwidth_radps = 125.66370614;
 	//#################################################*
 
 	//**************************************************
@@ -1001,27 +1001,27 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[0].filteredInputLimits[0] = -250.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[0].filteredInputLimits[1] = 250.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[0].filteredInputLimits[0] = -500.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[0].filteredInputLimits[1] = 500.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[0].filteredInputRateLimits[0] = -12500.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[0].filteredInputRateLimits[1] = 12500.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[0].filteredInputRateLimits[0] = -62500.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[0].filteredInputRateLimits[1] = 62500.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[0].filteredInputAccelLimits[0] = -625000.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[0].filteredInputAccelLimits[1] = 625000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[0].filteredInputAccelLimits[0] = -7812500.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[0].filteredInputAccelLimits[1] = 7812500.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[0].filteredInputJerkLimits[0] = -31250000.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[0].filteredInputJerkLimits[1] = 31250000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[0].filteredInputJerkLimits[0] = -976562500.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[0].filteredInputJerkLimits[1] = 976562500.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[0].filterParams.filterBandwidth_radps = 62.83185307;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[0].filterParams.filterBandwidth_radps = 125.66370614;
 	//#################################################*
 
 	//**************************************************
@@ -1029,27 +1029,27 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[1].filteredInputLimits[0] = -250.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[1].filteredInputLimits[1] = 250.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[1].filteredInputLimits[0] = -500.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[1].filteredInputLimits[1] = 500.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[1].filteredInputRateLimits[0] = -12500.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[1].filteredInputRateLimits[1] = 12500.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[1].filteredInputRateLimits[0] = -62500.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[1].filteredInputRateLimits[1] = 62500.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[1].filteredInputAccelLimits[0] = -625000.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[1].filteredInputAccelLimits[1] = 625000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[1].filteredInputAccelLimits[0] = -7812500.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[1].filteredInputAccelLimits[1] = 7812500.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[1].filteredInputJerkLimits[0] = -31250000.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[1].filteredInputJerkLimits[1] = 31250000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[1].filteredInputJerkLimits[0] = -976562500.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[1].filteredInputJerkLimits[1] = 976562500.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[1].filterParams.filterBandwidth_radps = 62.83185307;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[1].filterParams.filterBandwidth_radps = 125.66370614;
 	//#################################################*
 
 	//**************************************************
@@ -1057,27 +1057,27 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[2].filteredInputLimits[0] = -250.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[2].filteredInputLimits[1] = 250.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[2].filteredInputLimits[0] = -500.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[2].filteredInputLimits[1] = 500.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[2].filteredInputRateLimits[0] = -12500.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[2].filteredInputRateLimits[1] = 12500.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[2].filteredInputRateLimits[0] = -62500.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[2].filteredInputRateLimits[1] = 62500.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[2].filteredInputAccelLimits[0] = -625000.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[2].filteredInputAccelLimits[1] = 625000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[2].filteredInputAccelLimits[0] = -7812500.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[2].filteredInputAccelLimits[1] = 7812500.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[2].filteredInputJerkLimits[0] = -31250000.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[2].filteredInputJerkLimits[1] = 31250000.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[2].filteredInputJerkLimits[0] = -976562500.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[2].filteredInputJerkLimits[1] = 976562500.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[2].filterParams.filterBandwidth_radps = 18.84955592;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.measSignalConditioningParamsArray[2].filterParams.filterBandwidth_radps = 125.66370614;
 	//#################################################*
 
 	//**************************************************
@@ -1090,22 +1090,22 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[0].filteredInputRateLimits[0] = -4905.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[0].filteredInputRateLimits[1] = 4905.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[0].filteredInputRateLimits[0] = -12262.50000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[0].filteredInputRateLimits[1] = 12262.50000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[0].filteredInputAccelLimits[0] = -245250.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[0].filteredInputAccelLimits[1] = 245250.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[0].filteredInputAccelLimits[0] = -1532812.50000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[0].filteredInputAccelLimits[1] = 1532812.50000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[0].filteredInputJerkLimits[0] = -12262500.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[0].filteredInputJerkLimits[1] = 12262500.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[0].filteredInputJerkLimits[0] = -191601562.50000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[0].filteredInputJerkLimits[1] = 191601562.50000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[0].filterParams.filterBandwidth_radps = 18.84955592;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[0].filterParams.filterBandwidth_radps = 125.66370614;
 	//#################################################*
 
 	//**************************************************
@@ -1118,22 +1118,22 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[1].filteredInputRateLimits[0] = -4905.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[1].filteredInputRateLimits[1] = 4905.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[1].filteredInputRateLimits[0] = -12262.50000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[1].filteredInputRateLimits[1] = 12262.50000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[1].filteredInputAccelLimits[0] = -245250.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[1].filteredInputAccelLimits[1] = 245250.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[1].filteredInputAccelLimits[0] = -1532812.50000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[1].filteredInputAccelLimits[1] = 1532812.50000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[1].filteredInputJerkLimits[0] = -12262500.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[1].filteredInputJerkLimits[1] = 12262500.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[1].filteredInputJerkLimits[0] = -191601562.50000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[1].filteredInputJerkLimits[1] = 191601562.50000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[1].filterParams.filterBandwidth_radps = 18.84955592;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[1].filterParams.filterBandwidth_radps = 125.66370614;
 	//#################################################*
 
 	//**************************************************
@@ -1146,22 +1146,22 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[2].filteredInputRateLimits[0] = -4905.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[2].filteredInputRateLimits[1] = 4905.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[2].filteredInputRateLimits[0] = -12262.50000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[2].filteredInputRateLimits[1] = 12262.50000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[2].filteredInputAccelLimits[0] = -245250.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[2].filteredInputAccelLimits[1] = 245250.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[2].filteredInputAccelLimits[0] = -1532812.50000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[2].filteredInputAccelLimits[1] = 1532812.50000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[2].filteredInputJerkLimits[0] = -12262500.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[2].filteredInputJerkLimits[1] = 12262500.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[2].filteredInputJerkLimits[0] = -191601562.50000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[2].filteredInputJerkLimits[1] = 191601562.50000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[2].filterParams.filterBandwidth_radps = 471.23889804;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelSignalConditioningParamsArray[2].filterParams.filterBandwidth_radps = 125.66370614;
 	//#################################################*
 
 	//**************************************************
@@ -1169,14 +1169,14 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelFbGainsArray[0] = 0.75000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelFbGainsArray[1] = 0.75000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelFbGainsArray[0] = 0.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelFbGainsArray[1] = 0.00000000;
 	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.accelFbGainsArray[2] = 0.00000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ffGainsArray[0] = 2.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ffGainsArray[1] = 2.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ffGainsArray[0] = 0.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ffGainsArray[1] = 0.00000000;
 	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.ffGainsArray[2] = 2.05000000;
 	//#################################################*
 
@@ -1187,6 +1187,16 @@ busFcsParams AssignFcsCtrlParams(){
 	//**************************************************
 	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.baseMassMinMax_kg[0] = 1.50000000;
 	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.baseMassMinMax_kg[1] = 3.00000000;
+	//#################################################*
+
+	//**************************************************
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.firstOrderHeadingFilterNum[0] = 0.11163521;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.firstOrderHeadingFilterNum[1] = 0.11163521;
+	//#################################################*
+
+	//**************************************************
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.firstOrderHeadingFilterDen[0] = 1.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.velCtrlParams.firstOrderHeadingFilterDen[1] = -0.77672958;
 	//#################################################*
 
 	//**************************************************
@@ -1267,7 +1277,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.ctrlParams.Ki = 0.25000000;
+	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.ctrlParams.Ki = 0.30000000;
 	//#################################################*
 
 	//**************************************************
@@ -1283,7 +1293,7 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.ctrlParams.filterBandwidth_radps = 125.66370614;
+	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.ctrlParams.filterBandwidth_radps = 157.07963268;
 	//#################################################*
 
 	//**************************************************
@@ -1292,8 +1302,8 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.ctrlParams.outputRateLimits[0] = -250.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.ctrlParams.outputRateLimits[1] = 250.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.ctrlParams.outputRateLimits[0] = -625.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.ctrlParams.outputRateLimits[1] = 625.00000000;
 	//#################################################*
 
 	//**************************************************
@@ -1302,22 +1312,22 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.cmdSignalConditioningParams.filteredInputRateLimits[0] = -4905.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.cmdSignalConditioningParams.filteredInputRateLimits[1] = 4905.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.cmdSignalConditioningParams.filteredInputRateLimits[0] = -12262.50000000;
+	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.cmdSignalConditioningParams.filteredInputRateLimits[1] = 12262.50000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.cmdSignalConditioningParams.filteredInputAccelLimits[0] = -245250.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.cmdSignalConditioningParams.filteredInputAccelLimits[1] = 245250.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.cmdSignalConditioningParams.filteredInputAccelLimits[0] = -1532812.50000000;
+	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.cmdSignalConditioningParams.filteredInputAccelLimits[1] = 1532812.50000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.cmdSignalConditioningParams.filteredInputJerkLimits[0] = -12262500.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.cmdSignalConditioningParams.filteredInputJerkLimits[1] = 12262500.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.cmdSignalConditioningParams.filteredInputJerkLimits[0] = -191601562.50000000;
+	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.cmdSignalConditioningParams.filteredInputJerkLimits[1] = 191601562.50000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.cmdSignalConditioningParams.filterParams.filterBandwidth_radps = 471.23889804;
+	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.cmdSignalConditioningParams.filterParams.filterBandwidth_radps = 157.07963268;
 	//#################################################*
 
 	//**************************************************
@@ -1330,22 +1340,22 @@ busFcsParams AssignFcsCtrlParams(){
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.measSignalConditioningParams.filteredInputRateLimits[0] = -4905.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.measSignalConditioningParams.filteredInputRateLimits[1] = 4905.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.measSignalConditioningParams.filteredInputRateLimits[0] = -12262.50000000;
+	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.measSignalConditioningParams.filteredInputRateLimits[1] = 12262.50000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.measSignalConditioningParams.filteredInputAccelLimits[0] = -245250.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.measSignalConditioningParams.filteredInputAccelLimits[1] = 245250.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.measSignalConditioningParams.filteredInputAccelLimits[0] = -1532812.50000000;
+	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.measSignalConditioningParams.filteredInputAccelLimits[1] = 1532812.50000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.measSignalConditioningParams.filteredInputJerkLimits[0] = -12262500.00000000;
-	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.measSignalConditioningParams.filteredInputJerkLimits[1] = 12262500.00000000;
+	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.measSignalConditioningParams.filteredInputJerkLimits[0] = -191601562.50000000;
+	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.measSignalConditioningParams.filteredInputJerkLimits[1] = 191601562.50000000;
 	//#################################################*
 
 	//**************************************************
-	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.measSignalConditioningParams.filterParams.filterBandwidth_radps = 471.23889804;
+	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.measSignalConditioningParams.filterParams.filterBandwidth_radps = 157.07963268;
 	//#################################################*
 
 	//**************************************************
@@ -1354,6 +1364,60 @@ busFcsParams AssignFcsCtrlParams(){
 
 	//**************************************************
 	fcs_ctrl_params.outerLoopCtrlParams.zAccelCtrlParams.ffGain = 1.00000000;
+	//#################################################*
+
+	//**************************************************
+	fcs_ctrl_params.sysIdInjectionParams.mxAmp = 0.10000000;
+	//#################################################*
+
+	//**************************************************
+	fcs_ctrl_params.sysIdInjectionParams.myAmp = 0.10000000;
+	//#################################################*
+
+	//**************************************************
+	fcs_ctrl_params.sysIdInjectionParams.mzAmp = 0.20000000;
+	//#################################################*
+
+	//**************************************************
+	fcs_ctrl_params.sysIdInjectionParams.fzAmp = 0.75000000;
+	//#################################################*
+
+	//**************************************************
+	fcs_ctrl_params.sysIdInjectionParams.fStart_Hz = 0.25000000;
+	//#################################################*
+
+	//**************************************************
+	fcs_ctrl_params.sysIdInjectionParams.fEnd_hz = 10.00000000;
+	//#################################################*
+
+	//**************************************************
+	fcs_ctrl_params.sysIdInjectionParams.tRec_s = 15.00000000;
+	//#################################################*
+
+	//**************************************************
+	fcs_ctrl_params.sysIdInjectionParams.fadeInTime_s = 3.00000000;
+	//#################################################*
+
+	//**************************************************
+	fcs_ctrl_params.sysIdInjectionParams.fadeOutTime_s = 3.00000000;
+	//#################################################*
+
+	//**************************************************
+	fcs_ctrl_params.sysIdInjectionParams.c1 = 4.00000000;
+	//#################################################*
+
+	//**************************************************
+	fcs_ctrl_params.sysIdInjectionParams.c2 = 0.01870000;
+	//#################################################*
+
+	//**************************************************
+	fcs_ctrl_params.sysIdInjectionParams.filterNum[0] = 0.11216024;
+	fcs_ctrl_params.sysIdInjectionParams.filterNum[1] = 0.11216024;
+	//#################################################*
+
+	//**************************************************
+	fcs_ctrl_params.sysIdInjectionParams.filterDen[0] = 1.00000000;
+	fcs_ctrl_params.sysIdInjectionParams.filterDen[1] = -0.77567951;
 	//#################################################*
 
 	return fcs_ctrl_params;

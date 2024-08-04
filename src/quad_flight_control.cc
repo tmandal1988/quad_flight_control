@@ -53,6 +53,11 @@ int main(int argc, char *argv[]){
 	ImuHelper imu_reader("mpu");
 	imu_reader.InitializeImu();
 
+	// Enable IMU notch filters
+	imu_reader.UpdateImuNotchFilterCoeffs(array<float, 3> {0.521563404087046, 0.427674228653371, 0.520613021818241}, 
+																				array<float, 3> {1, 0.427674228653371, 0.0421764259052876});
+	imu_reader.EnableImuNotchFilters();
+
 	BaroHelper baro_reader;
 	float baro_debug_data[9];
 	array<float, 3> baro_accel{0};
@@ -171,15 +176,15 @@ int main(int argc, char *argv[]){
 
 	// Calibration variables for mag
 	// Offset
-	MatrixInv<float> mag_offset = {{17.8902136639429}, {35.5186740453011}, {-33.8067089624238}};
+	MatrixInv<float> mag_offset = {{19.1927}, {42.3204}, {-32.0349}};
 	// Rotation matrix for misalignment of the IMU axes
 	MatrixInv<float> mag_a(3, 3, "eye");
 	// Scale factor for each axis of the IMU
-	MatrixInv<float> mag_scale = {{0.9652, 0, 0}, {0, 1.09, 0}, {0, 0, 0.9556}};	
+	MatrixInv<float> mag_scale = {{1.0, 0, 0}, {0, 1.0, 0}, {0, 0, 1.0}};	
 	imu_reader.SetMagParams(magnetic_declination , mag_a, mag_offset, mag_scale);
 
 	// Initial attitude and NED velocity
-	imu_reader.ComputeGyroOffset(100);
+	imu_reader.ComputeGyroOffset(200);
 	imu_reader.GetGyroOffset(gyro_offset);
 	float* init_att = imu_reader.ComputeInitialRollPitchAndYaw(200);
 	float init_att_array[3];
@@ -273,6 +278,8 @@ int main(int argc, char *argv[]){
 	bool fifty_hz_flag = false;
 	// 10 Hz flag
 	bool ten_hz_flag = false;
+	// 25 Hz flag
+	bool twenty_five_hz_flag = false;
 	// initialize the duration
 	chrono::microseconds delta (dt_count); 
 	auto duration = chrono::duration_cast<chrono::microseconds> (delta);
@@ -329,6 +336,15 @@ int main(int argc, char *argv[]){
     		ten_hz_flag = false;
     	}
 
+    	/* Check if the current loop count is a multiple of 210 which will give a 25hz loop as main loop
+    	runs at 250Hz
+    	*/
+    	if(loop_count % 10 == 0){
+    		twenty_five_hz_flag = true;
+    	}else{
+    		twenty_five_hz_flag = false;
+    	}
+
     	/* Get loop start time
     	*/
     	loop_start = chrono::high_resolution_clock::now();
@@ -348,7 +364,7 @@ int main(int argc, char *argv[]){
 	    if (use_ekf){
 		    // Assign required sensor value for time propagation of the ekf state and measurement update
 		    for(size_t imu_idx = 0; imu_idx < 3; imu_idx++){
-		    	state_sensor_val(imu_idx) = imu_data[imu_idx];
+		    	state_sensor_val(imu_idx) = imu_data[imu_idx] - gyro_offset[imu_idx];
 		    	state_sensor_val(imu_idx + 3) = imu_data[imu_idx + 3];
 		    	sensor_meas(imu_idx) =  imu_data[imu_idx + 6];
 		    }
@@ -379,7 +395,7 @@ int main(int argc, char *argv[]){
     	// Get NED to Body DCM
       c_ned2b = GetDcm(current_state(0), current_state(1), current_state(2));
 
-      // //GET NED to FEP DCM
+      //GET NED to FEP DCM
       c_ned2fep = GetDcm(current_state(0), current_state(1), 0);
 
     	// Read Baro data at 50 Hz
@@ -458,7 +474,7 @@ int main(int argc, char *argv[]){
       		stateEstimate_.bodyAngRates_radps[idx] = ( state_sensor_val(idx) - current_state(idx + 3) );
       	}else{      		
       		stateEstimate_.attitude_rad[idx] = mh_euler[idx];
-      		stateEstimate_.bodyAngRates_radps[idx] = imu_data[idx] - gyro_offset[idx];
+      		stateEstimate_.bodyAngRates_radps[idx] = imu_data[idx] - gyro_offset[idx];;
       	}
  
       	stateEstimate_.nedPos_m[idx] = current_state(idx + 6);
@@ -502,17 +518,17 @@ int main(int argc, char *argv[]){
   			ExtY_fcsModel_T_ = fcsModel_Obj.getExternalOutputs();
   		}
 
-     if(ten_hz_flag){
+     if(fifty_hz_flag){
         data_writer.UpdateDataBuffer(duration_count, loop_count, imu_data, sensor_meas, current_state, secondary_filter_debug, gps_meas_indices, rc_periods, ExtY_fcsModel_T_);
 	   }
-
-	    // if (remainder(loop_count, 50) == 0){
+	   
+	    // if (fifty_hz_flag){
 	    // 	printf("Roll [deg]: %+7.3f, Pitch[deg]: %+7.3f, Yaw[deg]: %+7.3f\n", current_state(0)*RAD2DEG, current_state(1)*RAD2DEG, current_state(2)*RAD2DEG);
 	  // //   	// printf("Pos N [m]: %+7.3f, Pos E [m]: %+7.3f, Pos D[m]: %+7.3f\n", current_state(6), current_state(7), current_state(8));
 	  // //   	// printf("Vel N [m]: %+7.3f, Vel E [m]: %+7.3f, Vel D[m]: %+7.3f\n", current_state(9), current_state(10), current_state(11));
 	    	// printf("Throttle: %d, Roll: %d, Pitch: %d, Yaw: %d, Sw1: %d, Sw2: %d, Sw3: %d, State: %d, Flight Mode: %d\n", ExtU_fcsModel_T_->rcCmdsIn.throttleCmd_nd, ExtU_fcsModel_T_->rcCmdsIn.joystickXCmd_nd, 
-	    	// 	ExtU_fcsModel_T_->rcCmdsIn.joystickYCmd_nd, ExtU_fcsModel_T_->rcCmdsIn.joystickZCmd_nd, ExtU_fcsModel_T_->rcCmdsIn.rcSwitch1_nd, ExtU_fcsModel_T_->rcCmdsIn.rcSwitch2_nd, 
-	    	// 	ExtU_fcsModel_T_->rcCmdsIn.rcSwitch3_nd, ExtY_fcsModel_T_.fcsDebug.state, ExtY_fcsModel_T_.fcsDebug.flightMode);
+	    		// ExtU_fcsModel_T_->rcCmdsIn.joystickYCmd_nd, ExtU_fcsModel_T_->rcCmdsIn.joystickZCmd_nd, ExtU_fcsModel_T_->rcCmdsIn.rcSwitch1_nd, ExtU_fcsModel_T_->rcCmdsIn.rcSwitch2_nd, 
+	    		// ExtU_fcsModel_T_->rcCmdsIn.rcSwitch3_nd, ExtY_fcsModel_T_.fcsDebug.state, ExtY_fcsModel_T_.fcsDebug.flightMode);
 	  // //   	// // printf("%g, %g, %g, %g, %d\n",ExtY_fcsModel_T_.actuatorsCmds[0], ExtY_fcsModel_T_.actuatorsCmds[1], ExtY_fcsModel_T_.actuatorsCmds[2], ExtY_fcsModel_T_.actuatorsCmds[3], ExtY_fcsModel_T_.fcsDebug.state);
 	  //   	printf("Throttle: %d, Vz_Cmd: %+7.3f\n",ExtU_fcsModel_T_->rcCmdsIn.throttleCmd_nd, ExtY_fcsModel_T_.fcsDebug.outerLoopCtrlDebug.velCtrlDebug.cmd[2]);
 	  //   	printf("############################################\n");

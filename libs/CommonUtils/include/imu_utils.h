@@ -6,6 +6,7 @@
 #include "Navio/Navio2/LSM9DS1.h"
 #include<Matrix/matrix_inv_class.h>
 #include<constants.h>
+#include "notch_filter.h"
 
 #include<cmath>
 #include<memory>
@@ -18,6 +19,9 @@ class ImuHelper{
 		~ImuHelper();
 		void GetInertialSensor();
 		void InitializeImu();
+		void UpdateImuNotchFilterCoeffs(const array<float, 3> notch_filter_num, const array<float, 3> notch_filter_den);
+		void EnableImuNotchFilters();
+		void DisableImuNotchFilters();
 		void ComputeGyroOffset(size_t num_samples);
 		void GetGyroOffset(float (&gyro_offset)[3]);
 		float* ComputeInitialRollPitchAndYaw(size_t num_samples);
@@ -57,6 +61,13 @@ class ImuHelper{
 		MatrixInv<float> MAG_A_;
 		MatrixInv<float> MAG_SCALE_;
 		MatrixInv<float> MAG_OFFSET_;
+
+		array<float, 3> notch_filter_num_{1, 0, 0};
+		array<float, 3> notch_filter_den_{0, 0, 0};
+
+		bool enable_notch_filter_{false};
+
+		NotchFilter<float> gyro_accel_notch_filters_[6];
 
 		void ReadRawImu();
 		
