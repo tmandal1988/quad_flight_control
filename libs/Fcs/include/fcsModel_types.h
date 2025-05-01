@@ -3,9 +3,9 @@
 //
 // Code generated for Simulink model 'fcsModel'.
 //
-// Model version                  : 1.112
+// Model version                  : 1.114
 // Simulink Coder version         : 9.7 (R2022a) 13-Nov-2021
-// C/C++ source code generated on : Sat Aug  3 00:09:24 2024
+// C/C++ source code generated on : Mon Feb 17 09:08:05 2025
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM 7
@@ -131,10 +131,10 @@ struct busStateEstimate
 {
   std::array<real_T, 3> attitude_rad;
   std::array<real_T, 3> bodyAngRates_radps;
+  std::array<real_T, 3> bodyAccels_mps2;
   busGeodeticPos geodeticPos;
   std::array<real_T, 3> nedPos_m;
   std::array<real_T, 3> nedVel_mps;
-  std::array<real_T, 3> nedAccel_mps2;
   real_T pressure_mbar;
   real_T temp_c;
   real_T aglEst_m;

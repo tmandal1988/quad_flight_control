@@ -17,7 +17,7 @@ set(PROJECT_SOURCE_DIR
 )
 
 set(PROJECT_SOURCE
-	${PROJECT_SOURCE_DIR}/quad_flight_control.cc
+	${PROJECT_SOURCE_DIR}/quad_flight_control_new_ekf.cc
 )
 
 set(PROJECT_LIBRARIES_DIR
@@ -31,6 +31,8 @@ set(PROJECT_LIBRARIES
     CommonUtils
     Ekf
     Fcs
+    #StateEstimator
+    StateEstimatorEskf
 )
 
 set(PROJECT_LIBRARIES_SUBDIR
@@ -40,6 +42,8 @@ set(PROJECT_LIBRARIES_SUBDIR
     CommonUtils
     Ekf
     Fcs
+    #StateEstimator
+    StateEstimatorEskf
 )
 
 # To enable threading

@@ -10,6 +10,8 @@ use_kalman_filter_(false){
 	stop_baro_read_thread_.store(false);
 
 	barometer_.initialize();
+	usleep(1000);
+	// ext_mag_.TestConnection();
 }
 
 void BaroHelper::StartBaroReader(int cpu_to_use, int32_t priority, float sample_time_s){
@@ -33,6 +35,84 @@ void BaroHelper::StartBaroReader(int cpu_to_use, int32_t priority, float sample_
 	if (rc != 0) {
       std::cerr << "Error calling pthread_setaffinity_np on Baro Reader Thread: " << rc << "\n";
     }
+}
+
+void BaroHelper::StartRawBaroReader(int cpu_to_use, int32_t priority, float sample_time_s){
+	sample_time_s_ = sample_time_s;
+
+	baro_reader_thread_ = thread(&BaroHelper::BaroRawReadLoop, this);
+
+    CPU_ZERO(&cpuset_);
+    CPU_SET(cpu_to_use, &cpuset_);
+
+	pthread_getschedparam(baro_reader_thread_.native_handle(), &policy_, &sch_);
+	sch_.sched_priority = priority;
+	pthread_setschedparam(baro_reader_thread_.native_handle(), SCHED_FIFO, &sch_);
+	int rc = pthread_setaffinity_np(baro_reader_thread_.native_handle(),
+                                    sizeof(cpuset_), &cpuset_);    
+	if (rc != 0) {
+      std::cerr << "Error calling pthread_setaffinity_np on Baro Reader Thread: " << rc << "\n";
+    }
+}
+
+void BaroHelper::BaroRawReadLoop(){
+	// Loop timers
+	chrono::high_resolution_clock::time_point loop_start;
+	chrono::high_resolution_clock::time_point loop_end;
+
+	//Sample Step
+	size_t dt_count = sample_time_s_*1e6;
+	// initialize the duration
+	chrono::microseconds delta (dt_count); 
+	auto duration = chrono::duration_cast<chrono::microseconds> (delta);
+	auto duration_count = duration.count();
+
+	// Keep reading the Baro data forever
+	while(1){
+		// Get loop start time
+		loop_start = chrono::high_resolution_clock::now();
+
+		barometer_.refreshPressure();
+		usleep(2500); // Waiting for pressure data ready
+		barometer_.readPressure();
+
+		barometer_.refreshTemperature();
+        usleep(2500); // Waiting for temperature data ready
+        barometer_.readTemperature();
+
+    	barometer_.calculatePressureAndTemperature();
+
+    	{
+    		unique_lock<mutex> baro_data_lock(baro_data_mutex_);
+    		baro_updated_ = true;
+    	} 
+
+    	if(stop_baro_read_thread_.load()){
+				break;
+		}
+
+    	// Get the stop time and compute the duration
+    	loop_end = std::chrono::high_resolution_clock::now();
+
+    	duration_count = chrono::duration_cast<chrono::microseconds>(loop_end - loop_start).count();
+    	while(duration_count < dt_count){
+    		duration_count = chrono::duration_cast<chrono::microseconds>(std::chrono::high_resolution_clock::now() - loop_start).count();
+    	}
+    }
+}
+
+bool BaroHelper::GetRawPressAndTemp(float& press_pa, float& temp_c) const{
+	if(baro_updated_){
+		press_pa = barometer_.getPressure()*100.0f;
+		temp_c = barometer_.getTemperature();
+		{
+    		unique_lock<mutex> baro_data_lock(baro_data_mutex_);
+    		baro_updated_ = false;
+    	}  
+		return true;
+	}else{
+		return false;
+	}
 }
 
 void BaroHelper::BaroReadLoop(){
@@ -180,6 +260,9 @@ void BaroHelper::BaroReadLoopKalmanFilter(){
 		// Get loop start time
 		loop_start = chrono::high_resolution_clock::now();
 
+		// Start external mag measurement
+		// ext_mag_.StartMeasurement();
+
 		barometer_.refreshPressure();
 		usleep(2500); // Waiting for pressure data ready
 		barometer_.readPressure();
@@ -187,6 +270,9 @@ void BaroHelper::BaroReadLoopKalmanFilter(){
 		barometer_.refreshTemperature();
         usleep(2500); // Waiting for temperature data ready
         barometer_.readTemperature();
+
+        // Get mag measurements
+        // ext_mag_.GetMeasurement(mag_meas_);
 
         // {
         //  	unique_lock<mutex> baro_data_lock(baro_data_mutex_);
@@ -411,6 +497,8 @@ void BaroHelper::BaroReadLoopKalmanFilter(){
     	loop_end = std::chrono::high_resolution_clock::now();
 
     	duration_count = chrono::duration_cast<chrono::microseconds>(loop_end - loop_start).count();
+    	// printf("Duration Count: %ld\n", duration_count);
+    	// cout<<duration_count<<", "<< mag_meas_[0] << ", "<< mag_meas_[1] << ", "<< mag_meas_[2]<<endl;
     	while(duration_count < dt_count){
     		duration_count = chrono::duration_cast<chrono::microseconds>(std::chrono::high_resolution_clock::now() - loop_start).count();
     	}
@@ -524,6 +612,22 @@ void BaroHelper::GetBaroPressAndTemp(float baro_data[]){
 	baro_data[1] = barometer_.getTemperature();
 
 }
+
+// void BaroHelper::GetMagMeasurements(float mag_data[]){
+// 	// mag_data[0] = -1.00000274603449*(mag_meas_[0]*0.3 + 3.71770767644864e-06);
+// 	// mag_data[1] = 1.00000299618554*(mag_meas_[1]*0.3 + 7.91287616412323e-06);
+// 	// mag_data[2] = 0.999994257804712*(mag_meas_[2]*0.3 - 3.03889525377698e-06);
+
+// 	mag_data[0] = -mag_meas_[0]*0.3;
+// 	mag_data[1] = mag_meas_[1]*0.3;
+// 	mag_data[2] = mag_meas_[2]*0.3;
+// 	// printf("Mag X: %g, Mag Y: %g, Mag Z: %g\n", mag_data[0], mag_data[1], mag_data[2]);
+
+// 	// float mag_norm = mag_data[0]*mag_data[0] + mag_data[1]*mag_data[1] + mag_data[2]*mag_data[2];
+// 	// mag_data[0] = mag_data[0]/mag_norm;
+// 	// mag_data[1] = mag_data[1]/mag_norm;
+// 	// mag_data[2] = mag_data[2]/mag_norm;
+// }
 
 void BaroHelper::GetAglAndClimbRateEst(float baro_data[]){
 	baro_data[0] = agl_est_m_;

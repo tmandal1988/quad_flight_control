@@ -103,7 +103,9 @@ enum message_t
     NAV_HPPOSLLH = 0x0114,
     NAV_POSLLH = 0x0102,
     NAV_STATUS = 0x0103,
-    NAV_VELNED = 0x0112
+    NAV_VELNED = 0x0112,
+    NAV_PVT = 0x0107,
+    NAV_HNR_PVT = 0x2800
 };
 
 private:
@@ -117,13 +119,18 @@ private:
         SOFT_RST_CFG = 0x04,
         NAV5_CFG = 0x24,
         PRT_CFG = 0x00,
+        HNR_RATE = 0x5C,
+        GNSS_CFG = 0x3E,
 
         CLASS_NAV = 0x01,
         MSG_HP_LLH = 0x14,
         MSG_LLH = 0x02,
         MSG_SOL_STATUS = 0x03,
         MSG_VEL_NED = 0x12,
+        MSG_NAV_PVT = 0x07,
 
+        CLASS_HNR_NAV = 0x28,
+        MSG_NAV_HNR_PVT = 0x00,
 
         CFG_SAMPLE_RATE = 0x08
     };
@@ -155,6 +162,13 @@ private:
         std::uint8_t msg_class;
         std::uint8_t msg_id;
         std::uint8_t msg_rate;
+    };
+
+    struct PACKED CfgHnrRate{
+        std::uint8_t high_nav_rate;
+        std::uint8_t reserved1;
+        std::uint8_t reserved2;
+        std::uint8_t reserved3;
     };
 
     struct PACKED ResetUblox {
@@ -232,6 +246,9 @@ public:
     int enableNAV_HPPOSLLH();
     int enableNAV_STATUS();
     int enableNAV_VELNED();
+    int enableNAV_PVT();
+    int enableNAV_HNR_PVT();
+    int setHnrRate();
     int testConnection();
     int configureSolutionRate(std::uint16_t meas_rate,
                               std::uint16_t nav_rate = 1,
@@ -239,7 +256,9 @@ public:
     int configureNavEngine();
     int resetConfig();
     int configureUbloxSpiPort();
+    int configureHnrRate();
     int decodeMessages();
+    void getGnssConfig();
     int decodeSingleMessage(message_t msg, std::vector<double>& position_data);
 
 private:

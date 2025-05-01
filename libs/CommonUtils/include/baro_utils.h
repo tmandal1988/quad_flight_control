@@ -3,6 +3,11 @@
 
 #include<Navio/Common/MS5611.h>
 #include<Navio/Common/Util.h>
+
+// External mag and baro are on the same I2C port therefore read them one after another in
+// a single thread
+#include "external_mag.h"
+
 #include<constants.h>
 #include<unistd.h>
 #include<atomic>
@@ -23,8 +28,10 @@ class BaroHelper{
 		~BaroHelper();
 
 		void StartBaroReader(int cpu_to_use, int32_t priority, float sample_time_s = 0.008);
+		void StartRawBaroReader(int cpu_to_use, int32_t priority, float sample_time_s = 0.008);
 		void GetBaroPressAndTemp(float baro_data[]);
 		void GetAglAndClimbRateEst(float baro_data[]);
+		// void GetMagMeasurements(float mag_data[]);
 		void GetBaroDebugData(float baro_debug_data[]);
 		void SetBodyAccels(const array<float, 3> &body_accel_mps2);
 		void SetGpsVelAndAlt(const array<float, 2> &baro_gps_alt_and_climb_rate_mps, 
@@ -36,6 +43,7 @@ class BaroHelper{
 		void SetKalmanFilterParams(const array<float, 3> &p_cov_init, const array<float, 3> &proc_noise, 
 								   const array<float, 4> &meas_noise, const size_t zupt_length = 12, 
 								   const float zupt_threshold = 0.5);
+		bool GetRawPressAndTemp(float& press_pa, float& temp_c) const;
 
 		bool is_baro_ready_;
 
@@ -51,10 +59,16 @@ class BaroHelper{
 		int policy_;
 
 		// Mutex to guard resource access between threads while running GpsReadLoop()
-	    mutex baro_data_mutex_;
+	    mutable mutex baro_data_mutex_;
 
 		MS5611 barometer_;
 		void BaroReadLoop();
+		void BaroRawReadLoop();
+
+		// Flag to indicate if baro data has been updated
+		mutable bool baro_updated_ = false;
+
+		// ExtMagDriver ext_mag_;
 
 		// Function to setup base station height
 		void SetInitHeight();
@@ -102,6 +116,9 @@ class BaroHelper{
 
 		// Variable to indicate Baro Thread to stop
 	    atomic<bool> stop_baro_read_thread_;
+
+	    // Variable to read mag measurements
+	    int16_t mag_meas_[3] = {0};
 };
 
 

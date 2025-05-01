@@ -19,15 +19,17 @@ class ImuHelper{
 		~ImuHelper();
 		void GetInertialSensor();
 		void InitializeImu();
-		void UpdateImuNotchFilterCoeffs(const array<float, 3> notch_filter_num, const array<float, 3> notch_filter_den);
+		void UpdateImuNotchFilterCoeffs(const array<float, 3> &notch_filter_num, const array<float, 3> &notch_filter_den);
 		void EnableImuNotchFilters();
 		void DisableImuNotchFilters();
+		void SetAccelCalibParams(const array<array<float, 3>, 3> &accel_calib_m, const std::array<float, 3> &accel_calib_off);
 		void ComputeGyroOffset(size_t num_samples);
 		void GetGyroOffset(float (&gyro_offset)[3]);
 		float* ComputeInitialRollPitchAndYaw(size_t num_samples);
 		MatrixInv<float> CorrectMagData(MatrixInv<float> mag_vector);
 		MatrixInv<float> GetMag3DTo2DProj(float roll, float pitch);
 		float* GetImuData();
+		bool getRawImuData(float (&imu_raw_data)[9]);
 		void SetMagParams(float mag_dec, MatrixInv<float> mag_a, MatrixInv<float> mag_offset, MatrixInv<float> mag_scale){
 			MAG_DEC_ = mag_dec;
 			MAG_A_ = mag_a;
@@ -55,6 +57,9 @@ class ImuHelper{
 
 		// IMU data array
 		float imu_data_[9];
+		float imu_raw_data_[9];
+		float old_mag_[3] = {0.0f, 0.0f, 0.0f};
+		bool is_mag_valid_ = false;
 
 		// Mag parameters
 		float MAG_DEC_;
@@ -64,6 +69,9 @@ class ImuHelper{
 
 		array<float, 3> notch_filter_num_{1, 0, 0};
 		array<float, 3> notch_filter_den_{0, 0, 0};
+
+		array<array<float, 3>, 3 > accel_calib_m_{0};
+		array<float, 3> accel_calib_off_{0};
 
 		bool enable_notch_filter_{false};
 

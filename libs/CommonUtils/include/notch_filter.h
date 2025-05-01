@@ -16,9 +16,9 @@ class NotchFilter{
 	public:
 		// Constructors
 		NotchFilter();
-		NotchFilter(const array<T, 3> notch_filter_num, array<T, 3> const notch_filter_den);
+		NotchFilter(const array<T, 3> &notch_filter_num, const array<T, 3> &notch_filter_den);
 
-		void UpdateFilterCoeff(const array<T, 3> notch_filter_num, const array<T, 3> notch_filter_den);
+		void UpdateFilterCoeff(const array<T, 3> &notch_filter_num, const array<T, 3> &notch_filter_den);
 		T Filter(const T u);
 
 		~NotchFilter();

@@ -196,7 +196,7 @@ int UBXParser::decodeMessageGeneric(std::string spi_device_name, std::vector<uns
                 scanner->reset();
             }else{
                 // If we got everything right, then return the raw data
-                data.clear();
+                //data.clear();
                 data.push_back(*message + pos);
                 data.push_back(*(message +pos + 1));
                 data.push_back(*(message + pos + 2));
@@ -263,7 +263,6 @@ int UBXParser::decodeMessage(std::vector<double>& data)
     id = (*(message+pos+2)) << 8 | (*(message+pos+3)); // ID is a two-byte number with little endianness
 
     flag = id; // will return message id, if we got the info decoded
-
     switch(id){
         case 258:
                 // ID for Nav-Posllh messages is 0x0102 == 258
@@ -295,44 +294,90 @@ int UBXParser::decodeMessage(std::vector<double>& data)
                 data.push_back ((unsigned)((*(message+pos+33) << 24) | (*(message+pos+32) << 16) | (*(message+pos+31) << 8) | (*(message+pos+30))));
                 break;
 
-        case 276:
-                // ID for Nav-HpPosllh messages is 0x0114 == 276
-                // In this example we extract 11 variables - longitude, latitude,
-                // height above ellipsoid and mean sea level, HP lon, HP Lat, HP Alt,
-                // HP MSL, horizontal and vertical
-                // accuracy estimate and iTOW - GPS Millisecond Time of Week
+        case 263:
+                // ID for Nav-PVT messages is 0x0107 == 263
+                // In this example we extract 8 variables - longitude, latitude,
+                // height above ellipsoid, N, E, D velocity,
+                // fix status and fix type
 
                 // All the needed parameters are 4-byte numbers with little endianness.
                 // We know the current message and we want to update the info in the data vector.
                 // First we clear the old data:
-
                 data.clear();
-
-                // Second, we extract the needed data from the message buffer and save it to the vector.
-
                 //iTOW
-                data.push_back ((unsigned)((*(message+pos+13) << 24) | (*(message+pos+12) << 16) | (*(message+pos+11) << 8) | (*(message+pos+10))));
+                data.push_back ((unsigned)((*(message+pos+9) << 24) | (*(message+pos+8) << 16) | (*(message+pos+7) << 8) | (*(message+pos+6))));                // Fix Type
+                data.push_back((unsigned)(*(message+pos+26)));
+                // Fix Validity
+                data.push_back((unsigned)(*(message+pos+27)) & (1 << 0));
                 //Longitude
-                data.push_back ((*(message+pos+17) << 24) | (*(message+pos+16) << 16) | (*(message+pos+15) << 8) | (*(message+pos+14)));
+                data.push_back ((*(message+pos+33) << 24) | (*(message+pos+32) << 16) | (*(message+pos+31) << 8) | (*(message+pos+30)));
                 //Latitude
-                data.push_back ((*(message+pos+21) << 24) | (*(message+pos+20) << 16) | (*(message+pos+19) << 8) | (*(message+pos+18)));
+                data.push_back ((*(message+pos+37) << 24) | (*(message+pos+36) << 16) | (*(message+pos+35) << 8) | (*(message+pos+34)));
                 //Height above Ellipsoid
-                data.push_back ((*(message+pos+25) << 24) | (*(message+pos+24) << 16) | (*(message+pos+23) << 8) | (*(message+pos+22)));
-                //Height above mean sea level
-                data.push_back ((*(message+pos+29) << 24) | (*(message+pos+28) << 16) | (*(message+pos+27) << 8) | (*(message+pos+26)));
-                //HP Lon
-                data.push_back (*(message+pos+30));
-                //HP Lat
-                data.push_back (*(message+pos+31));
-                //HP Height
-                data.push_back (*(message+pos+32));
-                //HP MSL
-                data.push_back (*(message+pos+33));
-                //Horizontal Accuracy Estateimate
-                data.push_back ((unsigned)((*(message+pos+37) << 24) | (*(message+pos+36) << 16) | (*(message+pos+35) << 8) | (*(message+pos+34))));
-                //Vertical Accuracy Estateimate
-                data.push_back ((unsigned)((*(message+pos+41) << 24) | (*(message+pos+40) << 16) | (*(message+pos+39) << 8) | (*(message+pos+38))));
+                data.push_back ((*(message+pos+41) << 24) | (*(message+pos+40) << 16) | (*(message+pos+39) << 8) | (*(message+pos+38)));
+                //North velocity
+                data.push_back ((*(message+pos+57) << 24) | (*(message+pos+56) << 16) | (*(message+pos+55) << 8) | (*(message+pos+54)));
+                //East velocity
+                data.push_back ((*(message+pos+61) << 24) | (*(message+pos+60) << 16) | (*(message+pos+59) << 8) | (*(message+pos+58)));
+                //Down velocity
+                data.push_back ((*(message+pos+65) << 24) | (*(message+pos+64) << 16) | (*(message+pos+63) << 8) | (*(message+pos+62)));
+                //Year
+                data.push_back((uint16_t) ((*(message+pos+11) << 8) | (*(message+pos+10))) );
+                //Month
+                data.push_back((uint16_t)(*(message+pos+12)));
+                //Day
+                data.push_back((uint16_t)(*(message+pos+13)));
+                //Hour
+                data.push_back((uint16_t)(*(message+pos+14)));
+                //Min
+                data.push_back((uint16_t)(*(message+pos+15)));
+                //Sec
+                data.push_back((uint16_t)(*(message+pos+16)));
                 break;
+
+        case 276:
+            // ID for Nav-HpPosllh messages is 0x0114 == 276
+            // In this example we extract 11 variables - longitude, latitude,
+            // height above ellipsoid and mean sea level, HP lon, HP Lat, HP Alt,
+            // HP MSL, horizontal and vertical
+            // accuracy estimate and iTOW - GPS Millisecond Time of Week
+
+            // All the needed parameters are 4-byte numbers with little endianness.
+            // We know the current message and we want to update the info in the data vector.
+            // First we clear the old data:
+
+            data.clear();
+
+            // Second, we extract the needed data from the message buffer and save it to the vector.
+
+            //iTOW
+            data.push_back ((unsigned)((*(message+pos+13) << 24) | (*(message+pos+12) << 16) | (*(message+pos+11) << 8) | (*(message+pos+10))));
+            //Longitude
+            data.push_back ((*(message+pos+17) << 24) | (*(message+pos+16) << 16) | (*(message+pos+15) << 8) | (*(message+pos+14)));
+            //Latitude
+            data.push_back ((*(message+pos+21) << 24) | (*(message+pos+20) << 16) | (*(message+pos+19) << 8) | (*(message+pos+18)));
+            //Height above Ellipsoid
+            data.push_back ((*(message+pos+25) << 24) | (*(message+pos+24) << 16) | (*(message+pos+23) << 8) | (*(message+pos+22)));
+            //Height above mean sea level
+            data.push_back ((*(message+pos+29) << 24) | (*(message+pos+28) << 16) | (*(message+pos+27) << 8) | (*(message+pos+26)));
+            //HP Lon
+            data.push_back (*(message+pos+30));
+            //HP Lat
+            data.push_back (*(message+pos+31));
+            //HP Height
+            data.push_back (*(message+pos+32));
+            //HP MSL
+            data.push_back (*(message+pos+33));
+            //Horizontal Accuracy Estateimate
+            data.push_back ((unsigned)((*(message+pos+37) << 24) | (*(message+pos+36) << 16) | (*(message+pos+35) << 8) | (*(message+pos+34))));
+            //Vertical Accuracy Estateimate
+            data.push_back ((unsigned)((*(message+pos+41) << 24) | (*(message+pos+40) << 16) | (*(message+pos+39) << 8) | (*(message+pos+38))));
+            break;
+
+        case 0x2800:
+            //iTOW
+            data.push_back ((unsigned)((*(message+pos+13) << 24) | (*(message+pos+12) << 16) | (*(message+pos+11) << 8) | (*(message+pos+10))));
+            break;
 
         case 259:
                 // ID for Nav-Status messages is 0x0103 == 259
@@ -553,6 +598,60 @@ int Ublox::enableNAV_VELNED()
     return -1;
 }
 
+int Ublox::enableNAV_PVT()
+{
+    CfgMeasrate msg_meas_rate;
+    msg_meas_rate.msg_class = CLASS_NAV;
+    msg_meas_rate.msg_id = MSG_NAV_PVT;
+    msg_meas_rate.msg_rate = 0x01;
+
+    int send_status = _sendMessage(CLASS_CFG, MSG_CFG_RATE, &msg_meas_rate, sizeof(CfgMeasrate));
+
+    std::vector<unsigned char> raw_data;
+    int ack_received = -1;
+    int count = 0;
+    while(ack_received != 1 && count < 100){
+        if(parser->decodeMessageGeneric(spi_device_name, raw_data) > 0)
+        {
+            if(raw_data[2] == 0x05 && raw_data[3] == 0x01 && raw_data[6] == CLASS_CFG && raw_data[7] == MSG_CFG_RATE)
+                ack_received = 1;
+        }
+        count++;
+    }
+
+    if (send_status > 0 && ack_received > 0)
+        return 1;
+
+    return -1;
+}
+
+int Ublox::enableNAV_HNR_PVT()
+{
+    CfgMeasrate msg_meas_rate;
+    msg_meas_rate.msg_class = CLASS_HNR_NAV;
+    msg_meas_rate.msg_id = MSG_NAV_HNR_PVT;
+    msg_meas_rate.msg_rate = 0x01;
+
+    int send_status = _sendMessage(CLASS_CFG, MSG_CFG_RATE, &msg_meas_rate, sizeof(CfgMeasrate));
+
+    std::vector<unsigned char> raw_data;
+    int ack_received = -1;
+    int count = 0;
+    while(ack_received != 1 && count < 100){
+        if(parser->decodeMessageGeneric(spi_device_name, raw_data) > 0)
+        {
+            if(raw_data[2] == 0x05 && raw_data[3] == 0x01 && raw_data[6] == CLASS_CFG && raw_data[7] == MSG_CFG_RATE)
+                ack_received = 1;
+        }
+        count++;
+    }
+
+    if (send_status > 0 && ack_received > 0)
+        return 1;
+
+    return -1;
+}
+
 int Ublox::resetConfig(){
     ResetUblox msg_rst;
     msg_rst.nav_bbr_mask = 0; //Warm Start
@@ -624,28 +723,49 @@ int Ublox::testConnection()
         return 0;
     }
 
-    if (enableNAV_POSLLH()<0)
-    {
-        std::cerr << "Could not configure POSLLH for ublox over SPI\n";
-        return 0;
-    }
+    // if (enableNAV_POSLLH()<0)
+    // {
+    //     std::cerr << "Could not configure POSLLH for ublox over SPI\n";
+    //     return 0;
+    // }
 
-    if (enableNAV_STATUS()<0)
-    {
-        std::cerr << "Could not configure NAV_STATUS for ublox over SPI\n";
-        return 0;
-    }
+    // if (enableNAV_STATUS()<0)
+    // {
+    //     std::cerr << "Could not configure NAV_STATUS for ublox over SPI\n";
+    //     return 0;
+    // }
 
-    if (enableNAV_VELNED()<0)
-    {
-        std::cerr << "Could not configure VELNED for ublox over SPI\n";
-        return 0;
-    }
+    // if (enableNAV_VELNED()<0)
+    // {
+    //     std::cerr << "Could not configure VELNED for ublox over SPI\n";
+    //     return 0;
+    // }
+
+    // getGnssConfig();
 
     if (configureNavEngine() < 0){
         std::cerr << "Could not configure NAV5 Engine for ublox over SPI\n";
         return 0;
     }
+
+    if (enableNAV_PVT()<0)
+    {
+        std::cerr << "Could not configure PVT for ublox over SPI\n";
+        return 0;
+    }
+
+    // getGnssConfig();
+
+    // if(configureHnrRate() < 0){
+    //     std::cerr << "Could not configure HNR RATE for ublox over SPI\n";
+    //     return 0;
+    // }
+
+    // if (enableNAV_HNR_PVT()<0)
+    // {
+    //     std::cerr << "Could not configure HNR PVT for ublox over SPI\n";
+    //     return 0;
+    // }
 
     // printf("Here\n");
 
@@ -677,6 +797,33 @@ int Ublox::testConnection()
     // }
 
     return 1;
+}
+
+void Ublox::getGnssConfig(){
+    // CfgNavRate msg;
+    // msg.measure_rate = meas_rate;
+    // msg.nav_rate     = nav_rate;
+    // msg.timeref      = timeref;
+
+    int send_status = _sendMessage(CLASS_CFG, GNSS_CFG, nullptr, 0);
+
+    std::vector<unsigned char> raw_data;
+    int ack_received = -1;
+    int count = 0;
+    while(ack_received != 1 && count < 100){
+        if(parser->decodeMessageGeneric(spi_device_name, raw_data) > 0)
+        {
+            if(raw_data[2] == 0x05 && raw_data[3] == 0x01 && raw_data[6] == CLASS_CFG && raw_data[7] == GNSS_CFG)
+                ack_received = 1;
+        }
+        count++;
+    }
+
+    // if(send_status > 0 && ack_received > 0){
+    //     return 1;
+    // }
+
+    // return 0;
 }
 
 int Ublox::configureSolutionRate(std::uint16_t meas_rate,
@@ -782,6 +929,31 @@ int Ublox::configureUbloxSpiPort(){
         if(parser->decodeMessageGeneric(spi_device_name, raw_data) > 0)
         {
             if(raw_data[2] == 0x05 && raw_data[3] == 0x01 && raw_data[6] == CLASS_CFG && raw_data[7] == PRT_CFG)
+                ack_received = 1;
+        }
+        count++;
+    }
+
+    if(send_status > 0 && ack_received > 0){
+        return 1;
+    }
+
+    return -1;
+}
+
+int Ublox::configureHnrRate(){
+    CfgHnrRate msg;
+    msg.high_nav_rate = 20;
+
+    int send_status = _sendMessage(CLASS_CFG, HNR_RATE, &msg, sizeof(CfgHnrRate));
+
+    std::vector<unsigned char> raw_data;
+    int ack_received = -1;
+    int count = 0;
+    while(ack_received != 1 && count < 100){
+        if(parser->decodeMessageGeneric(spi_device_name, raw_data) > 0)
+        {
+            if(raw_data[2] == 0x05 && raw_data[3] == 0x01 && raw_data[6] == CLASS_CFG && raw_data[7] == HNR_RATE)
                 ack_received = 1;
         }
         count++;
@@ -984,6 +1156,105 @@ int Ublox::decodeSingleMessage(message_t msg, std::vector<double>& position_data
 
         break;
 
+    case NAV_PVT:
+            {
+                uint16_t id = 0x0107;
+                int status;
+                int count = 0;
+                unsigned char to_gps_data = 0x00, from_gps_data = 0x00;
+
+                while (count < UBX_BUFFER_LENGTH/2)
+                {
+                    // From now on, we will send zeroes to the receiver, which it will ignore
+                    // However, we are simultaneously getting useful information from it
+                    SPIdev::transfer(spi_device_name.c_str(), &to_gps_data, &from_gps_data, 1);
+
+                    // Scanner checks the message structure with every byte received
+                    status = scanner->update(from_gps_data);
+
+                    if (status == UBXScanner::Done)
+                    {
+                        // Once we have a full message we decode it and reset the scanner, making it look for another message
+                        // in the data stream, coming over SPI
+                        if(parser->decodeMessage(position_data) == id)
+                        {
+                            // Now let's do something with the extracted information
+                            // in case of NAV-POSLLH messages we can print the information like this:
+                            // printf("GPS Millisecond Time of Week: %lf\n", position_data[0]/1000);
+                            // printf("Longitude: %lf\n", position_data[1]/10000000);
+                            // printf("Latitude: %lf\n", position_data[2]/10000000);
+                            // printf("Height above Ellipsoid: %.3lf m\n", pos_data[3]/1000);
+                            // printf("Height above mean sea level: %.3lf m\n", pos_data[4]/1000);
+                            // printf("Horizontal Accuracy Estateimate: %.3lf m\n", pos_data[5]/1000);
+                            // printf("Vertical Accuracy Estateimate: %.3lf m\n", pos_data[6]/1000);
+
+
+                            // You can see ubx message structure in ublox reference manual
+                            scanner->reset();
+
+                            return 1;
+                        }
+
+                        scanner->reset();
+                    }
+
+                    count++;
+                }
+
+                return 0;
+            }
+        break;
+
+    case NAV_HNR_PVT:
+            {
+                uint16_t id = 0x2800;
+                int status;
+                int count = 0;
+                unsigned char to_gps_data = 0x00, from_gps_data = 0x00;
+
+                while (count < UBX_BUFFER_LENGTH/2)
+                {
+                    // From now on, we will send zeroes to the receiver, which it will ignore
+                    // However, we are simultaneously getting useful information from it
+                    SPIdev::transfer(spi_device_name.c_str(), &to_gps_data, &from_gps_data, 1);
+
+                    // Scanner checks the message structure with every byte received
+                    status = scanner->update(from_gps_data);
+
+                    if (status == UBXScanner::Done)
+                    {
+                        // Once we have a full message we decode it and reset the scanner, making it look for another message
+                        // in the data stream, coming over SPI
+                        if(parser->decodeMessage(position_data) == id)
+                        {
+                            // Now let's do something with the extracted information
+                            // in case of NAV-POSLLH messages we can print the information like this:
+                            // printf("GPS Millisecond Time of Week: %lf\n", position_data[0]/1000);
+                            // printf("Longitude: %lf\n", position_data[1]/10000000);
+                            // printf("Latitude: %lf\n", position_data[2]/10000000);
+                            // printf("Height above Ellipsoid: %.3lf m\n", pos_data[3]/1000);
+                            // printf("Height above mean sea level: %.3lf m\n", pos_data[4]/1000);
+                            // printf("Horizontal Accuracy Estateimate: %.3lf m\n", pos_data[5]/1000);
+                            // printf("Vertical Accuracy Estateimate: %.3lf m\n", pos_data[6]/1000);
+
+
+                            // You can see ubx message structure in ublox reference manual
+                            scanner->reset();
+
+                            return 1;
+                        }
+
+                        scanner->reset();
+                    }
+
+                    count++;
+                }
+
+                return 0;
+            }
+        break;
+
+
         case NAV_POSLLH:
             {
                 uint16_t id = 0x0102;
@@ -1018,7 +1289,6 @@ int Ublox::decodeSingleMessage(message_t msg, std::vector<double>& position_data
 
 
                             // You can see ubx message structure in ublox reference manual
-
                             scanner->reset();
 
                             return 1;

@@ -45,7 +45,7 @@ void EkfBase<T>::Run(const MatrixInv<T> &state_sensor_val, const MatrixInv<T> &m
 	PropagateState(state_sensor_val);
 	ComputeStateJacobian(state_sensor_val);
 
-	GetMeas(meas_sensor_val);
+	GetMeas(meas_sensor_val, meas_indices);
 	ComputeMeasJacobian(meas_sensor_val);
 
 	//P = F*P*F' + L*Q*L';
@@ -60,6 +60,68 @@ void EkfBase<T>::Run(const MatrixInv<T> &state_sensor_val, const MatrixInv<T> &m
 	current_state_ = time_propagated_state_;
 	// sequentially update state with measurement
 	for(size_t idx_r = 0; idx_r < num_meas_; idx_r++){
+		// if (meas_indices[idx_r]){
+			ComputeMeasFromState(idx_r);
+			ComputeKalmanGainSequential(idx_r);
+			MatrixInv<T> meas_jacobian_row = meas_jacobian_.GetRow(idx_r);
+			current_state_ = current_state_ + kalman_gain_seq_*( computed_meas_(idx_r) - meas_from_propogated_state_(idx_r) );
+			covariance_p_ = covariance_p_ - kalman_gain_seq_*meas_jacobian_row*covariance_p_;
+		// }
+	}
+}
+
+template <typename T>
+void EkfBase<T>::Run(const MatrixInv<T> &state_sensor_val, MatrixInv<T> &meas_sensor_val, const bool meas_indices [], const long long int ins_dt_us, const long long int gps_time_us){
+	ins_time_us_ += ins_dt_us;
+
+	// printf("GPS TIME [us]: %lld, GPS Meas Indices: %d, %d\n", gps_time_us, meas_indices[0], meas_indices[1]);
+	// Keep track of when sensor data are arriving, we are getting PVT from U-blox M8N so all the meas validity
+	// flags are true
+	if(meas_indices[1]){
+		if(gps_prev_time_us_ == -1){
+			// If this is the first time gps data was received set previous gps time to current time
+			// set gps time between samples to zero. Also capture the ins time at the same time and set
+			// ins time between gps update to 0
+			gps_prev_time_us_ = gps_time_us;
+			gps_dt_us_ = 0;
+			ins_time_at_last_gps_update_us_ = ins_time_us_;
+			ins_dt_bw_gps_update_us_ = 0;
+		}else{
+			// Find the time between last and current gps update and at the same time find out how far ins time has
+			// progressed
+			gps_dt_us_ = gps_time_us - gps_prev_time_us_;
+			gps_prev_time_us_ = gps_time_us;
+			ins_dt_bw_gps_update_us_  = ins_time_us_ - ins_time_at_last_gps_update_us_;
+			ins_time_at_last_gps_update_us_ = ins_time_us_;
+			printf("INS dt [us]: %lld, GPS dt [us]: %lld, 'GPS Meas Indices:%d, %d, %d, %d, %d, %d, %d\n", ins_dt_bw_gps_update_us_, gps_dt_us_, meas_indices[0], meas_indices[1], meas_indices[2],
+					meas_indices[3], meas_indices[4], meas_indices[5], meas_indices[6]);
+		}
+	}else{
+		ins_dt_bw_gps_update_us_  = 0;
+		gps_dt_us_ = 1;
+	}
+
+	MatrixInv<T> meas_sensor_val_corrected = meas_sensor_val;
+
+	// if ins time between gps updates is greater than time between gps updates then integrate gps position and velocity by the time
+	// difference to make it current
+	if(ins_dt_bw_gps_update_us_ > gps_dt_us_){
+		PropagateState(state_sensor_val, meas_sensor_val_corrected, (ins_dt_bw_gps_update_us_ - gps_dt_us_));		
+	}else{
+		PropagateState(state_sensor_val);
+	}
+
+	ComputeStateJacobian(state_sensor_val);
+
+
+	GetMeas(meas_sensor_val_corrected, meas_indices);
+	ComputeMeasJacobian(meas_sensor_val_corrected);
+
+	covariance_p_ = state_jacobian_*covariance_p_*state_jacobian_.Transpose() + process_noise_q_;
+
+	current_state_ = time_propagated_state_;
+	// sequentially update state with measurement
+	for(size_t idx_r = 0; idx_r < num_meas_; idx_r++){
 		if (meas_indices[idx_r]){
 			ComputeMeasFromState(idx_r);
 			ComputeKalmanGainSequential(idx_r);
@@ -68,6 +130,7 @@ void EkfBase<T>::Run(const MatrixInv<T> &state_sensor_val, const MatrixInv<T> &m
 			covariance_p_ = covariance_p_ - kalman_gain_seq_*meas_jacobian_row*covariance_p_;
 		}
 	}
+
 }
 
 template <typename T>

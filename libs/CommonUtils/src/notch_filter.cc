@@ -7,7 +7,7 @@ NotchFilter<T>::NotchFilter(){
 }
 
 template <typename T>
-NotchFilter<T>::NotchFilter(const array<T, 3> notch_filter_num, const array<T, 3> notch_filter_den):
+NotchFilter<T>::NotchFilter(const array<T, 3> &notch_filter_num, const array<T, 3> &notch_filter_den):
 notch_filter_num_(notch_filter_num),
 notch_filter_den_(notch_filter_den){
 	//
@@ -19,7 +19,7 @@ NotchFilter<T>::~NotchFilter(){
 }
 
 template <typename T>
-void NotchFilter<T>::UpdateFilterCoeff(const array<T, 3> notch_filter_num, const array<T, 3> notch_filter_den){
+void NotchFilter<T>::UpdateFilterCoeff(const array<T, 3> &notch_filter_num, const array<T, 3> &notch_filter_den){
 	notch_filter_num_ = notch_filter_num;
 	notch_filter_den_ = notch_filter_den;
 }

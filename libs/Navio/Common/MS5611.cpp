@@ -159,13 +159,13 @@ void MS5611::update() {
 /** Get calculated temperature value
  @return Temperature in degrees of Celsius
  */
-float MS5611::getTemperature() {
+float MS5611::getTemperature() const{
     return TEMP;
 }
 
 /** Get calculated pressure value
  @return Pressure in millibars
  */
-float MS5611::getPressure() {
+float MS5611::getPressure() const{
     return PRES;
 }

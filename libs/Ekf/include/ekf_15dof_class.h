@@ -30,9 +30,10 @@ class Ekf15Dof:public EkfBase<T>{
 	protected:
 		// member functions
 		void PropagateState(const MatrixInv<T> &state_sensor_val);
+		void PropagateState(const MatrixInv<T> &state_sensor_val, MatrixInv<T> &meas_sensor_val_corrected, const long long int meas_dt_us);
 		void ComputeStateJacobian(const MatrixInv<T> &state_sensor_val);
 		void ComputeStateNoiseJacobian(const MatrixInv<T> &previous_state);
-		void GetMeas(const MatrixInv<T> &meas_sensor_val);
+		void GetMeas(const MatrixInv<T> &meas_sensor_val, const bool meas_indices []);
 		void ComputeMeasJacobian(const MatrixInv<T> &meas_sensor_val);
 		void ComputeMeasNoiseJacobian(const MatrixInv<T> &meas_sensor_val);
 		void ComputeMeasFromState(size_t r_idx);
@@ -57,9 +58,10 @@ class Ekf15Dof:public EkfBase<T>{
 		MatrixInv<T> body_rates_2_euler_rates_;
 		MatrixInv<T> c_b2ned_;
 
+		// Hold the orginal meas noise R
+		MatrixInv<T> meas_noise_r_orig_;
 
-		MatrixInv<T> g;
 
-			
+		MatrixInv<T> g;			
 };
 #endif

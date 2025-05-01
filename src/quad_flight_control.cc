@@ -11,6 +11,7 @@
 #include "Navio/Common/Util.h"
 #include <gps_utils.h>
 #include <write_utils.h>
+#include <slow_loop_tasks.h>
 #include <imu_utils.h>
 #include <baro_utils.h>
 #include <mahony_filter.h>
@@ -53,9 +54,27 @@ int main(int argc, char *argv[]){
 	ImuHelper imu_reader("mpu");
 	imu_reader.InitializeImu();
 
+	
+	//MPU9250 accel calibration params
+	imu_reader.SetAccelCalibParams(array<array<float, 3>, 3> {{ {0.998770730345757, 0.032038460751964, 0.00456682146125724}, 
+																		{0.0334529802696145, 0.998117925934751, -0.00059376997065095}, 
+																		{0.00165741276858106, -0.000863323936142106, 0.995291285007445} }},
+																		array<float, 3>{-0.0147876268438356, -0.00241447642309635, 0.0508151008869335});
+
+	//LSM9DS1 accel calibration params
+	// imu_reader.SetAccelCalibParams(array<array<float, 3>, 3> {{ {0.999481398573966, -0.000681251922646447, 0.00435486026283914}, 
+	// 																	{-0.000615560608519294, 0.998909545892812, -0.00131721573926727}, 
+	// 																	{0.00335755404458588 , -0.00127064372869229, 0.995475645944972} }},
+	// 																	array<float, 3>{-0.0151328561952165, -0.00151892413551878, 0.0509647066737018});
+
 	// Enable IMU notch filters
-	imu_reader.UpdateImuNotchFilterCoeffs(array<float, 3> {0.521563404087046, 0.427674228653371, 0.520613021818241}, 
-																				array<float, 3> {1, 0.427674228653371, 0.0421764259052876});
+	// imu_reader.UpdateImuNotchFilterCoeffs(array<float, 3> {0.521563404087046, 0.427674228653371, 0.520613021818241}, 
+	// 																			array<float, 3> {1, 0.427674228653371, 0.0421764259052876}); //79.3249Hz notch
+	// imu_reader.UpdateImuNotchFilterCoeffs(array<float, 3> {0.528511303482344, 0.49017830797471, 0.528043320336412}, 
+	// 																			array<float, 3> {1, 0.49017830797471, 0.0565546238187557}); //81.6956Hz notch
+	imu_reader.UpdateImuNotchFilterCoeffs(array<float, 3> {0.512410353069834, 0.272099029930436, 0.502631437210059}, 
+																				array<float, 3> {1, 0.272099029930437, 0.0150417902798928}); //73.2981Hz notch
+
 	imu_reader.EnableImuNotchFilters();
 
 	BaroHelper baro_reader;
@@ -78,9 +97,15 @@ int main(int argc, char *argv[]){
 
 	vector<float> pwm_out_val(4, 0);
 
+	// All the monitoring tasks such as monitoring battery voltage and current
+	SlowLoopTasks slow_loop_tasks;
+	slow_loop_tasks.Start();
+	WriteHelper::SlowLoopTasksData slow_loop_tasks_data;
+
 	float ned_pos_and_vel_meas[6];
 	bool gps_meas_indices[6];
 	float raw_lat_lon_alt[3];
+	// uint16_t pvt_times[6];
 	
 	sched_param sch;
 	int policy;	
@@ -114,6 +139,7 @@ int main(int argc, char *argv[]){
 
   /****************Variables to read data from the Baro*************************************/
   float baro_data[2];
+  float ext_mag_data[3];
   /****************Variables to read data from the Baro*************************************/
 
 	//Quat
@@ -146,15 +172,15 @@ int main(int argc, char *argv[]){
 	// MatrixInv<float> process_noise_q(6, 6, "eye");
 	// process_noise_q.Diag({1e-5, 1e-5, 1e-5, 1e-5, 1e-5, 1e-5});
 	MatrixInv<float> process_noise_q(15, 15, "eye");
-	process_noise_q.Diag({0.000001, 0.000001, 0.000001, 1e-8, 1e-8, 1e-8, 1e-8, 1e-8,
-    									  1e-8, 0.005, 0.005, 0.005, 1e-8, 1e-8, 1e-8});
+	process_noise_q.Diag({0.00001, 0.00001, 0.00001, 1e-8, 1e-8, 1e-8, 1e-8, 1e-8,
+    									  1e-8, 0.00001, 0.00001, 0.00001, 1e-8, 1e-8, 1e-8});
 	// R matrix of the EKF
 	MatrixInv<float> meas_noise_r(7, 7, "eye");
-	meas_noise_r.Diag({0.5, 10, 10, 10, 0.01, 0.01, 0.01});
+	meas_noise_r.Diag({0.5, 100, 100, 100, 10, 10, 10});
 	//meas_noise_r.Diag({0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001});
 	// P init
-	initial_covariance_p.Diag({30*DEG2RAD, 30*DEG2RAD, 30*DEG2RAD, 0.01, 0.01, 0.01, 100, 100, 100,
-							   10, 10, 10, 0.1, 0.1, 0.1});	
+	initial_covariance_p.Diag({30*DEG2RAD, 30*DEG2RAD, 30*DEG2RAD, 0.0001, 0.0001, 0.0001, 10000, 10000, 10000,
+							   100, 100, 100, 0.01, 0.01, 0.01});	
 
 	/****************SECONDARY FILTER DEBUG*************************************/
 	MatrixInv<float> secondary_filter_debug(3, 1);
@@ -172,15 +198,26 @@ int main(int argc, char *argv[]){
 						   false, false, false};
 
 	// Magnetic field declination in the Bay Area
-	float magnetic_declination = 13.01*DEG2RAD;
+	float magnetic_declination = 12.866667*DEG2RAD;
 
-	// Calibration variables for mag
+	// Calibration variables for mag MPU9250
 	// Offset
 	MatrixInv<float> mag_offset = {{19.1927}, {42.3204}, {-32.0349}};
 	// Rotation matrix for misalignment of the IMU axes
 	MatrixInv<float> mag_a(3, 3, "eye");
 	// Scale factor for each axis of the IMU
 	MatrixInv<float> mag_scale = {{1.0, 0, 0}, {0, 1.0, 0}, {0, 0, 1.0}};	
+
+	// Calibration variables for mag LSM9DS1
+	// Offset
+	// MatrixInv<float> mag_offset = {{11.7724227738579}, {-5.6356964117497}, {7.16743769763488}};
+	// // Rotation matrix for misalignment of the IMU axes
+	// MatrixInv<float> mag_a(3, 3, "eye");
+	// // Scale factor for each axis of the IMU
+	// MatrixInv<float> mag_scale = {{0.950520809508439, -0.0345616517214453, 0.0245049441134811}, 
+	// 															{-0.0345616517214453, 0.980799987060036, 0.00243979356462729}, 
+	// 															{0.0245049441134811, 0.00243979356462729, 1.07466892286139}};	
+
 	imu_reader.SetMagParams(magnetic_declination , mag_a, mag_offset, mag_scale);
 
 	// Initial attitude and NED velocity
@@ -197,7 +234,9 @@ int main(int argc, char *argv[]){
   MahonyFilter m_filt(0.0, 2.0, dt_s, quat);	
 
 
-	bool gps_init_status = gps_reader.InitializeGps(30);
+	bool gps_init_status = gps_reader.InitializeGps(60);
+	// return(0);
+
 
 	if(!gps_init_status){
 		use_mahony_filter = true;
@@ -223,6 +262,7 @@ int main(int argc, char *argv[]){
 
 	// Variable to read imu data
 	float* imu_data;
+	float imu_raw_data[9] = {0};
 
 	//Variable to read rc input data
 	int* rc_periods = new int[7];
@@ -267,7 +307,10 @@ int main(int argc, char *argv[]){
 	// rc_periods_ph[4] = -1;
 	// rc_periods_ph[5] = -1;
 	// rc_periods_ph[6] = -1;
-	data_writer.UpdateDataBuffer(0, 0, zero_array, sensor_meas, initial_state, secondary_filter_debug, gps_meas_indices, rc_periods, ExtY_fcsModel_T_);
+	slow_loop_tasks.GetSlowLoopTasksData(slow_loop_tasks_data);
+	data_writer.UpdateDataBuffer(0, 0, zero_array, sensor_meas, slow_loop_tasks_data, 
+															 initial_state, secondary_filter_debug, gps_meas_indices, 
+															 rc_periods, ExtY_fcsModel_T_);
 
 	// Loop counter
 	size_t loop_count = 0;
@@ -284,16 +327,20 @@ int main(int argc, char *argv[]){
 	chrono::microseconds delta (dt_count); 
 	auto duration = chrono::duration_cast<chrono::microseconds> (delta);
 	auto duration_count = duration.count();
-	// start time
-	auto time_point_start = chrono::high_resolution_clock::now();
-	chrono::microseconds time_start_us = chrono::duration_cast<chrono::microseconds>(time_point_start.time_since_epoch());
-	auto time_start_us_count = time_start_us.count();
 
 	// Loop timers
-	chrono::high_resolution_clock::time_point loop_start;
-	chrono::high_resolution_clock::time_point loop_end;
-	// long long time_since_loop_start_us;
-	// long long loop_start_us;
+	chrono::steady_clock::time_point loop_start;
+	chrono::steady_clock::time_point loop_end;
+
+	//////////////////////Timers to track GPS measurement Delays//////////////////
+	// /*Time when the main loop received the GPS measurements
+	// chrono::steady_clock::time_point gps_receipt_time_ms;
+	// // /*Time when main loop received first GPS measurements
+	// chrono::steady_clock::time_point first_gps_receipt_time_ms;
+	// long long int delta_gps_receipt_time_since_start_ms;
+
+
+
 	bool is_mtr_armed = false;
 
 	// Intermediate trig variables for use in calculations
@@ -304,6 +351,16 @@ int main(int argc, char *argv[]){
 	float c_phi;
 	float c_theta;
 	float c_psi;
+
+	// gps time
+	/* GPS reported time of current GPS measurements received by the main loop
+	*/
+	// long long int gps_time_ms;
+	// /* GPS reported time of last GPS measurements received by the main loop
+	// */
+	// long long int first_gps_time_ms = -1;
+
+	// long long int delta_gps_time_since_start_ms;
 
 	// loop
     while(1) {
@@ -347,7 +404,7 @@ int main(int argc, char *argv[]){
 
     	/* Get loop start time
     	*/
-    	loop_start = chrono::high_resolution_clock::now();
+    	loop_start = chrono::steady_clock::now();
 
     	// Make all the measurement flags corresponding to position and velocity false
 			for( size_t idx_meas = 1; idx_meas < 7; idx_meas++ ){
@@ -356,17 +413,46 @@ int main(int argc, char *argv[]){
 
     	// Read IMU data
 	    imu_data = imu_reader.GetImuData();
+	    // printf("IMU Z Accel: %g\n", imu_data[5]);
 
 	    // Read GPS data
-	    gps_reader.GetRawLatLonAlt(raw_lat_lon_alt);
-		  gps_reader.GetGpsNedPosAndVel(ned_pos_and_vel_meas, gps_meas_indices);
+	    // gps_reader.GetRawLatLonAlt(raw_lat_lon_alt);
+		  //auto gps_time_ms = gps_reader.GetGpsNedPosVelAndTime(ned_pos_and_vel_meas, gps_meas_indices, pvt_times);
+		  uint32_t gps_itow_ms;
+		  gps_reader.GetGpsNedPosAndVel(ned_pos_and_vel_meas, gps_meas_indices, gps_itow_ms);
+
+		  // if(gps_meas_indices[0] == 1){
+
+		  // // // 	printf("GPS iTOW: %ld, Year: %d, Month: %d, Hour: %d, Min: %d, Sec: %d\n", gps_time_ms, pvt_times[0], pvt_times[1],
+			// // // 			  pvt_times[2], pvt_times[3], pvt_times[4], pvt_times[5]);
+		  // // // 	gps_receipt_time_ms = std::chrono::steady_clock::now();
+		  // // // 	if (first_gps_time_ms == -1){
+		  // // // 		delta_gps_time_since_start_ms = 0;
+		  // // // 		delta_gps_receipt_time_since_start_ms = 0;
+
+		  // // // 		first_gps_receipt_time_ms = gps_receipt_time_ms;
+		  // // // 		first_gps_time_ms = gps_time_ms;
+		  // // // 	}else{
+		  // // // 		delta_gps_receipt_time_since_start_ms = chrono::duration_cast<chrono::milliseconds>(gps_receipt_time_ms - first_gps_receipt_time_ms).count();
+    	// // // 		delta_gps_time_since_start_ms = gps_time_ms - first_gps_time_ms;
+		  // // // 	}  		
+		  // 	printf("GPS iTOW: %d\n", gps_itow_ms);
+
+		  // // // 	printf("Delta gps receipt time: %lld, Delta gps time: %lld, gps_meas_indices: %d, %d, %d, %d, %d, %d\n", delta_gps_receipt_time_since_start_ms, delta_gps_time_since_start_ms, gps_meas_indices[0], gps_meas_indices[1], gps_meas_indices[2],
+		  // // // 			gps_meas_indices[3], gps_meas_indices[4], gps_meas_indices[5]);
+		  // }
+		  
 
 	    if (use_ekf){
+	    	// Get external mag data
+		    // baro_reader.GetMagMeasurements(ext_mag_data);
+
 		    // Assign required sensor value for time propagation of the ekf state and measurement update
 		    for(size_t imu_idx = 0; imu_idx < 3; imu_idx++){
 		    	state_sensor_val(imu_idx) = imu_data[imu_idx] - gyro_offset[imu_idx];
 		    	state_sensor_val(imu_idx + 3) = imu_data[imu_idx + 3];
-		    	sensor_meas(imu_idx) =  imu_data[imu_idx + 6];
+		    	sensor_meas(imu_idx) =  imu_data[imu_idx + 6];//ext_mag_data[imu_idx];//imu_data[imu_idx + 6];
+		    	// imu_data[imu_idx + 6] = ext_mag_data[imu_idx];
 		    }
 		    
 		    // Check if GPS position and velocity has been updated and set appropriate flags
@@ -377,8 +463,13 @@ int main(int argc, char *argv[]){
 		    	}
 		    }
 
+		    
+		    // printf("Internal Mag: %g, %g, %g, External Mag: %g, %g, %g\n", imu_data[6], imu_data[7], imu_data[8],
+		    // 				ext_mag_data[0], ext_mag_data[1], ext_mag_data[2]);
+
 		   	// Run one step of EKF
-		    imu_gps_ekf.Run(state_sensor_val, sensor_meas, meas_indices);
+		   	imu_gps_ekf.Run(state_sensor_val, sensor_meas, meas_indices);
+		    // imu_gps_ekf.Run(state_sensor_val, sensor_meas, meas_indices, duration_count, gps_time_us);
 		    // Get the state after EKF run
 	      current_state = imu_gps_ekf.GetCurrentState();
     	}
@@ -519,8 +610,12 @@ int main(int argc, char *argv[]){
   		}
 
      if(fifty_hz_flag){
-        data_writer.UpdateDataBuffer(duration_count, loop_count, imu_data, sensor_meas, current_state, secondary_filter_debug, gps_meas_indices, rc_periods, ExtY_fcsModel_T_);
-	   }
+     		slow_loop_tasks.GetSlowLoopTasksData(slow_loop_tasks_data);
+     	}
+     	imu_reader.getRawImuData(imu_raw_data);
+        data_writer.UpdateDataBuffer(duration_count, loop_count, imu_raw_data, sensor_meas, slow_loop_tasks_data, current_state, 
+        														 secondary_filter_debug, gps_meas_indices, rc_periods, ExtY_fcsModel_T_);
+	   // }
 	   
 	    // if (fifty_hz_flag){
 	    // 	printf("Roll [deg]: %+7.3f, Pitch[deg]: %+7.3f, Yaw[deg]: %+7.3f\n", current_state(0)*RAD2DEG, current_state(1)*RAD2DEG, current_state(2)*RAD2DEG);
@@ -561,11 +656,11 @@ int main(int argc, char *argv[]){
 
 
     // Get the stop time and compute the duration
-    loop_end = std::chrono::high_resolution_clock::now();
+    loop_end = std::chrono::steady_clock::now();
 
     duration_count = chrono::duration_cast<chrono::microseconds>(loop_end - loop_start).count();
     while(duration_count < dt_count){
-    	duration_count = chrono::duration_cast<chrono::microseconds>(std::chrono::high_resolution_clock::now() - loop_start).count();
+    	duration_count = chrono::duration_cast<chrono::microseconds>(std::chrono::steady_clock::now() - loop_start).count();
     }
 
    	if(sigint_flag == 1)

@@ -1,6 +1,7 @@
 #include "imu_utils.h"
 
 ImuHelper::ImuHelper(const string& imu_name):imu_name_(imu_name){
+	accel_calib_m_ = {{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}}};
 }
 
 
@@ -23,7 +24,7 @@ void ImuHelper::InitializeImu(){
 
 }
 
-void ImuHelper::UpdateImuNotchFilterCoeffs(const array<float, 3> notch_filter_num, const array<float, 3> notch_filter_den){
+void ImuHelper::UpdateImuNotchFilterCoeffs(const array<float, 3> &notch_filter_num, const array<float, 3> &notch_filter_den){
 	notch_filter_num_ = notch_filter_num;
 	notch_filter_den_ = notch_filter_den;
 	for(size_t idx = 0; idx < 6; idx++){
@@ -67,6 +68,11 @@ void ImuHelper::GetGyroOffset(float (&gyro_offset)[3]){
 	gyro_offset[0] = gyro_offset_[0];
 	gyro_offset[1] = gyro_offset_[1];
 	gyro_offset[2] = gyro_offset_[2];
+}
+
+void ImuHelper::SetAccelCalibParams(const array<array<float, 3>, 3> &accel_calib_m, const std::array<float, 3> &accel_calib_off){
+	accel_calib_m_ = accel_calib_m;
+	accel_calib_off_ = accel_calib_off;
 }
 
 float* ImuHelper::ComputeInitialRollPitchAndYaw(size_t num_samples){
@@ -118,6 +124,34 @@ void ImuHelper::ReadRawImu(){
 	imu_sensor_->read_accelerometer(accel_);
 	imu_sensor_->read_gyroscope(gyro_);
 	imu_sensor_->read_magnetometer(mag_);
+
+	imu_raw_data_[0] = accel_[0];
+	imu_raw_data_[1] = accel_[1];
+	imu_raw_data_[2] = accel_[2];
+
+	imu_raw_data_[3] = gyro_[0];
+	imu_raw_data_[4] = gyro_[1];
+	imu_raw_data_[5] = gyro_[2];
+
+	imu_raw_data_[6] = mag_[0];
+	imu_raw_data_[7] = mag_[1];
+	imu_raw_data_[8] = mag_[2];
+
+	float mag_eps = 1e-7f;
+	if (isnan(mag_[0]) || isnan(mag_[1]) || isnan(mag_[2])) {
+	    is_mag_valid_ = false;
+	} else if (abs(mag_[0] - old_mag_[0]) < mag_eps &&
+	           abs(mag_[1] - old_mag_[1]) < mag_eps &&
+	           abs(mag_[2] - old_mag_[2]) < mag_eps) {
+	    is_mag_valid_ = false;
+	} else {
+	    // Assign values index by index
+	    old_mag_[0] = mag_[0];
+	    old_mag_[1] = mag_[1];
+	    old_mag_[2] = mag_[2];
+	    is_mag_valid_ = true;
+	}
+
 }
 
 MatrixInv<float> ImuHelper::CorrectMagData(MatrixInv<float> mag_vector){
@@ -129,6 +163,7 @@ MatrixInv<float> ImuHelper::CorrectMagData(MatrixInv<float> mag_vector){
 	// Normalize the corrected mag vector
 	float mag_norm = sqrt(pow(corrected_mag(0), 2) + pow(corrected_mag(1), 2) + pow(corrected_mag(2), 2));
 	return corrected_mag/mag_norm;
+	// return corrected_mag;
 
 }
 
@@ -136,6 +171,20 @@ MatrixInv<float> ImuHelper::GetMag3DTo2DProj(float roll, float pitch){
 	MatrixInv<float> mag2d_projection = { {cos(pitch), sin(pitch)*sin(roll), sin(pitch)*cos(roll) },
 										  {     0    , 			-cos(roll)  ,       sin(roll)     }   };
 	return mag2d_projection;
+}
+
+// Function to copy the private member data_ to the given array
+bool ImuHelper::getRawImuData(float (&imu_raw_data)[9]){
+	ReadRawImu();
+    for (int idx = 0; idx < 9; ++idx) {
+        imu_raw_data[idx] = imu_raw_data_[idx];
+    }
+    if(is_mag_valid_){
+    	is_mag_valid_ = false;
+    	return true;
+    }else{
+    	return false;
+    }
 }
 
 float* ImuHelper::GetImuData(){
@@ -155,6 +204,21 @@ float* ImuHelper::GetImuData(){
 		
 		imu_data_[imu_idx + 6] = corrected_mag(imu_idx);
 	}
+
+		// calibrate accels
+		float cal_accel_x = 0, cal_accel_y = 0, cal_accel_z = 0;
+		cal_accel_x = imu_data_[3]*accel_calib_m_[0][0] + imu_data_[4]*accel_calib_m_[0][1] +
+					  imu_data_[5]*accel_calib_m_[0][2] + accel_calib_off_[0];
+
+		cal_accel_y = imu_data_[3]*accel_calib_m_[1][0] + imu_data_[4]*accel_calib_m_[1][1] +
+					  imu_data_[5]*accel_calib_m_[1][2] + accel_calib_off_[1];
+
+		cal_accel_z = imu_data_[3]*accel_calib_m_[2][0] + imu_data_[4]*accel_calib_m_[2][1] +
+					  imu_data_[5]*accel_calib_m_[2][2] + accel_calib_off_[2];
+
+		imu_data_[3] = cal_accel_x*G_SI;
+		imu_data_[4] = cal_accel_y*G_SI;
+		imu_data_[5] = cal_accel_z*G_SI;
 
 	return imu_data_;
 }

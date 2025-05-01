@@ -21,9 +21,23 @@ class WriteHelper{
 
 		// Thread to loop and data to file
 		void StopWriteLoop();
-		void UpdateDataBuffer(long long dt_ms, size_t count, float* const& imu_data, const MatrixInv<float> &sensor_meas, const MatrixInv<float> &ekf_current_state, 
-			const MatrixInv<float> &secondary_filter_debug, const bool (&gps_valid_flag)[6], int* const& rc_periods, const FcsOutput &fcs_output);
 		void StartFileWriteThread();
+		void StartFileWriteThread2();
+
+		struct SlowLoopTasksData{
+			float volt_v_;
+			float current_amp_;
+		};
+
+		void UpdateDataBuffer(long long dt_ms, size_t count, float* const& imu_data, const MatrixInv<float> &sensor_meas, 
+							  const SlowLoopTasksData &slow_loop_tasks_data, const MatrixInv<float> &ekf_current_state, 
+							  const MatrixInv<float> &secondary_filter_debug, const bool (&gps_valid_flag)[6], int* const& rc_periods, 
+							  const FcsOutput &fcs_output);
+		void UpdateDataBuffer2(long long dt_ms, size_t count, float* const& imu_data, const bool is_mag_valid, float* const& gps_data,
+							  const bool is_gps_valid, float const press_pa, float const temp_c, bool const is_baro_valid, 
+							  const float& lidar_range_m, const bool is_lidar_valid, const array<double, 23> &ekf_current_state, 
+							  const SlowLoopTasksData &slow_loop_tasks_data, int* const& rc_periods, 
+							  const FcsOutput &fcs_output);
 	private:
 		// Thread to write file
 		thread write_thread_;
@@ -46,9 +60,15 @@ class WriteHelper{
 		DataFields data_to_save1_[MAX_BUFF_SIZE];
 		DataFields data_to_save2_[MAX_BUFF_SIZE];
 
+		DataFields2 data2_to_save1_[MAX_BUFF_SIZE];
+		DataFields2 data2_to_save2_[MAX_BUFF_SIZE];
+
 		// Variable to indicate when the data buffers are full of data
 	    atomic<bool> is_data_buff1_full_;
 	    atomic<bool> is_data_buff2_full_;
+
+	    atomic<bool> is_data2_buff1_full_;
+	    atomic<bool> is_data2_buff2_full_;
 
 	    // Variable to indicate wrte loop to stop
 	    atomic<bool> stop_data_write_loop_;
@@ -56,9 +76,12 @@ class WriteHelper{
 	    size_t data_buff_idx1_;
 	    size_t data_buff_idx2_;
 
+	    size_t data2_buff_idx1_;
+	    size_t data2_buff_idx2_;
+
 	    // write to file
 	    void WriteToFileLoop();
-
+	    void WriteToFileLoop2();
 };
 
 

@@ -1,7 +1,7 @@
 #ifndef GPSUTILS_H
 #define GPSUTILS_H
 
-#include<Navio/Common/Ublox.h>
+#include<Navio/Common/UbloxDriver.h>
 #include<Matrix/matrix_inv_class.h>
 #include<constants.h>
 #include<coordinate_transformation.h>
@@ -33,30 +33,61 @@ class GpsHelper{
 		// Useful function that can be used to read GPS data in a loop at the configured rate
 		// This function can be passed to a thread to update position and velocity data in thread safe way
 		void GpsReadLoop();
+		void GpsRawReadLoop();
 
 		// Start the GPS running thread
 		void CreateGpsThread();
+		void CreateRawGpsThread();
 
 		// Get init NED Vel
 		double* GetInitNedVel(){
 			return vned_init_;
 		}
 
-		// Get Raw Unfiltered Lat Lon and height
-		void GetRawLatLonAlt(float (&raw_lat_lon_alt)[3]){
-			raw_lat_lon_alt[0] = pos_data_[2];
-			raw_lat_lon_alt[1] = pos_data_[1];
-			raw_lat_lon_alt[2] = pos_data_[3];
-
-		}
+		// Get Raw Unfiltered Lat Lon and height and NED Velocities
+		bool GetGpsRawPosAndVel(float (&gps_raw_pos_and_vel)[6]) const;
 
 		// Get NED position and velocity
-		void GetGpsNedPosAndVel(float (&ned_pos_and_vel_meas)[6], bool (&gps_meas_indices)[6]){
+		void GetGpsNedPosAndVel(float (&ned_pos_and_vel_meas)[6], bool (&gps_meas_indices)[6], uint32_t &gps_itow_ms){
 			for(size_t idx = 0; idx < 6; idx++){
-				ned_pos_and_vel_meas[idx] = ned_pos_and_vel_meas_[idx];
-				gps_meas_indices[idx] = gps_meas_indices_[idx];
+				if(data_ready_){
+					ned_pos_and_vel_meas[idx] = ned_pos_and_vel_meas_[idx];
+					gps_meas_indices[idx] = gps_meas_indices_[idx];
+					if(idx == 5)
+						data_ready_ = false;
+				}else{
+					gps_meas_indices[idx] = false;
+				}
 			}
+
+			gps_itow_ms = nav_pvt_data_.iTow_ms;
 		}
+
+		// long long int GetGpsNedPosVelAndTime(float (&ned_pos_and_vel_meas)[6], bool (&gps_meas_indices)[6], uint16_t (&pvt_times)[6]){
+		// 	for(size_t idx = 0; idx < 6; idx++){
+		// 		if(data_ready_){
+		// 			ned_pos_and_vel_meas[idx] = ned_pos_and_vel_meas_[idx];
+		// 			gps_meas_indices[idx] = gps_meas_indices_[idx];
+		// 			if(idx == 5)
+		// 				data_ready_ = false;
+		// 		}else{
+		// 			gps_meas_indices[idx] = false;
+		// 		}
+				
+		// 	}
+
+		// 	pvt_times[0] = pvt_data_[9];
+		// 	pvt_times[1] = pvt_data_[10];
+		// 	pvt_times[2] = pvt_data_[11];
+		// 	pvt_times[3] = pvt_data_[12];
+		// 	pvt_times[4] = pvt_data_[13];
+		// 	pvt_times[5] = pvt_data_[14];
+
+
+		// 	return pvt_data_[0];
+		// }
+
+
 
 		// Stops the above loop
 		void StopGpsReadLoop(){
@@ -72,7 +103,7 @@ class GpsHelper{
 		sched_param sch_;
 		int policy_;
 		// Create an Ublox object to read GPS data
-		Ublox gps_;
+		UbxDriver gps_;
 		// Configuration parameter to set GPS sample rate
 		uint16_t time_in_ms_bw_samples_;
 		// Variable to store GPS fix quality data
@@ -81,6 +112,8 @@ class GpsHelper{
 	    size_t gps_pos_count_;
 	    // Counter to keep track of how many valid ned velocity data was received from GPS during initialization
 	    size_t gps_vel_count_;
+	    // Counter to keep track of how many pvt data was received from GPS during initialization
+	    size_t gps_pvt_count_;
 	    // Counter to keep track of how many valid 3D GPS fixes we got before we start capturing llh position and
 	    // ned velocity data to be used in EKF initialization
 	    size_t gps_fix_count_;
@@ -90,6 +123,9 @@ class GpsHelper{
 	    size_t n_valid_gps_count_;
 	    // Flag to indicate if GPS has a valid 3D fix or not
 	    bool gps_3d_fix_;
+
+	    // Flag to indicate if gps data has been updated
+		mutable bool gps_updated_ = false;
 
 	    // Variables to store reference llh or the origin of NED frame
 	    double lat_ref_;
@@ -102,17 +138,22 @@ class GpsHelper{
 	    // Measured NED position
 	    MatrixInv<float> ned_pos_meas_{MatrixInv<float>(3, 1)};
 	    // llh position data at each iteration received from the GPS
-	    vector<double> pos_data_;
-	    // NED velocity data at each iteration received from the GPS
-	    vector<double> vel_data_;
+	    // vector<double> pos_data_;
+	    // // NED velocity data at each iteration received from the GPS
+	    // vector<double> vel_data_;
+	    // // NAV PVT data at each iteration received from the GPS
+	    // vector<double> pvt_data_;
 	    // variable to store ned pos and ned velocity
 	    float ned_pos_and_vel_meas_[6];
 
 	    // Mutex to guard resource access between threads while running GpsReadLoop()
-	    mutex gps_mutex_;
+	    mutable mutex gps_mutex_;
 
 	    // Variable to indicate GpsReadLoop() to stop
 	    atomic<bool> stop_gps_read_loop_;
+
+	    // Hold UbxDriver GPS data
+	    UbxDriver::NavPvtData nav_pvt_data_;
 
 	    /* Variable to indicate which GPS measurement has been updated
 		first 3 indices are for position and last 3 indices are for velocities,
@@ -128,6 +169,14 @@ class GpsHelper{
 	    bool GetNedVel();
 	    // Function to get llh position
 	    bool GetLlhPos();
+	    // Function to get NAV PVT
+	    bool GetNavPvt();
+
+	    //prev gps time
+	    uint32_t prev_gps_time = 0;
+
+	    //data ready flag
+	    bool data_ready_ = false;
 
 	    // To catch SIGINT
 		volatile sig_atomic_t sigint_flag;

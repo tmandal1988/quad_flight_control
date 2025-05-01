@@ -4,8 +4,14 @@ WriteHelper::WriteHelper(const string& file_name):file_name_(file_name){
 	is_data_buff1_full_.store(false);
 	is_data_buff2_full_.store(false);
 
+	is_data2_buff1_full_.store(false);
+	is_data2_buff2_full_.store(false);
+
 	data_buff_idx1_ = 0;
 	data_buff_idx2_ = 0;
+
+	data2_buff_idx1_ = 0;
+	data2_buff_idx2_ = 0;
 
 	file_object_.open(file_name_, ios::out | ios::binary);
 
@@ -36,6 +42,26 @@ void WriteHelper::WriteToFileLoop(){
 
 }
 
+void WriteHelper::WriteToFileLoop2(){
+	const size_t bufsize = 1024 * 1024;
+	unique_ptr<char[]> buf(new char[bufsize]);
+	file_object_.rdbuf()->pubsetbuf(buf.get(), bufsize);
+	while(1){
+		if(is_data2_buff1_full_.load()){
+			file_object_.write((char*)data2_to_save1_, 1024*sizeof(DataFields2));
+			is_data2_buff1_full_.store(false);
+		}else if(is_data2_buff2_full_.load()){
+			file_object_.write((char*)data2_to_save2_, 1024*sizeof(DataFields2));
+			is_data2_buff2_full_.store(false);
+		}else{
+			sleep(1);
+		}
+		if(stop_data_write_loop_.load())
+			break;
+	}// While loop
+
+}
+
 WriteHelper::~WriteHelper(){
 	// Making sure that write loop is stopped
 	stop_data_write_loop_.store(true);
@@ -48,7 +74,10 @@ WriteHelper::~WriteHelper(){
 }
 
 void WriteHelper::UpdateDataBuffer(long long dt_ms, size_t count, float* const& imu_data, 
-	const MatrixInv<float> &sensor_meas, const MatrixInv<float> &ekf_current_state, const MatrixInv<float> &secondary_filter_debug, const bool (&gps_valid_flag)[6], int* const& rc_periods, const FcsOutput &fcs_output){
+	const MatrixInv<float> &sensor_meas,const SlowLoopTasksData &slow_loop_tasks_data, 
+	const MatrixInv<float> &ekf_current_state, const MatrixInv<float> &secondary_filter_debug, 
+	const bool (&gps_valid_flag)[6], int* const& rc_periods, const FcsOutput &fcs_output){
+
 	if(data_buff_idx2_ == 0 && data_buff_idx1_ != MAX_BUFF_SIZE){
 		{
 			unique_lock<mutex> save_data_lock(data_mutex_);
@@ -74,6 +103,9 @@ void WriteHelper::UpdateDataBuffer(long long dt_ms, size_t count, float* const& 
 			data_to_save1_[data_buff_idx1_].baro_data[8] = sensor_meas(17);
 			data_to_save1_[data_buff_idx1_].baro_data[9] = sensor_meas(18);
 			data_to_save1_[data_buff_idx1_].baro_data[10] = sensor_meas(19);
+
+			data_to_save1_[data_buff_idx1_].adc_data[0] = slow_loop_tasks_data.volt_v_;
+			data_to_save1_[data_buff_idx1_].adc_data[1] = slow_loop_tasks_data.current_amp_;
 
 
 			for(size_t d_idx = 0; d_idx < ekf_current_state.get_nrows(); d_idx++){
@@ -152,6 +184,9 @@ void WriteHelper::UpdateDataBuffer(long long dt_ms, size_t count, float* const& 
 			data_to_save2_[data_buff_idx2_].baro_data[9] = sensor_meas(18);
 			data_to_save2_[data_buff_idx2_].baro_data[10] = sensor_meas(19);
 
+			data_to_save2_[data_buff_idx2_].adc_data[0] = slow_loop_tasks_data.volt_v_;
+			data_to_save2_[data_buff_idx2_].adc_data[1] = slow_loop_tasks_data.current_amp_;
+
 			for(size_t d_idx = 0; d_idx < ekf_current_state.get_nrows(); d_idx++){
 				data_to_save2_[data_buff_idx2_].ekf_current_state[d_idx] = ekf_current_state(d_idx);
 			}
@@ -205,8 +240,120 @@ void WriteHelper::UpdateDataBuffer(long long dt_ms, size_t count, float* const& 
 	}
 }
 
+void WriteHelper::UpdateDataBuffer2(long long dt_ms, size_t count, float* const& imu_data, const bool is_mag_valid, float* const& gps_data,
+							  const bool is_gps_valid, float const press_pa, float const temp_c, bool const is_baro_valid, 
+							  const float& lidar_range_m, const bool is_lidar_valid, const array<double, 23> &ekf_current_state, 
+							  const SlowLoopTasksData &slow_loop_tasks_data, int* const& rc_periods, const FcsOutput &fcs_output){
+
+	if(data2_buff_idx2_ == 0 && data2_buff_idx1_ != MAX_BUFF_SIZE){
+		{
+			unique_lock<mutex> save_data_lock(data_mutex_);
+			data2_to_save1_[data2_buff_idx1_].dt_s = static_cast< float >(dt_ms);
+			data2_to_save1_[data2_buff_idx1_].time_of_week_ms = static_cast< float >(count);
+			for(size_t imu_idx = 0; imu_idx < 3; imu_idx++){
+				data2_to_save1_[data2_buff_idx1_].imu_data[imu_idx] = imu_data[imu_idx];
+				data2_to_save1_[data2_buff_idx1_].imu_data[imu_idx + 3] = imu_data[imu_idx + 3];
+				data2_to_save1_[data2_buff_idx1_].imu_data[imu_idx + 6] = imu_data[imu_idx + 6];
+				data2_to_save1_[data2_buff_idx1_].lat_lon_alt[imu_idx] = static_cast< float >(gps_data[imu_idx]);
+				data2_to_save1_[data2_buff_idx1_].ned_vel_mps[imu_idx] = static_cast< float >(gps_data[imu_idx + 3]);
+			}
+
+			data2_to_save1_[data2_buff_idx1_].baro_data[0] = press_pa;
+			data2_to_save1_[data2_buff_idx1_].baro_data[1] = temp_c;
+
+			data2_to_save1_[data2_buff_idx1_].lidar_range_m = lidar_range_m;
+
+			data2_to_save1_[data2_buff_idx1_].adc_data[0] = slow_loop_tasks_data.volt_v_;
+			data2_to_save1_[data2_buff_idx1_].adc_data[1] = slow_loop_tasks_data.current_amp_;
+
+
+			for(size_t d_idx = 0; d_idx < ekf_current_state.size(); d_idx++){
+				data2_to_save1_[data2_buff_idx1_].ekf_current_state[d_idx] = static_cast< float >(ekf_current_state[d_idx]);
+			}
+
+			for(size_t r_idx = 0; r_idx < 7; r_idx++){
+				data2_to_save1_[data2_buff_idx1_].rc_in[r_idx] = static_cast< float >(rc_periods[r_idx]);
+			}
+
+			data2_to_save1_[data2_buff_idx1_].is_mag_valid = is_mag_valid;
+			data2_to_save1_[data2_buff_idx1_].is_gps_valid = is_gps_valid;
+			data2_to_save1_[data2_buff_idx1_].is_baro_valid = is_baro_valid;
+			data2_to_save1_[data2_buff_idx1_].is_lidar_valid = is_lidar_valid;
+
+
+			AssignFcsData2(fcs_output, data2_to_save1_, data2_buff_idx1_);
+
+			data2_buff_idx1_++;
+			if (data2_buff_idx1_ == MAX_BUFF_SIZE){
+				is_data2_buff1_full_.store(true);
+				data2_buff_idx2_ = 0;
+			}
+		}
+	}else if(data2_buff_idx1_  == MAX_BUFF_SIZE){
+		{
+			unique_lock<mutex> save_data_lock(data_mutex_);
+			data2_to_save2_[data2_buff_idx2_].dt_s = static_cast< float >(dt_ms);
+			data2_to_save2_[data2_buff_idx2_].time_of_week_ms = static_cast< float >(count);
+			for(size_t imu_idx = 0; imu_idx < 3; imu_idx++){
+				data2_to_save2_[data2_buff_idx2_].imu_data[imu_idx] = imu_data[imu_idx];
+				data2_to_save2_[data2_buff_idx2_].imu_data[imu_idx + 3] = imu_data[imu_idx + 3];
+				data2_to_save2_[data2_buff_idx2_].imu_data[imu_idx + 6] = imu_data[imu_idx + 6];
+				data2_to_save2_[data2_buff_idx2_].lat_lon_alt[imu_idx] = static_cast< float >(gps_data[imu_idx]);
+				data2_to_save2_[data2_buff_idx2_].ned_vel_mps[imu_idx] = static_cast< float >(gps_data[imu_idx + 3]);
+			}
+
+			data2_to_save2_[data2_buff_idx2_].baro_data[0] = press_pa;
+			data2_to_save2_[data2_buff_idx2_].baro_data[1] = temp_c;
+
+			data2_to_save2_[data2_buff_idx2_].lidar_range_m = lidar_range_m;
+
+			data2_to_save2_[data2_buff_idx2_].adc_data[0] = slow_loop_tasks_data.volt_v_;
+			data2_to_save2_[data2_buff_idx2_].adc_data[1] = slow_loop_tasks_data.current_amp_;
+
+			for(size_t d_idx = 0; d_idx < ekf_current_state.size(); d_idx++){
+				data2_to_save2_[data2_buff_idx2_].ekf_current_state[d_idx] = static_cast< float >(ekf_current_state[d_idx]);
+			}
+
+			for(size_t r_idx = 0; r_idx < 7; r_idx++){
+				data2_to_save2_[data2_buff_idx2_].rc_in[r_idx] = static_cast< float >(rc_periods[r_idx]);
+			}
+
+			data2_to_save2_[data2_buff_idx2_].is_mag_valid = is_mag_valid;
+			data2_to_save2_[data2_buff_idx2_].is_gps_valid = is_gps_valid;
+			data2_to_save2_[data2_buff_idx2_].is_baro_valid = is_baro_valid;
+			data2_to_save2_[data2_buff_idx2_].is_lidar_valid = is_lidar_valid;
+
+			AssignFcsData2(fcs_output, data2_to_save2_, data2_buff_idx2_);
+
+			data2_buff_idx2_++;
+			if (data2_buff_idx2_ == MAX_BUFF_SIZE){
+				is_data2_buff2_full_.store(true);
+				data2_buff_idx1_ = 0;
+				data2_buff_idx2_ = 0;
+			}
+		}
+	}
+}
+
 void WriteHelper::StartFileWriteThread(){
 	write_thread_ =  thread(&WriteHelper::WriteToFileLoop, this);
+
+	pthread_getschedparam(write_thread_.native_handle(), &policy_, &sch_);
+	sch_.sched_priority = 5;
+    pthread_setschedparam(write_thread_.native_handle(), SCHED_FIFO, &sch_);
+    CPU_ZERO(&cpuset_);
+    CPU_SET(1, &cpuset_);
+    //CPU_SET(2, &cpuset_);
+
+    int rc = pthread_setaffinity_np(write_thread_.native_handle(),
+                                    sizeof(cpuset_), &cpuset_);    
+	if (rc != 0) {
+      std::cerr << "Error calling pthread_setaffinity_np on write thread: " << rc << "\n";
+    }
+}
+
+void WriteHelper::StartFileWriteThread2(){
+	write_thread_ =  thread(&WriteHelper::WriteToFileLoop2, this);
 
 	pthread_getschedparam(write_thread_.native_handle(), &policy_, &sch_);
 	sch_.sched_priority = 5;

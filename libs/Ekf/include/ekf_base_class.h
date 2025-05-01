@@ -26,6 +26,8 @@ class EkfBase{
 		~EkfBase();
 
 		void Run(const MatrixInv<T> &state_sensor_val, const MatrixInv<T> &meas_sensor_val, const bool meas_indices []);
+		void Run(const MatrixInv<T> &state_sensor_val, MatrixInv<T> &meas_sensor_val_corrected, const bool meas_indices [], 
+				 const long long int ins_dt_us, const long long int gps_prev_time_us);
 		MatrixInv<T> GetCurrentState(){ return current_state_; }
 		MatrixInv<T> GetStateJacobian(){ return state_jacobian_; }
 		MatrixInv<T> GetSensorMeasurement(){ return computed_meas_; }
@@ -44,9 +46,10 @@ class EkfBase{
 
 		// member functions
 		virtual void PropagateState(const MatrixInv<T> &state_sensor_val) = 0;
+		virtual void PropagateState(const MatrixInv<T> &state_sensor_val, MatrixInv<T> &meas_sensor_val, const long long int meas_dt_us) = 0;
 		virtual void ComputeStateJacobian(const MatrixInv<T> &state_sensor_val) = 0;
 		virtual void ComputeStateNoiseJacobian(const MatrixInv<T> &previous_state) = 0;
-		virtual void GetMeas(const MatrixInv<T> &meas_sensor_val) = 0;
+		virtual void GetMeas(const MatrixInv<T> &meas_sensor_val, const bool meas_indices []) = 0;
 		virtual void ComputeMeasJacobian(const MatrixInv<T> &meas_sensor_val) = 0;
 		virtual void ComputeMeasNoiseJacobian(const MatrixInv<T> &meas_sensor_val) = 0;
 		virtual void ComputeMeasFromState(size_t r_idx) = 0;
@@ -62,7 +65,7 @@ class EkfBase{
 		MatrixInv<T> computed_meas_;
 
 		const MatrixInv<T> process_noise_q_;
-		const MatrixInv<T> meas_noise_r_;
+		MatrixInv<T> meas_noise_r_;
 		T process_noise_eps_;
 		MatrixInv<T> covariance_p_;
 
@@ -80,4 +83,15 @@ class EkfBase{
 		MatrixInv<T> process_noise_eps_matrix_;
 
 		MatrixInv<T> kalman_eye_;
+
+		// current ins time
+		// previous ins time when gps measurement was received in micro seconds
+		long long ins_time_us_{0};
+		long long ins_time_at_last_gps_update_us_{0};
+		// ins dt time between gps updates in micro seconds
+		long long ins_dt_bw_gps_update_us_{0};
+		// time of last gps measurement in micro seconds
+		long long gps_prev_time_us_{-1};
+		// dt time between gps updates in micro seconds
+		long long gps_dt_us_{-1};
 };

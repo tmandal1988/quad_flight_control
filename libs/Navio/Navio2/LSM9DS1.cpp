@@ -120,9 +120,9 @@ void LSM9DS1::update()
     for (int i=0; i<3; i++) {
         bit_data[i] = ((int16_t)response[2*i+1] << 8) | response[2*i] ;
     }
-    _ax = G_SI * ((float)bit_data[0] * acc_scale);
-    _ay = G_SI * ((float)bit_data[1] * acc_scale);
-    _az = G_SI * ((float)bit_data[2] * acc_scale);
+    _ax = ((float)bit_data[0] * acc_scale);
+    _ay = ((float)bit_data[1] * acc_scale);
+    _az = ((float)bit_data[2] * acc_scale);
 
     // Read gyroscope
     ReadRegs(DEVICE_ACC_GYRO, LSM9DS1XG_OUT_X_L_G, &response[0], 6);

@@ -49,3 +49,13 @@ X-Frame quadrotor configuration
 7. Toggle Switch Position 3 -> Position Hold Mode, Position hold when all sticks (except Yaw stick) are centered. **Not Tuned Yet**
     1. Tested Procedure -> Takeoff in Altitude Holde Mode and when in stable flight switch to Position Hold Mode with all stick centered.
     2. Moving Sticks away from center position will move the quadrotor in the same direction.
+
+
+## To Do
+2. 3D print a holder for Lidar
+3. Mount the Lidar and update the Lidar mount parameters in Simulink
+5. Rebuild the Simulink Estimator
+6. Detune rate controller gains for roll and yaw, verify in flight
+7. Fly and log Lidar data
+8. Run offline estimator with Lidar data
+9. Run Lidar in flight

@@ -78,8 +78,8 @@ class MS5611 {
 	    void calculatePressureAndTemperature();
 	    void update();
 
-	    float getTemperature();
-	    float getPressure();
+	    float getTemperature() const;
+	    float getPressure() const;
 
     private:
 	    uint8_t devAddr; // I2C device adress
